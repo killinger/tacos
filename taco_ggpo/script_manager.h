@@ -4,7 +4,7 @@
 #include "gamestate.h"
 #include "command.h"
 
-
+// TODO: fix the fucking naming convention jesus christ
 
 struct HitboxInfo
 {
@@ -67,4 +67,3 @@ public:
 	std::string					getScriptName(int script);
 	void						Update(playbackstate* playbackState, std::string trigger);
 };
-
