@@ -1,0 +1,93 @@
+{
+    "isContinuous": false,
+    "defaultTransition": 0,
+    "transitions": 
+    [
+        {
+            "trigger": "5B",
+            "script": 2
+        },
+        {
+            "trigger": "forward",
+            "script": 3
+        }
+    ],
+    "frames": 
+    [
+        {
+            "cancelList": -1,
+            "hitboxes": -1,
+            "hurtboxes": 0
+        },
+        {
+            "cancelList": -1,
+            "hitboxes": -1,
+            "hurtboxes": 0
+        },
+        {
+            "cancelList": -1,
+            "hitboxes": -1,
+            "hurtboxes": 0
+        },
+        {
+            "cancelList": -1,
+            "hitboxes": -1,
+            "hurtboxes": 0
+        },
+        {
+            "cancelList": -1,
+            "hitboxes": -1,
+            "hurtboxes": 0
+        },
+        {
+            "cancelList": 1,
+            "hitboxes": 0,
+            "hurtboxes": 0
+        },
+        {
+            "cancelList": 1,
+            "hitboxes": 0,
+            "hurtboxes": 0
+        },
+        {
+            "cancelList": 1,
+            "hitboxes": 0,
+            "hurtboxes": 0
+        },
+        {
+            "cancelList": 1,
+            "hitboxes": 0,
+            "hurtboxes": 0
+        },
+        {
+            "cancelList": 1,
+            "hitboxes": 0,
+            "hurtboxes": 0
+        },
+        {
+            "cancelList": -1,
+            "hitboxes": -1,
+            "hurtboxes": 0
+        },
+        {
+            "cancelList": -1,
+            "hitboxes": -1,
+            "hurtboxes": 0
+        },
+        {
+            "cancelList": -1,
+            "hitboxes": -1,
+            "hurtboxes": 0
+        },
+        {
+            "cancelList": -1,
+            "hitboxes": -1,
+            "hurtboxes": 0
+        },
+        {
+            "cancelList": -1,
+            "hitboxes": -1,
+            "hurtboxes": 0
+        }
+    ]
+}

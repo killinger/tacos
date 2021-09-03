@@ -1,0 +1,104 @@
+{
+    "type": 0,
+    "defaultTransition": 0,
+    "transitions": 0,
+    "frames":
+    [
+        {
+            "hitboxes": -1,
+            "hurtboxes": 0,
+            "xShift": 1.0,
+            "animationIndex": 8
+        },
+        {
+            "hitboxes": -1,
+            "hurtboxes": 0,
+            "xShift": 1.0,
+            "animationIndex": 8
+        },
+        {
+            "hitboxes": -1,
+            "hurtboxes": 0,
+            "xShift": 1.0,
+            "animationIndex": 8
+        },
+        {
+            "hitboxes": -1,
+            "hurtboxes": 0,
+            "xShift": 1.0,
+            "animationIndex": 8
+        },
+        {
+            "hitboxes": -1,
+            "hurtboxes": 0,
+            "xShift": 1.0,
+            "animationIndex": 9
+        },
+        {
+            "hitboxes": -1,
+            "hurtboxes": 0,
+            "xShift": 1.0,
+            "animationIndex": 9
+        },
+        {
+            "hitboxes": -1,
+            "hurtboxes": 0,
+            "xShift": 1.0,
+            "animationIndex": 9
+        },
+        {
+            "hitboxes": -1,
+            "hurtboxes": 0,
+            "xShift": 1.0,
+            "animationIndex": 10
+        },
+        {
+            "hitboxes": -1,
+            "hurtboxes": 0,
+            "xShift": 1.0,
+            "animationIndex": 10
+        },
+        {
+            "hitboxes": -1,
+            "hurtboxes": 0,
+            "xShift": 1.0,
+            "animationIndex": 10
+        },
+        {
+            "hitboxes": -1,
+            "hurtboxes": 0,
+            "xShift": 1.0,
+            "animationIndex": 10
+        },
+        {
+            "hitboxes": -1,
+            "hurtboxes": 0,
+            "xShift": 1.0,
+            "animationIndex": 10
+        },
+        {
+            "hitboxes": -1,
+            "hurtboxes": 0,
+            "xShift": 1.0,
+            "animationIndex": 10
+        },
+        {
+            "hitboxes": -1,
+            "hurtboxes": 0,
+            "xShift": 1.0,
+            "animationIndex": 9
+        },
+        {
+            "hitboxes": -1,
+            "hurtboxes": 0,
+            "xShift": 1.0,
+            "animationIndex": 9
+        },
+        {
+            "hitboxes": -1,
+            "hurtboxes": 0,
+            "xShift": 1.0,
+            "animationIndex": 9
+        }
+    ]
+}

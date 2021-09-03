@@ -1,0 +1,76 @@
+{
+    "isContinuous": false,
+    "defaultTransition": 0,
+    "transitions": 
+    [
+
+    ],
+    "frames": 
+    [
+        {
+            "cancelList": -1,
+            "hitboxes": -1,
+            "hurtboxes": 0
+        },
+        {
+            "cancelList": -1,
+            "hitboxes": -1,
+            "hurtboxes": 0
+        },
+        {
+            "cancelList": -1,
+            "hitboxes": -1,
+            "hurtboxes": 0
+        },
+        {
+            "cancelList": -1,
+            "hitboxes": -1,
+            "hurtboxes": 1
+        },
+        {
+            "cancelList": -1,
+            "hitboxes": -1,
+            "hurtboxes": 1
+        },
+        {
+            "cancelList": -1,
+            "hitboxes": -1,
+            "hurtboxes": 1
+        },
+        {
+            "cancelList": -1,
+            "hitboxes": -1,
+            "hurtboxes": 1
+        },
+        {
+            "cancelList": -1,
+            "hitboxes": -1,
+            "hurtboxes": 1
+        },
+        {
+            "cancelList": -1,
+            "hitboxes": 1,
+            "hurtboxes": 1
+        },
+        {
+            "cancelList": -1,
+            "hitboxes": 1,
+            "hurtboxes": 1
+        },
+        {
+            "cancelList": -1,
+            "hitboxes": 1,
+            "hurtboxes": 1
+        },
+        {
+            "cancelList": -1,
+            "hitboxes": -1,
+            "hurtboxes": 1
+        },
+        {
+            "cancelList": -1,
+            "hitboxes": -1,
+            "hurtboxes": 1
+        }
+    ]
+}

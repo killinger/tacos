@@ -1,0 +1,26 @@
+{
+    "command" :
+    [
+        {
+            "type": 0,
+            "directions": [5],
+            "button": 1,
+            "bufferTime": 0,
+            "trigger": "5B"
+        },
+        {
+            "type": 0,
+            "directions": [5],
+            "button": 0,
+            "bufferTime": 0,
+            "trigger": "5A"
+        },
+        {
+            "type": 2,
+            "directions": [6],
+            "button": 4,
+            "bufferTime": 0,
+            "trigger": "forward"
+        }
+    ]
+}

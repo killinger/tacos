@@ -1,0 +1,92 @@
+{
+    "type": 1,
+    "defaultTransition": 0,
+    "transitions": 0,
+    "specialTrigger": 
+    [
+
+    ],
+    "frames": 
+    [
+        {
+            "hitboxes": -1,
+            "hurtboxes": -1,
+            "animationIndex": 0
+        },
+        {
+            "hitboxes": -1,
+            "hurtboxes": -1,
+            "animationIndex": 0
+        },
+        {
+            "hitboxes": -1,
+            "hurtboxes": -1,
+            "animationIndex": 1
+        },
+        {
+            "hitboxes": -1,
+            "hurtboxes": -1,
+            "animationIndex": 1
+        },
+        {
+            "hitboxes": -1,
+            "hurtboxes": -1,
+            "animationIndex": 2
+        },
+        {
+            "hitboxes": -1,
+            "hurtboxes": -1,
+            "animationIndex": 3
+        },
+        {
+            "hitboxes": -1,
+            "hurtboxes": -1,
+            "animationIndex": 3
+        },
+        {
+            "hitboxes": -1,
+            "hurtboxes": -1,
+            "animationIndex": 3
+        },
+        {
+            "hitboxes": -1,
+            "hurtboxes": -1,
+            "animationIndex": 3
+        },
+        {
+            "hitboxes": -1,
+            "hurtboxes": -1,
+            "animationIndex": 4
+        },
+        {
+            "hitboxes": -1,
+            "hurtboxes": -1,
+            "animationIndex": 4
+        },
+        {
+            "hitboxes": -1,
+            "hurtboxes": -1,
+            "animationIndex": 4
+        },
+        {
+            "hitboxes": -1,
+            "hurtboxes": -1,
+            "animationIndex": 4
+        },
+        {
+            "hitboxes": -1,
+            "hurtboxes": -1,
+            "animationIndex": 1
+        },
+        {
+            "hitboxes": -1,
+            "hurtboxes": -1,
+            "animationIndex": 1
+        },
+        {
+            "hitboxes": -1,
+            "hurtboxes": -1,
+            "animationIndex": 1
+        }
+    ]
+}

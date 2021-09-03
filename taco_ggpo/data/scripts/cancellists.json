@@ -1,0 +1,8 @@
+{
+    "cancelLists":
+    [
+        ["5B", "5A", "forward"],                // 0
+        ["5B"],                                 // 1
+        ["5B", "5A", "forward", "stop"]         // 2
+    ]
+}

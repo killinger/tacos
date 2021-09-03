@@ -1,0 +1,50 @@
+{
+    "isContinuous": true,
+    "defaultTransition": 3,
+    "transitions": 
+    [
+        {
+            "trigger": "5A",
+            "script": 1
+        },
+        {
+            "trigger": "5B",
+            "script": 2
+        },
+        {
+            "trigger": "stop",
+            "script": 0
+        },
+        {
+            "trigger": "forward",
+            "script": 3
+        }
+    ],
+    "frames":
+    [
+        {
+            "cancelList": 2,
+            "hitboxes": -1,
+            "hurtboxes": 0,
+            "xShift": 1.0
+        },
+        {
+            "cancelList": 2,
+            "hitboxes": -1,
+            "hurtboxes": 0,
+            "xShift": 1.0
+        },
+        {
+            "cancelList": 2,
+            "hitboxes": -1,
+            "hurtboxes": 0,
+            "xShift": 1.0
+        },
+        {
+            "cancelList": 2,
+            "hitboxes": -1,
+            "hurtboxes": 0,
+            "xShift": 1.0
+        }
+    ]
+}

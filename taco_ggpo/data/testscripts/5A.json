@@ -1,0 +1,58 @@
+{
+    "type": 1,
+    "defaultTransition": 0,
+    "transitions": 0,
+    "frames": 
+    [
+        {
+            "hitboxes": -1,
+            "hurtboxes": 0,
+            "animationIndex": 11
+        },
+        {
+            "hitboxes": -1,
+            "hurtboxes": 0,
+            "animationIndex": 12
+        },
+        {
+            "hitboxes": -1,
+            "hurtboxes": 0,
+            "animationIndex": 13
+        },
+        {
+            "hitboxes": -1,
+            "hurtboxes": 0,
+            "animationIndex": 14
+        },
+        {
+            "hitboxes": -1,
+            "hurtboxes": 0,
+            "animationIndex": 14
+        },
+        {
+            "hitboxes": -1,
+            "hurtboxes": 0,
+            "animationIndex": 14
+        },
+        {
+            "hitboxes": -1,
+            "hurtboxes": 0,
+            "animationIndex": 14
+        },
+        {
+            "hitboxes": -1,
+            "hurtboxes": 0,
+            "animationIndex": 13
+        },
+        {
+            "hitboxes": -1,
+            "hurtboxes": 0,
+            "animationIndex": 13
+        },
+        {
+            "hitboxes": -1,
+            "hurtboxes": 0,
+            "animationIndex": 13
+        }
+    ]
+}

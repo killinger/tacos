@@ -1,0 +1,18 @@
+{
+    "include":
+    [
+        "standing",     // 0
+        "5A",           // 1
+        "5B",           // 2
+        "forward"       // 3
+    ],
+    "transitions":
+    [
+        [
+            { "trigger": "5B", "script": 2 },
+            { "trigger": "5A", "script": 1 },
+            { "trigger": "forward", "script": 3 },
+            { "trigger": "standing", "script": 0 }
+        ]
+    ]
+}
