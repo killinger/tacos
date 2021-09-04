@@ -59,34 +59,34 @@ int input_buffer::qcfDetection(int maxFrames)
 	return 0;
 }
 
-int input_buffer::CheckForCommand(Command command)
+int input_buffer::CheckForCommand(command Command)
 {
-	if (command.type == 0)
+	if (Command.type == 0)
 	{
-		if (m_InputStates[0].DirectionState.Direction == command.directions[0] &&
-			m_InputStates[0].ButtonStates[command.button].Held == 0)
+		if (m_InputStates[0].DirectionState.Direction == Command.directions[0] &&
+			m_InputStates[0].ButtonStates[Command.button].Held == 0)
 		{
 			return 1;
 		}
 	}
-	else if (command.type == 1)
+	else if (Command.type == 1)
 	{
-		if (m_InputStates[0].ButtonStates[command.button].Held == 0)
+		if (m_InputStates[0].ButtonStates[Command.button].Held == 0)
 		{
-			int foundInputIndex = command.directionCount - 1;
+			int foundInputIndex = Command.directionCount - 1;
 
-			for (int i = 0; i < command.bufferTime; i++)
+			for (int i = 0; i < Command.bufferTime; i++)
 			{
-				if (command.directions[foundInputIndex] == m_InputStates[i].DirectionState.Direction)
+				if (Command.directions[foundInputIndex] == m_InputStates[i].DirectionState.Direction)
 					foundInputIndex--;
 				if (foundInputIndex < 0)
 					return 1;
 			}
 		}
 	}
-	else if (command.type == 2)
+	else if (Command.type == 2)
 	{
-		if (command.directions[0] == m_InputStates[0].DirectionState.Direction)
+		if (Command.directions[0] == m_InputStates[0].DirectionState.Direction)
 		{
 			return 1;
 		}

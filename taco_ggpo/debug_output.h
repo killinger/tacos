@@ -15,9 +15,10 @@ struct debug_output
 		switch (OutputMode)
 		{
 		case DEBUG_DRAW_SCRIPT_INFO:
-			String = Script->m_ScriptName + "\n" +
-				std::to_string(GameState->PlayerState[0].PlaybackState.PlaybackCursor - 1) +
-				" / " + std::to_string(Script->m_FrameCount);
+			String =	
+				Script->m_ScriptName + "\n" +
+				std::to_string(GameState->PlayerState[0].PlaybackState.PlaybackCursor - 1) + " / " + 
+				std::to_string(Script->m_FrameCount);
 			break;
 		case DEBUG_DRAW_NONE:
 		default:

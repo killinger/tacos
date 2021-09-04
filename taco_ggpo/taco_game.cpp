@@ -11,6 +11,7 @@
 // TODO: The renderer interface is appaling
 // TODO: Figure out where to house assets
 // TODO: Script manager tings only halfway renamed to non-disgusting convention
+// TODO: Figure out how to deal with coordinates 
 
 console_system*	ConsoleSystem;
 render_system*	RenderSystem;
@@ -47,8 +48,6 @@ namespace taco
 
 	void AdvanceFrame()
 	{
-		PlayerGraphics.NextFrame();
-
 		UpdatePlayerState();
 
 		RenderSystem->Clear();
@@ -81,14 +80,13 @@ namespace taco
 			}
 		}
 
-		// oof
-
 		DebugOutput.Update(Script, &GameState);
 
 		if (Frame->m_AnimationIndex != -1)
 		{
 			PlayerGraphics.SetAnimation(Frame->m_AnimationIndex);
 		}
+		PlayerGraphics.SetPosition(GameState.PlayerState[0].PositionX, GameState.PlayerState[0].PositionY, -1);
 
 		ScriptManager.Update(&GameState.PlayerState[0].PlaybackState, Trigger);
 		GameState.PlayerState[0].PlaybackState.Script = GameState.PlayerState[0].PlaybackState.PendingScript;

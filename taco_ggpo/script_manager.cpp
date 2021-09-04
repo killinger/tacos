@@ -72,19 +72,19 @@ void script_manager::initializeTestData()
 	//m_cancelLists[0].push_back("5A");
 	//m_cancelLists[1].push_back("5B");
 
-	//// command Initialize
-	//Command command = { 0 };
-	//command.type = 0;
-	//command.button = 0;
-	//command.directions[0] = 5;
+	//// Command Initialize
+	//Command Command = { 0 };
+	//Command.type = 0;
+	//Command.button = 0;
+	//Command.directions[0] = 5;
 
-	//m_commandTriggers["5A"].push_back(command);
+	//m_commandTriggers["5A"].push_back(Command);
 
-	//command.type = 0;
-	//command.button = 1;
-	//command.directions[0] = 5;
+	//Command.type = 0;
+	//Command.button = 1;
+	//Command.directions[0] = 5;
 
-	//m_commandTriggers["5B"].push_back(command);
+	//m_commandTriggers["5B"].push_back(Command);
 
 	//// hitbox Initialize
 	//m_hitboxCount = 1;
@@ -112,17 +112,17 @@ void script_manager::initializeTestData()
 //		fclose(filePointer);
 //
 //		assert(document.IsObject());
-//		assert(document.HasMember("command"));
+//		assert(document.HasMember("Command"));
 //
-//		Command command = { 0 };
+//		Command Command = { 0 };
 //
-//		for (unsigned int i = 0; i < document["command"].Size(); i++)
+//		for (unsigned int i = 0; i < document["Command"].Size(); i++)
 //		{
-//			command.type = document["command"][i]["type"].GetInt();
-//			command.button = document["command"][i]["button"].GetInt();
-//			command.bufferTime = document["command"][i]["bufferTime"].GetInt();
-//			command.directions[0] = document["command"][i]["directions"][0].GetInt();
-//			m_commandTriggers[document["command"][i]["Trigger"].GetString()].push_back(command);
+//			Command.type = document["Command"][i]["type"].GetInt();
+//			Command.button = document["Command"][i]["button"].GetInt();
+//			Command.bufferTime = document["Command"][i]["bufferTime"].GetInt();
+//			Command.directions[0] = document["Command"][i]["directions"][0].GetInt();
+//			m_commandTriggers[document["Command"][i]["Trigger"].GetString()].push_back(Command);
 //		}
 //	}
 //
@@ -247,16 +247,16 @@ void script_manager::readTestDataFromFile2()
 		assert(document.IsObject());
 		assert(document.HasMember("command"));
 
-		Command command = { 0 };
+		command Command = { 0 };
 
 		for (unsigned int i = 0; i < document["command"].Size(); i++)
 		{
-			command.type = document["command"][i]["type"].GetInt();
-			command.button = document["command"][i]["button"].GetInt();
-			command.bufferTime = document["command"][i]["bufferTime"].GetInt();
-			command.directions[0] = document["command"][i]["directions"][0].GetInt();
-			command.Trigger = document["command"][i]["trigger"].GetString();
-			m_Commands.push_back(command);
+			Command.type = document["command"][i]["type"].GetInt();
+			Command.button = document["command"][i]["button"].GetInt();
+			Command.bufferTime = document["command"][i]["bufferTime"].GetInt();
+			Command.directions[0] = document["command"][i]["directions"][0].GetInt();
+			Command.Trigger = document["command"][i]["trigger"].GetString();
+			m_Commands.push_back(Command);
 		}
 	}
 

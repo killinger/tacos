@@ -1,7 +1,9 @@
 #pragma once
 #include <string>
 
-struct Command
+// TODO: these are half assed
+
+struct command
 {
 	int type;
 	int directionCount;

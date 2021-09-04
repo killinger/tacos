@@ -55,7 +55,7 @@ public:
 	HitboxInfo*									m_hitboxes;
 	HurtboxInfo*								m_hurtboxes;
 	std::vector<std::map<std::string, int>>		m_transitionMaps;
-	std::vector<Command>						m_Commands;
+	std::vector<command>						m_Commands;
 
 	script_manager();
 	~script_manager();
