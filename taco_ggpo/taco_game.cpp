@@ -24,6 +24,7 @@
 // TODO: Same for input buffer
 // TODO: Script manager is overall hella messy, streamline that update function
 // TODO: Audio shit
+// TODO: Is a custom memory allocator worth it? There isn't a lot of (if any) allocations during gameplay
 
 // DESIGN
 // TODO: The renderer interface is appaling
@@ -71,8 +72,10 @@ namespace taco
 	}
 
 	/* TODO:
-	RunFrame should pass inputs OK:d by GGPO to AdvanceFrame. AdvanceFrame should only have to care about what inputs belong to which player,
-	not the details of those players (local/remote/dummy).
+	RunFrame should pass inputs OK:d by GGPO to AdvanceFrame. AdvanceFrame (and whatever will handling updating gamestate) should only have to care about 
+	what inputs belong to which player,	not the details of those players (local/remote/dummy).
+	There should possibly be another layer of abstraction when getting a trigger from the command buffer to allow for directly setting a trigger,
+	to allow for easier dummy behaviour.
 	*/
 	void RunFrame()
 	{
