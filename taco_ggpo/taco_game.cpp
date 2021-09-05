@@ -17,6 +17,9 @@
 //			- Origin of sprites (top-left, bottom-center etc.)
 //				- rn using sprite height/width for offsetting doesn't look right because of variable sprite sizes + sfml positive y axis being down
 //				- has to work nicely with horizontal flip 
+// TODO: Script manager tings only halfway renamed to non-disgusting convention
+// TODO: ^Also input buffer tings
+// TODO: Script manager is overall hella messy, streamline that update function
 
 // DESIGN
 // TODO: The renderer interface is appaling
@@ -24,10 +27,6 @@
 // TODO: Figure out where to house assets
 // TODO: Figure out where to house the camera (or let the renderer handle it)
 // TODO: Name some of these enums perhaps
-
-// CLEAN UP
-// TODO: Script manager tings only halfway renamed to non-disgusting convention
-// TODO: ^Also input buffer tings
 
 // Subsystems
 console_system*	ConsoleSystem;
