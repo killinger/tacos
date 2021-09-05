@@ -78,5 +78,5 @@ public:
 	void Initialize();
 	int Update(int rawInputs);
 	int qcfDetection(int maxFrames);
-	int CheckForCommand(command command);
+	int CheckForCommand(command Command);
 };

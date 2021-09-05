@@ -46,7 +46,9 @@ uint32 player_graphics::Initialize(const char* Filename)
 
 void player_graphics::SetAnimation(uint32 Index)
 {
+	// TODO: Figure this shit out
 	m_CharacterSprite.setTextureRect(m_AnimationFrames[Index]);
+	m_CharacterSprite.setOrigin((float)m_AnimationFrames[Index].width / 2.0f, (float)m_AnimationFrames[Index].height);
 }
 
 void player_graphics::SetPosition(float PositionX, float PositionY, int Facing)
@@ -58,7 +60,7 @@ void player_graphics::SetPosition(float PositionX, float PositionY, int Facing)
 		FacingAdjustment = -(float)m_CharacterSprite.getTextureRect().height;
 	}
 	sf::Vector2f ViewCenter = RenderSystem->GetViewCenter();
-	m_CharacterSprite.setPosition(sf::Vector2f(PositionX + ViewCenter.x + FacingAdjustment, -PositionY - (float)m_CharacterSprite.getTextureRect().height - ViewCenter.y));
+	m_CharacterSprite.setPosition(sf::Vector2f(PositionX + ViewCenter.x, -PositionY - ViewCenter.y));
 }
 
 void player_graphics::NextFrame()

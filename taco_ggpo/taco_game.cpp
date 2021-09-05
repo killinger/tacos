@@ -8,10 +8,24 @@
 #include "input_polling.h"
 #include "debug_output.h"
 
+// TASKS
+// TODO: Set up struct or whatever for more permanent (or doesn't change frame to frame) state that gets passed around (input mapping etc, ggpo stuff)
+// TODO: Set up controls properly
+// TODO: Set up everything to account for two players instead of this test shit
+
+// DESIGN
 // TODO: The renderer interface is appaling
+// TODO: Every other interface is also appaling
 // TODO: Figure out where to house assets
-// TODO: Script manager tings only halfway renamed to non-disgusting convention
+// TODO: Figure out where to house the camera (or let the renderer handle it)
 // TODO: Figure out how to deal with coordinates 
+//			- Origin of sprites (top-left, bottom-center etc.)
+//				- rn using sprite height/width for offsetting doesn't look correctly because of variable sprite sizes
+//				- has to work nicely with horizontal flip 
+
+// CLEAN UP
+// TODO: Script manager tings only halfway renamed to non-disgusting convention
+// TODO: ^Also input buffer tings
 
 console_system*	ConsoleSystem;
 render_system*	RenderSystem;
@@ -61,6 +75,11 @@ namespace taco
 		GameState.FrameCount++;
 	}
 
+	/* TODO:
+	1. Get current frame for both players
+	2. Check collisions for both players
+	3. Rest can be sequential 
+	*/
 	void UpdatePlayerState()
 	{
 		uint32 Input = PollInput();
@@ -86,7 +105,7 @@ namespace taco
 		{
 			PlayerGraphics.SetAnimation(Frame->m_AnimationIndex);
 		}
-		PlayerGraphics.SetPosition(GameState.PlayerState[0].PositionX, GameState.PlayerState[0].PositionY, -1);
+		PlayerGraphics.SetPosition(GameState.PlayerState[0].PositionX, GameState.PlayerState[0].PositionY, 1);
 
 		ScriptManager.Update(&GameState.PlayerState[0].PlaybackState, Trigger);
 		GameState.PlayerState[0].PlaybackState.Script = GameState.PlayerState[0].PlaybackState.PendingScript;
