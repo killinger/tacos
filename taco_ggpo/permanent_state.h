@@ -1,7 +1,7 @@
 #pragma once
 #include "defs.h"
 
-enum
+enum player_type
 {
 	PLAYER_TYPE_LOCAL,
 	PLAYER_TYPE_REMOTE,
@@ -10,7 +10,7 @@ enum
 
 struct player_info
 {
-	int32 Type;
+	player_type Type;
 };
 
 struct permanent_state

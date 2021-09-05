@@ -34,8 +34,8 @@ console_system*	ConsoleSystem;
 render_system*	RenderSystem;
 
 // State
-gamestate		GameState		= { 0 };
-permanent_state PermanentState	= { 0 };
+gamestate		GameState = { 0 };
+permanent_state PermanentState;
 
 // Assets/other
 player_graphics	PlayerGraphics;
