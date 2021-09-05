@@ -1,6 +1,7 @@
 #pragma once
 
 // TODO: everything about this a mess pls get rid off
+// TODO: this probably has enough going on to motivate it being moved to a class
 
 #define IN_2 0x01
 #define IN_4 0x02

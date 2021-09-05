@@ -12,21 +12,27 @@
 // TASKS
 // TODO: Set up struct or whatever for more permanent (or doesn't change frame to frame) state that gets passed around (input mapping etc, ggpo stuff)
 // TODO: Set up controls properly + input_polling is a fucking mess
+//			- Read input mapping from file
+//			- Some way to set up controls at runtime
 // TODO: Set up everything to account for two players instead of this test shit
+// TODO: Set up stage + camera rules
 // TODO: Figure out how to deal with coordinates 
 //			- Origin of sprites (top-left, bottom-center etc.)
 //				- rn using sprite height/width for offsetting doesn't look right because of variable sprite sizes + sfml positive y axis being down
 //				- has to work nicely with horizontal flip 
 // TODO: Script manager tings only halfway renamed to non-disgusting convention
-// TODO: ^Also input buffer tings
+// TODO: Same for input buffer
 // TODO: Script manager is overall hella messy, streamline that update function
+// TODO: Audio shit
 
 // DESIGN
 // TODO: The renderer interface is appaling
 // TODO: Every other interface is also appaling
-// TODO: Figure out where to house assets
+// TODO: Figure out where to house/how to work with assets
 // TODO: Figure out where to house the camera (or let the renderer handle it)
-// TODO: Name some of these enums perhaps
+// TODO: Is a renderer class even necessary? It's useful but doesn't really do renderer tings rn
+// TODO: Name some of these enums perhaps? Undecided
+// TODO: A lot of shit that probably shouldn't be is header only rn, figure out what to do with them
 
 // Subsystems
 console_system*	ConsoleSystem;
@@ -64,6 +70,10 @@ namespace taco
 		CreateDefaultInputMap();
 	}
 
+	/* TODO:
+	RunFrame should pass inputs OK:d by GGPO to AdvanceFrame. AdvanceFrame should only have to care about what inputs belong to which player,
+	not the details of those players (local/remote/dummy).
+	*/
 	void RunFrame()
 	{
 		uint32 Key = PollKeyboard();
