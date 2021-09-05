@@ -3,6 +3,7 @@
 #include "console_system.h"
 #include "subsystems.h"
 #include "gamestate.h"
+#include "permanent_state.h"
 #include "player_graphics.h"
 #include "script_manager.h"
 #include "input_polling.h"
@@ -10,26 +11,33 @@
 
 // TASKS
 // TODO: Set up struct or whatever for more permanent (or doesn't change frame to frame) state that gets passed around (input mapping etc, ggpo stuff)
-// TODO: Set up controls properly
+// TODO: Set up controls properly + input_polling is a fucking mess
 // TODO: Set up everything to account for two players instead of this test shit
+// TODO: Figure out how to deal with coordinates 
+//			- Origin of sprites (top-left, bottom-center etc.)
+//				- rn using sprite height/width for offsetting doesn't look right because of variable sprite sizes + sfml positive y axis being down
+//				- has to work nicely with horizontal flip 
 
 // DESIGN
 // TODO: The renderer interface is appaling
 // TODO: Every other interface is also appaling
 // TODO: Figure out where to house assets
 // TODO: Figure out where to house the camera (or let the renderer handle it)
-// TODO: Figure out how to deal with coordinates 
-//			- Origin of sprites (top-left, bottom-center etc.)
-//				- rn using sprite height/width for offsetting doesn't look correctly because of variable sprite sizes
-//				- has to work nicely with horizontal flip 
+// TODO: Name some of these enums perhaps
 
 // CLEAN UP
 // TODO: Script manager tings only halfway renamed to non-disgusting convention
 // TODO: ^Also input buffer tings
 
+// Subsystems
 console_system*	ConsoleSystem;
 render_system*	RenderSystem;
-gamestate		GameState = { 0 };
+
+// State
+gamestate		GameState		= { 0 };
+permanent_state PermanentState	= { 0 };
+
+// Assets/other
 player_graphics	PlayerGraphics;
 script_manager	ScriptManager;
 debug_output	DebugOutput;
@@ -43,12 +51,18 @@ namespace taco
 	{
 		ConsoleSystem = new console_system();
 		RenderSystem = new render_system(Window);
+		
 		GameState.Initialize();
+		PermanentState.Players[0].Type = PLAYER_TYPE_LOCAL;
+		PermanentState.Players[1].Type = PLAYER_TYPE_DUMMY;
+		
 		PlayerGraphics.Initialize("data/sphere");
 		ScriptManager.initializeTestData();
 		DebugOutput.OutputMode = DEBUG_DRAW_NONE;
 
 		ConsoleSystem->RegisterCVar("debug", &DebugOutput.OutputMode, "0", "1", "Display debug string\n0: none\n1: script playback", CVAR_INT);
+
+		CreateDefaultInputMap();
 	}
 
 	void RunFrame()

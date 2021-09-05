@@ -77,5 +77,8 @@
     <ClInclude Include="debug_output.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="permanent_state.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

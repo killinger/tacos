@@ -11,25 +11,50 @@
 #define IN_C 0x40
 #define IN_D 0x80
 
+#define BUTTON_BIND_COUNT 4
+
+struct button_binding
+{
+	int32 ButtonIndex;
+	int32 InputBinding;
+};
+
+struct input_map
+{
+	int32			Device;
+	button_binding	Bindings[BUTTON_BIND_COUNT];
+};
+
+input_map InputMap = { 0 };
+
+// Read this from file
+void CreateDefaultInputMap()
+{
+	InputMap.Device = 0;
+	InputMap.Bindings[0] = { 0, IN_A };
+	InputMap.Bindings[1] = { 3, IN_B };
+	InputMap.Bindings[2] = { 5, IN_C };
+	InputMap.Bindings[3] = { 7, IN_D };
+}
+
 uint32 PollInput()
 {
-	int inputState = 0;
-	if (sf::Joystick::getAxisPosition(0, sf::Joystick::PovY) < -1.0)
-		inputState |= IN_2;
-	if (sf::Joystick::getAxisPosition(0, sf::Joystick::PovY) > 1.0)
-		inputState |= IN_8;
-	if (sf::Joystick::getAxisPosition(0, sf::Joystick::PovX) < -1.0)
-		inputState |= IN_4;
-	if (sf::Joystick::getAxisPosition(0, sf::Joystick::PovX) > 1.0)
-		inputState |= IN_6;
-	if (sf::Joystick::isButtonPressed(0, 0))
-		inputState |= IN_A;
-	if (sf::Joystick::isButtonPressed(0, 3))
-		inputState |= IN_B;
-	if (sf::Joystick::isButtonPressed(0, 5))
-		inputState |= IN_C;
+	int32 InputState = 0;
+	if (sf::Joystick::getAxisPosition(InputMap.Device, sf::Joystick::PovY) < -1.0)
+		InputState |= IN_2;
+	if (sf::Joystick::getAxisPosition(InputMap.Device, sf::Joystick::PovY) > 1.0)
+		InputState |= IN_8;
+	if (sf::Joystick::getAxisPosition(InputMap.Device, sf::Joystick::PovX) < -1.0)
+		InputState |= IN_4;
+	if (sf::Joystick::getAxisPosition(InputMap.Device, sf::Joystick::PovX) > 1.0)
+		InputState |= IN_6;
+	for (uint32 i = 0; i < BUTTON_BIND_COUNT; i++)
+	{
+		if (sf::Joystick::isButtonPressed(InputMap.Device, InputMap.Bindings[i].ButtonIndex))
+			InputState |= InputMap.Bindings[i].InputBinding;
+	}
 
-	return inputState;
+	return InputState;
 }
 
 unsigned int PollKeyboard()

@@ -136,6 +136,7 @@
     <ClInclude Include="gamestate.h" />
     <ClInclude Include="input_buffer.h" />
     <ClInclude Include="input_polling.h" />
+    <ClInclude Include="permanent_state.h" />
     <ClInclude Include="player_graphics.h" />
     <ClInclude Include="render_system.h" />
     <ClInclude Include="script_manager.h" />
