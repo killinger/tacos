@@ -15,6 +15,7 @@ struct playerstate
 	input_buffer	InputBuffer;
 	float			PositionX;
 	float			PositionY;
+	float			Facing;
 };
 
 // TODO: Move playerstate to a proper class? possibly the entirety of gamestate?
