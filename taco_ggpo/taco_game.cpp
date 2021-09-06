@@ -24,11 +24,12 @@
 // TODO: Same for input buffer
 // TODO: Script manager is overall hella messy, streamline that update function
 // TODO: Audio shit
-// TODO: Is a custom memory allocator worth it? There isn't a lot of (if any) allocations during gameplay
+// TODO: Is a custom memory allocator worth it? There isn't a lot of (if any) allocations during gameplay, but locality might be nice?
 // TODO: Basic menus
 // TODO: Reloading scripts at runtime (either through menu or console)
 // TODO: When things are more comfortable, move all these non-detail TODOs outta here
 // TODO: Streamline asset loading, and only load unique assets ie in case of a mirror match share the assets between both players
+//		 ^ textures would be shared, not sprites
 
 // DESIGN
 // TODO: The renderer interface is appaling
@@ -36,16 +37,19 @@
 // TODO: Figure out where to house/how to work with assets
 // TODO: Figure out where to house the camera (or let the renderer handle it)
 // TODO: Is a renderer class even necessary? It's useful but doesn't really do renderer tings rn
+//		 ^ use RenderTexture to render off-screen, to set internal resolution
+//		 ^ maybe some neat shader effects?
 // TODO: Name some of these enums perhaps? Undecided
 // TODO: A lot of shit that probably shouldn't be is header only rn, figure out what to do with them
 // TODO: Should playerstate->script be index or pointer?
+// TODO: Should animation be separated from scripts?
 
 // TODO: This should find a more suitable home
 #define PLAYER_STARTING_POSITIONS 80.0f
 
 // Subsystems
-console_system* ConsoleSystem;
-render_system* RenderSystem;
+console_system*	ConsoleSystem;
+render_system*	RenderSystem;
 
 // State
 gamestate		GameState = { 0 };
@@ -101,8 +105,6 @@ namespace taco
 		{
 			if (PermanentState.Players[i].Type == PLAYER_TYPE_LOCAL)
 				Inputs[i] = PollInput();
-			else
-				Inputs[i] = 0;
 		}
 
 		// GGPO stuff here
@@ -144,7 +146,7 @@ namespace taco
 			&Scripts[1]->m_Frames[GameState.PlayerState[1].PlaybackState.PlaybackCursor]
 		};
 
-		// TODO: Collision detection
+		// TODO: Collision detection. It's ok for collision detection to be ineffective as there aren't going to be all that many checks per frame even in the worst case
 
 		DebugOutput.Update(Scripts[0], &GameState);
 
@@ -153,7 +155,8 @@ namespace taco
 			GameState.PlayerState[j].InputBuffer.Update(Inputs[j]);
 			std::string Trigger = "";
 
-			// TODO: add another one of those script managers
+			// TODO: Add another one of those script managers
+			// TODO: There needs to be additional checks, such as meter requirement/availability 
 			for (uint32 i = 0; i < ScriptManager.m_Commands.size(); i++)
 			{
 				if (GameState.PlayerState[j].InputBuffer.CheckForCommand(ScriptManager.m_Commands[i]))
@@ -163,7 +166,7 @@ namespace taco
 				}
 			}
 
-			// TODO: -1 should be a define, not magic number
+			// TODO: -1 should be a define, not magic number. also should never happen
 			if (Frames[j]->m_AnimationIndex != -1)
 			{
 				PlayerGraphics[j].SetAnimation(Frames[j]->m_AnimationIndex);

@@ -5,7 +5,10 @@
 #include "command.h"
 
 // TODO: fix the fucking naming convention jesus christ
+// TODO: try impact of using smaller data types
+// TODO: why are some of these classes and some struct it looks ridiculous and you are ridiculous 
 
+// TODO: Do these two really need different structs? All collision boxes should have the same fields
 struct HitboxInfo
 {
 	float width;
