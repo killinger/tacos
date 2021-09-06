@@ -323,7 +323,7 @@ void script_manager::readTestDataFromFile2()
 		fclose(filePointer);
 
 		m_hitboxCount = document["hitboxes"].Size();
-		m_hitboxes = new HitboxInfo[m_hitboxCount];
+		m_hitboxes = new hitbox_info[m_hitboxCount];
 
 		for (int i = 0; i < m_hitboxCount; i++)
 		{
@@ -341,7 +341,7 @@ void script_manager::readTestDataFromFile2()
 		fclose(filePointer);
 
 		m_hurtboxCount = document["hurtboxes"].Size();
-		m_hurtboxes = new HurtboxInfo[m_hurtboxCount];
+		m_hurtboxes = new hurtbox_info[m_hurtboxCount];
 
 		for (int i = 0; i < m_hurtboxCount; i++)
 		{

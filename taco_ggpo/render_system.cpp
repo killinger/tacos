@@ -21,7 +21,7 @@ render_system::render_system(sf::RenderWindow* Window)
 	m_DebugString.setFillColor(sf::Color::White);
 
 	m_DebugView = m_Window->getDefaultView();
-	m_MainView.setCenter(sf::Vector2f(0.0f, 0.0f));
+	m_MainView.setCenter(sf::Vector2f(0.0f, -80.0f));
 	m_MainView.setSize(sf::Vector2f(VIEW_WIDTH, VIEW_HEIGHT));
 
 	m_Window->setView(m_MainView);
@@ -58,6 +58,12 @@ void render_system::Draw(sf::Sprite Sprite)
 {
 	m_Window->setView(m_MainView);
 	m_Window->draw(Sprite);
+}
+
+void render_system::Draw(sf::RectangleShape Rectangle)
+{
+	m_Window->setView(m_MainView);
+	m_Window->draw(Rectangle);
 }
 
 void render_system::Display()

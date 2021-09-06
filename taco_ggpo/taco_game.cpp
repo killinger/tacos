@@ -15,11 +15,12 @@
 //			- Read input mapping from file
 //			- Some way to set up controls at runtime
 // TODO: Set up everything to account for two players instead of this test shit
-// TODO: Set up stage + camera rules
+// TODO: Set up stage + camera rules + debug camera to visualize bounds
 // TODO: Figure out how to deal with coordinates 
 //			- Origin of sprites (top-left, bottom-center etc.)
 //				- rn using sprite height/width for offsetting doesn't look right because of variable sprite sizes + sfml positive y axis being down
 //				- has to work nicely with horizontal flip 
+//				- do collision detection first, it would be immediately apparent when coordinates are off
 // TODO: Script manager tings only halfway renamed to non-disgusting convention
 // TODO: Same for input buffer
 // TODO: Script manager is overall hella messy, streamline that update function
@@ -60,10 +61,17 @@ player_graphics	PlayerGraphics[2];
 script_manager	ScriptManager;
 debug_output	DebugOutput;
 
+// TEST TINGS REMOVE AFTER IMPLEMENTATION
+hurtbox_info*	Hurtboxes[2];
+bool			Collision = false;
+
 namespace taco
 {
 	void AdvanceFrame(uint32* Inputs);
 	void UpdatePlayerState(uint32* Inputs);
+
+	// TEST TINGS REMOVE AFTER IMPLEMENTATION
+	void DrawHurtboxes(uint32 Player);
 
 	void Initialize(sf::RenderWindow* Window)
 	{
@@ -87,6 +95,10 @@ namespace taco
 		ConsoleSystem->RegisterCVar("debug", &DebugOutput.OutputMode, "0", "1", "Display debug string\n0: none\n1: script playback", CVAR_INT);
 
 		CreateDefaultInputMap();
+
+		// TEST TINGS REMOVE AFTER IMPLEMENTATION
+		Hurtboxes[0] = NULL;
+		Hurtboxes[1] = NULL;
 	}
 
 	/* TODO:
@@ -117,8 +129,14 @@ namespace taco
 		UpdatePlayerState(Inputs);
 
 		RenderSystem->Clear();
+		// TODO: What's the draw order rules? Last character to land a hit on top?
 		RenderSystem->Draw(PlayerGraphics[0].m_CharacterSprite);
 		RenderSystem->Draw(PlayerGraphics[1].m_CharacterSprite);
+		for (uint32 i = 0; i < 2; i++)
+		{
+			if (Hurtboxes[i] != NULL)
+				DrawHurtboxes(i);
+		}
 		if (ConsoleSystem->m_IsActive)
 			ConsoleSystem->DrawConsole();
 		else if (DebugOutput.OutputMode != DEBUG_DRAW_NONE)
@@ -147,6 +165,12 @@ namespace taco
 		};
 
 		// TODO: Collision detection. It's ok for collision detection to be ineffective as there aren't going to be all that many checks per frame even in the worst case
+		if (Hurtboxes[0] != NULL &&
+			Hurtboxes[1] != NULL)
+		{
+
+		}
+
 
 		DebugOutput.Update(Scripts[0], &GameState);
 
@@ -176,10 +200,37 @@ namespace taco
 				GameState.PlayerState[j].PositionY, 
 				GameState.PlayerState[j].Facing);
 
+			// TODO: this be test shit
+			if (Frames[j]->m_hurtboxes != -1)
+			{
+				Hurtboxes[j] = &ScriptManager.m_hurtboxes[Frames[j]->m_hurtboxes];
+			}
+			else
+			{
+				Hurtboxes[j] = NULL;
+			}
+
 			// TODO: At this stage, is there a point to having a pending script if updating the playback state is the last operation? 
 			// Is there ever anything you'd want to do between updating the playback state and committing to switching script?
 			ScriptManager.Update(&GameState.PlayerState[j].PlaybackState, Trigger);
 			GameState.PlayerState[j].PlaybackState.Script = GameState.PlayerState[j].PlaybackState.PendingScript;
 		}
+	}
+	void DrawHurtboxes(uint32 Player)
+	{
+		sf::RectangleShape Hurtbox;
+
+		float FacingAdjustment = 0.0f;
+		Hurtbox.setScale(GameState.PlayerState[Player].Facing, 1.0f);
+		if (GameState.PlayerState[Player].Facing == 1.0f)
+		{
+			FacingAdjustment = -Hurtboxes[Player]->width;
+		}
+		sf::Vector2f ViewCenter = RenderSystem->GetViewCenter();
+		Hurtbox.setSize(sf::Vector2f(Hurtboxes[Player]->width, Hurtboxes[Player]->height));
+		Hurtbox.setPosition(sf::Vector2f(	Hurtboxes[Player]->x + ViewCenter.x + GameState.PlayerState[Player].PositionX, 
+											-Hurtboxes[Player]->y - ViewCenter.y - Hurtboxes[Player]->height - GameState.PlayerState[Player].PositionY));
+		Hurtbox.setFillColor(sf::Color(155, 155, 0, 100));
+		RenderSystem->Draw(Hurtbox);
 	}
 }

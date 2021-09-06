@@ -48,19 +48,19 @@ void player_graphics::SetAnimation(uint32 Index)
 {
 	// TODO: Figure this shit out
 	m_CharacterSprite.setTextureRect(m_AnimationFrames[Index]);
-	m_CharacterSprite.setOrigin((float)m_AnimationFrames[Index].width / 2.0f, (float)m_AnimationFrames[Index].height);
+	//m_CharacterSprite.setOrigin((float)m_AnimationFrames[Index].width / 2.0f, (float)m_AnimationFrames[Index].height);
 }
 
 void player_graphics::SetPosition(float PositionX, float PositionY, int Facing)
 {
 	float FacingAdjustment = 0.0f;
-	m_CharacterSprite.setScale(Facing, 1);
-	if (Facing == 1)
+	m_CharacterSprite.setScale(Facing, 1.0f);
+	if (Facing == -1.0f)
 	{
-		FacingAdjustment = -(float)m_CharacterSprite.getTextureRect().height;
+		FacingAdjustment = -(float)m_CharacterSprite.getTextureRect().width;
 	}
 	sf::Vector2f ViewCenter = RenderSystem->GetViewCenter();
-	m_CharacterSprite.setPosition(sf::Vector2f(PositionX + ViewCenter.x, -PositionY - ViewCenter.y));
+	m_CharacterSprite.setPosition(sf::Vector2f(PositionX + ViewCenter.x, -PositionY - ViewCenter.y - m_CharacterSprite.getTextureRect().height));
 }
 
 void player_graphics::NextFrame()

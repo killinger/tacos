@@ -9,7 +9,7 @@
 // TODO: why are some of these classes and some struct it looks ridiculous and you are ridiculous 
 
 // TODO: Do these two really need different structs? All collision boxes should have the same fields
-struct HitboxInfo
+struct hitbox_info
 {
 	float width;
 	float height;
@@ -17,7 +17,7 @@ struct HitboxInfo
 	float y;
 };
 
-struct HurtboxInfo
+struct hurtbox_info
 {
 	float width;
 	float height;
@@ -55,8 +55,8 @@ public:
 	int											m_hurtboxCount;
 	character_script*							m_Scripts;
 	std::vector<std::string>*					m_cancelLists;
-	HitboxInfo*									m_hitboxes;
-	HurtboxInfo*								m_hurtboxes;
+	hitbox_info*								m_hitboxes;
+	hurtbox_info*								m_hurtboxes;
 	std::vector<std::map<std::string, int>>		m_transitionMaps;
 	std::vector<command>						m_Commands;
 

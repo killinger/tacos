@@ -15,6 +15,7 @@ public:
 	void			DrawDebugString(const char* DebugString);
 	void			Clear();
 	void			Draw(sf::Sprite Sprite);
+	void			Draw(sf::RectangleShape Rectangle);
 	void			Display();
 	sf::Vector2f	GetViewCenter();
 
