@@ -31,6 +31,7 @@
 // TODO: When things are more comfortable, move all these non-detail TODOs outta here
 // TODO: Streamline asset loading, and only load unique assets ie in case of a mirror match share the assets between both players
 //		 ^ textures would be shared, not sprites
+// TODO: Get a def for Facing
 
 // DESIGN
 // TODO: The renderer interface is appaling
@@ -44,6 +45,9 @@
 // TODO: A lot of shit that probably shouldn't be is header only rn, figure out what to do with them
 // TODO: Should playerstate->script be index or pointer?
 // TODO: Should animation be separated from scripts?
+// TODO: Consider having an "apply walkspeed" flag in scripts instead of using x shift, so walkspeed can easily be changed at runtime.
+//		 ^ same deal with run etc
+//		 ^ x shift would be used for small shifts during moves 
 
 // TODO: This should find a more suitable home
 #define PLAYER_STARTING_POSITIONS 80.0f
@@ -171,12 +175,14 @@ namespace taco
 
 		}
 
-
 		DebugOutput.Update(Scripts[0], &GameState);
 
 		for (uint32 j = 0; j < 2; j++)
 		{
-			GameState.PlayerState[j].InputBuffer.Update(Inputs[j]);
+			// TODO: There needs to be quite a bit of rules for changing position
+			GameState.PlayerState[j].PositionX += (Frames[j]->m_xShift * GameState.PlayerState[j].Facing);
+
+			GameState.PlayerState[j].InputBuffer.Update(Inputs[j], GameState.PlayerState[j].Facing);
 			std::string Trigger = "";
 
 			// TODO: Add another one of those script managers

@@ -43,6 +43,29 @@ int input_buffer::Update(int rawInputs)
 	return 0;
 }
 
+int input_buffer::Update(int rawInputs, float Facing)
+{
+	//TODO: ring buffer
+	for (int i = INPUT_BUFFER_SIZE - 2; i >= 0; i--)
+	{
+		m_InputStates[i + 1] = m_InputStates[i];
+	}
+	
+	int32 AdjustedInputs = rawInputs;
+	if (Facing == -1.0f)
+	{
+		AdjustedInputs = ((rawInputs & INPUT_LEFT) << 1);
+		AdjustedInputs |= ((rawInputs & INPUT_RIGHT) >> 1);
+	}
+
+	m_InputStates[0].ButtonStates[0].Update(rawInputs & INPUT_A);
+	m_InputStates[0].ButtonStates[1].Update(rawInputs & INPUT_B);
+	m_InputStates[0].ButtonStates[2].Update(rawInputs & INPUT_C);
+	m_InputStates[0].DirectionState.Update(AdjustedInputs & (INPUT_DIRECTIONS));
+
+	return 0;
+}
+
 // TODO: change to something more general, like input being an array with stuff
 int input_buffer::qcfDetection(int maxFrames)
 {

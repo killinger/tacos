@@ -21,6 +21,13 @@
             "button": 4,
             "bufferTime": 0,
             "trigger": "forward"
+        },
+        {
+            "type": 2,
+            "directions": [4],
+            "button": 4,
+            "bufferTime": 0,
+            "trigger": "back"
         }
     ]
 }

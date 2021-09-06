@@ -4,7 +4,8 @@
         "standing",     // 0
         "5A",           // 1
         "5B",           // 2
-        "forward"       // 3
+        "forward",      // 3
+        "back"          // 4
     ],
     "transitions":
     [
@@ -12,7 +13,8 @@
             { "trigger": "5B", "script": 2 },
             { "trigger": "5A", "script": 1 },
             { "trigger": "forward", "script": 3 },
-            { "trigger": "standing", "script": 0 }
+            { "trigger": "back", "script": 4 },
+            { "trigger": "standing", "script": 0 }        
         ]
     ]
 }

@@ -313,6 +313,15 @@ void script_manager::readTestDataFromFile2()
 			{
 				m_Scripts[i].m_Frames[j].m_AnimationIndex = -1;
 			}
+
+			if (document["frames"][j].HasMember("xShift"))
+			{
+				m_Scripts[i].m_Frames[j].m_xShift = document["frames"][j]["xShift"].GetFloat();
+			}
+			else
+			{
+				m_Scripts[i].m_Frames[j].m_xShift = 0.0f;
+			}
 		}
 	}
 
