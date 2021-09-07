@@ -1,26 +1,21 @@
 #include "taco_game.h"
 #include "render_system.h"
 #include "console_system.h"
+#include "input_handler.h"
 #include "subsystems.h"
 #include "gamestate.h"
 #include "permanent_state.h"
 #include "player_graphics.h"
 #include "script_manager.h"
-#include "input_polling.h"
 #include "debug_output.h"
 
 // TASKS
 // TODO: Set up struct or whatever for more permanent (or doesn't change frame to frame) state that gets passed around (input mapping etc, ggpo stuff)
-// TODO: Set up controls properly + input_polling is a fucking mess
+// TODO: Set up controls properly
 //			- Read input mapping from file
 //			- Some way to set up controls at runtime
 // TODO: Set up everything to account for two players instead of this test shit
 // TODO: Set up stage + camera rules + debug camera to visualize bounds
-// TODO: Figure out how to deal with coordinates 
-//			- Origin of sprites (top-left, bottom-center etc.)
-//				- rn using sprite height/width for offsetting doesn't look right because of variable sprite sizes + sfml positive y axis being down
-//				- has to work nicely with horizontal flip 
-//				- do collision detection first, it would be immediately apparent when coordinates are off
 // TODO: Script manager tings only halfway renamed to non-disgusting convention
 // TODO: Same for input buffer
 // TODO: Script manager is overall hella messy, streamline that update function
@@ -32,6 +27,7 @@
 // TODO: Streamline asset loading, and only load unique assets ie in case of a mirror match share the assets between both players
 //		 ^ textures would be shared, not sprites
 // TODO: Get a def for Facing
+// TODO: Commands need to be finished, a flag for any similar direction among other things (else walking forward to button won't work etc) 
 
 // DESIGN
 // TODO: The renderer interface is appaling
@@ -48,6 +44,7 @@
 // TODO: Consider having an "apply walkspeed" flag in scripts instead of using x shift, so walkspeed can easily be changed at runtime.
 //		 ^ same deal with run etc
 //		 ^ x shift would be used for small shifts during moves 
+// TODO: Consider changing the format of collision boxes to left/right/top/bottom as it's better for collision detection
 
 // TODO: This should find a more suitable home
 #define PLAYER_STARTING_POSITIONS 80.0f
@@ -55,6 +52,7 @@
 // Subsystems
 console_system*	ConsoleSystem;
 render_system*	RenderSystem;
+input_handler*	InputHandler;
 
 // State
 gamestate		GameState = { 0 };
@@ -81,6 +79,7 @@ namespace taco
 	{
 		ConsoleSystem = new console_system();
 		RenderSystem = new render_system(Window);
+		InputHandler = new input_handler();
 
 		GameState.Initialize();
 		GameState.PlayerState[0].PositionX = -PLAYER_STARTING_POSITIONS;
@@ -98,8 +97,6 @@ namespace taco
 
 		ConsoleSystem->RegisterCVar("debug", &DebugOutput.OutputMode, "0", "1", "Display debug string\n0: none\n1: script playback", CVAR_INT);
 
-		CreateDefaultInputMap();
-
 		// TEST TINGS REMOVE AFTER IMPLEMENTATION
 		Hurtboxes[0] = NULL;
 		Hurtboxes[1] = NULL;
@@ -113,14 +110,14 @@ namespace taco
 	*/
 	void RunFrame()
 	{
-		uint32 Key = PollKeyboard();
+		uint32 Key = InputHandler->GetKey();
 		ConsoleSystem->Update(Key);
 
 		uint32 Inputs[2] = { 0 };
 		for (uint32 i = 0; i < 2; i++)
 		{
 			if (PermanentState.Players[i].Type == PLAYER_TYPE_LOCAL)
-				Inputs[i] = PollInput();
+				Inputs[i] = InputHandler->GetInputs();
 		}
 
 		// GGPO stuff here
@@ -214,6 +211,11 @@ namespace taco
 				}
 			}
 
+			if (Trigger == "5A")
+			{
+				int g = 2;
+			}
+
 			// TODO: -1 should be a define, not magic number. also should never happen
 			if (Frames[j]->m_AnimationIndex != -1)
 			{
@@ -244,12 +246,6 @@ namespace taco
 	{
 		sf::RectangleShape Hurtbox;
 
-		float FacingAdjustment = 0.0f;
-		//Hurtbox.setScale(GameState.PlayerState[Player].Facing, 1.0f);
-		if (GameState.PlayerState[Player].Facing == 1.0f)
-		{
-			FacingAdjustment = -Hurtboxes[Player]->width;
-		}
 		sf::Vector2f ViewCenter = RenderSystem->GetViewCenter();
 		Hurtbox.setSize(sf::Vector2f(Hurtboxes[Player]->width, Hurtboxes[Player]->height));
 		Hurtbox.setPosition(sf::Vector2f(	Hurtboxes[Player]->x + GameState.PlayerState[Player].PositionX - (Hurtboxes[Player]->width / 2.0f),

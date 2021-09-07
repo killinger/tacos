@@ -39,11 +39,11 @@
     <ClCompile Include="player_graphics.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="input_handler.cpp">
+      <Filter>Subsystems</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="input_polling.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="input_buffer.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -79,6 +79,9 @@
     </ClInclude>
     <ClInclude Include="permanent_state.h">
       <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="input_handler.h">
+      <Filter>Subsystems</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

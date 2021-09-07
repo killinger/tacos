@@ -13,8 +13,11 @@
 #define INPUT_RELEASE_BIT 0x01
 #define INPUT_CONSUME_BIT 0x02
 
+#define BUTTON_BIND_COUNT 4
+
 #define SCRIPT_TYPE_CONTINUOUS 0
 #define SCRIPT_TYPE_ATTACK 1
+
 
 typedef int8_t int8;
 typedef int16_t int16;

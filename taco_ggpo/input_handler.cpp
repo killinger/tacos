@@ -1,64 +1,37 @@
-#pragma once
+#include "input_handler.h"
+#include <SFML/Window.hpp>
 
-// TODO: everything about this a mess pls get rid off
-// TODO: this probably has enough going on to motivate it being moved to a class
-
-#define IN_2 0x01
-#define IN_4 0x02
-#define IN_6 0x04
-#define IN_8 0x08
-#define IN_A 0x10
-#define IN_B 0x20
-#define IN_C 0x40
-#define IN_D 0x80
-
-#define BUTTON_BIND_COUNT 4
-
-struct button_binding
+input_handler::input_handler()
 {
-	int32 ButtonIndex;
-	int32 InputBinding;
-};
-
-struct input_map
-{
-	int32			Device;
-	button_binding	Bindings[BUTTON_BIND_COUNT];
-};
-
-input_map InputMap = { 0 };
-
-// Read this from file
-void CreateDefaultInputMap()
-{
-	InputMap.Device = 0;
-	InputMap.Bindings[0] = { 0, IN_A };
-	InputMap.Bindings[1] = { 3, IN_B };
-	InputMap.Bindings[2] = { 5, IN_C };
-	InputMap.Bindings[3] = { 7, IN_D };
+	// TODO: Read input map from file 
+	CreateDefaultInputMap();
 }
 
-uint32 PollInput()
+input_handler::~input_handler()
+{
+}
+
+uint32 input_handler::GetInputs()
 {
 	int32 InputState = 0;
-	if (sf::Joystick::getAxisPosition(InputMap.Device, sf::Joystick::PovY) < -1.0)
-		InputState |= IN_2;
-	if (sf::Joystick::getAxisPosition(InputMap.Device, sf::Joystick::PovY) > 1.0)
-		InputState |= IN_8;
-	if (sf::Joystick::getAxisPosition(InputMap.Device, sf::Joystick::PovX) < -1.0)
-		InputState |= IN_4;
-	if (sf::Joystick::getAxisPosition(InputMap.Device, sf::Joystick::PovX) > 1.0)
-		InputState |= IN_6;
+	if (sf::Joystick::getAxisPosition(m_InputMap.Device, sf::Joystick::PovY) < -1.0)
+		InputState |= INPUT_DOWN;
+	if (sf::Joystick::getAxisPosition(m_InputMap.Device, sf::Joystick::PovY) > 1.0)
+		InputState |= INPUT_UP;
+	if (sf::Joystick::getAxisPosition(m_InputMap.Device, sf::Joystick::PovX) < -1.0)
+		InputState |= INPUT_LEFT;
+	if (sf::Joystick::getAxisPosition(m_InputMap.Device, sf::Joystick::PovX) > 1.0)
+		InputState |= INPUT_RIGHT;
 	for (uint32 i = 0; i < BUTTON_BIND_COUNT; i++)
 	{
-		if (sf::Joystick::isButtonPressed(InputMap.Device, InputMap.Bindings[i].ButtonIndex))
-			InputState |= InputMap.Bindings[i].InputBinding;
+		if (sf::Joystick::isButtonPressed(m_InputMap.Device, m_InputMap.Bindings[i].ButtonIndex))
+			InputState |= m_InputMap.Bindings[i].InputBinding;
 	}
 
 	return InputState;
 }
 
-unsigned int PollKeyboard()
+uint32 input_handler::GetKey()
 {
 	if (sf::Keyboard::isKeyPressed(sf::Keyboard::Backspace))
 		return 8;
@@ -144,4 +117,13 @@ unsigned int PollKeyboard()
 		return 122;
 
 	return 0;
+}
+
+void input_handler::CreateDefaultInputMap()
+{
+	m_InputMap.Device = 0;
+	m_InputMap.Bindings[0] = { 0, INPUT_A };
+	m_InputMap.Bindings[1] = { 3, INPUT_B };
+	m_InputMap.Bindings[2] = { 5, INPUT_C };
+	m_InputMap.Bindings[3] = { 7, INPUT_D };
 }
