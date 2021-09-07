@@ -48,19 +48,24 @@ void player_graphics::SetAnimation(uint32 Index)
 {
 	// TODO: Figure this shit out
 	m_CharacterSprite.setTextureRect(m_AnimationFrames[Index]);
-	//m_CharacterSprite.setOrigin((float)m_AnimationFrames[Index].width / 2.0f, (float)m_AnimationFrames[Index].height);
+}
+
+void player_graphics::SetAnimation(uint32 Index, float Facing)
+{
+	sf::IntRect TextureRect = m_AnimationFrames[Index];
+	if (Facing == -1.0f)
+	{
+		TextureRect.left += TextureRect.width;
+		TextureRect.width = -TextureRect.width;
+	}
+	m_CharacterSprite.setTextureRect(TextureRect);
 }
 
 void player_graphics::SetPosition(float PositionX, float PositionY, int Facing)
 {
-	float FacingAdjustment = 0.0f;
-	m_CharacterSprite.setScale(Facing, 1.0f);
-	if (Facing == -1.0f)
-	{
-		FacingAdjustment = -(float)m_CharacterSprite.getTextureRect().width;
-	}
 	sf::Vector2f ViewCenter = RenderSystem->GetViewCenter();
-	m_CharacterSprite.setPosition(sf::Vector2f(PositionX + ViewCenter.x, -PositionY - ViewCenter.y - m_CharacterSprite.getTextureRect().height));
+	float Adjustment = (float)Facing * (m_CharacterSprite.getTextureRect().width / 2.0f);
+	m_CharacterSprite.setPosition(sf::Vector2f(PositionX - Adjustment, -PositionY - ViewCenter.y - m_CharacterSprite.getTextureRect().height));
 }
 
 void player_graphics::NextFrame()

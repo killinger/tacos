@@ -16,6 +16,7 @@ public:
 	void			Clear();
 	void			Draw(sf::Sprite Sprite);
 	void			Draw(sf::RectangleShape Rectangle);
+	void			DrawLine(float P0X, float P0Y, float P1X, float P1Y);
 	void			Display();
 	sf::Vector2f	GetViewCenter();
 

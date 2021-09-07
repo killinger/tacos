@@ -145,6 +145,8 @@ namespace taco
 			ConsoleSystem->DrawConsole();
 		else if (DebugOutput.OutputMode != DEBUG_DRAW_NONE)
 			RenderSystem->DrawDebugString(DebugOutput.String.c_str());
+		RenderSystem->DrawLine(GameState.PlayerState[0].PositionX, -80.0f, GameState.PlayerState[0].PositionX, 80.0f);
+		RenderSystem->DrawLine(GameState.PlayerState[1].PositionX, -80.0f, GameState.PlayerState[1].PositionX, 80.0f);
 		RenderSystem->Display();
 
 		GameState.FrameCount++;
@@ -169,10 +171,26 @@ namespace taco
 		};
 
 		// TODO: Collision detection. It's ok for collision detection to be ineffective as there aren't going to be all that many checks per frame even in the worst case
+		Collision = false;
 		if (Hurtboxes[0] != NULL &&
 			Hurtboxes[1] != NULL)
 		{
+			float X0 = Hurtboxes[0]->x + GameState.PlayerState[0].PositionX;
+			float X1 = Hurtboxes[1]->x + GameState.PlayerState[1].PositionX;
+			float Y0 = Hurtboxes[0]->y + GameState.PlayerState[0].PositionY;
+			float Y1 = Hurtboxes[1]->y + GameState.PlayerState[1].PositionY;
+			float W0 = (Hurtboxes[0]->width / 2.0f);
+			float W1 = (Hurtboxes[1]->width / 2.0f);
+			float H0 = (Hurtboxes[0]->height);
+			float H1 = (Hurtboxes[1]->height);
 
+			if ((X0 - W0 <= X1 + W1) &&
+				(X0 + W0 >= X1 - W1) &&
+				(Y0 <= Y1 + H1) &&
+				(Y0 + H0 >= Y1))
+			{
+				Collision = true;
+			}
 		}
 
 		DebugOutput.Update(Scripts[0], &GameState);
@@ -199,7 +217,7 @@ namespace taco
 			// TODO: -1 should be a define, not magic number. also should never happen
 			if (Frames[j]->m_AnimationIndex != -1)
 			{
-				PlayerGraphics[j].SetAnimation(Frames[j]->m_AnimationIndex);
+				PlayerGraphics[j].SetAnimation(Frames[j]->m_AnimationIndex, GameState.PlayerState[j].Facing);
 			}
 			PlayerGraphics[j].SetPosition(
 				GameState.PlayerState[j].PositionX, 
@@ -227,16 +245,19 @@ namespace taco
 		sf::RectangleShape Hurtbox;
 
 		float FacingAdjustment = 0.0f;
-		Hurtbox.setScale(GameState.PlayerState[Player].Facing, 1.0f);
+		//Hurtbox.setScale(GameState.PlayerState[Player].Facing, 1.0f);
 		if (GameState.PlayerState[Player].Facing == 1.0f)
 		{
 			FacingAdjustment = -Hurtboxes[Player]->width;
 		}
 		sf::Vector2f ViewCenter = RenderSystem->GetViewCenter();
 		Hurtbox.setSize(sf::Vector2f(Hurtboxes[Player]->width, Hurtboxes[Player]->height));
-		Hurtbox.setPosition(sf::Vector2f(	Hurtboxes[Player]->x + ViewCenter.x + GameState.PlayerState[Player].PositionX, 
+		Hurtbox.setPosition(sf::Vector2f(	Hurtboxes[Player]->x + GameState.PlayerState[Player].PositionX - (Hurtboxes[Player]->width / 2.0f),
 											-Hurtboxes[Player]->y - ViewCenter.y - Hurtboxes[Player]->height - GameState.PlayerState[Player].PositionY));
-		Hurtbox.setFillColor(sf::Color(155, 155, 0, 100));
+		if (Collision)
+			Hurtbox.setFillColor(sf::Color(255, 155, 0, 100));
+		else
+			Hurtbox.setFillColor(sf::Color(155, 155, 0, 100));
 		RenderSystem->Draw(Hurtbox);
 	}
 }

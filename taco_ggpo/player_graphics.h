@@ -12,6 +12,7 @@ public:
 
 	uint32	Initialize(const char* Filename);
 	void	SetAnimation(uint32 Index);
+	void	SetAnimation(uint32 Index, float Facing);
 	void	SetPosition(float PositionX, float PositionY, int Facing);
 	// ** TEST/DEBUG/DEV FUNCTIONS, REMOVE AFTER IMPLEMENTATION IS COMPLETE **
 	void	NextFrame();

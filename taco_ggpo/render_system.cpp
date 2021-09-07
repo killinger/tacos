@@ -66,6 +66,16 @@ void render_system::Draw(sf::RectangleShape Rectangle)
 	m_Window->draw(Rectangle);
 }
 
+void render_system::DrawLine(float P0X, float P0Y, float P1X, float P1Y)
+{
+	sf::Vertex Points[2] =
+	{
+		sf::Vector2f(P0X, P0Y),
+		sf::Vector2f(P1X, P1Y)
+	};
+	m_Window->draw(Points, 2, sf::Lines);
+}
+
 void render_system::Display()
 {
 	m_Window->display();
