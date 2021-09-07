@@ -211,11 +211,6 @@ namespace taco
 				}
 			}
 
-			if (Trigger == "5A")
-			{
-				int g = 2;
-			}
-
 			// TODO: -1 should be a define, not magic number. also should never happen
 			if (Frames[j]->m_AnimationIndex != -1)
 			{
