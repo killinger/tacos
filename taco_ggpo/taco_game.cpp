@@ -10,6 +10,8 @@
 #include "debug_output.h"
 
 // TASKS
+// TODO: Commands need to be finished, a flag for any similar direction among other things (else walking forward to button won't work etc) 
+//		 ^ priority, will write up requirements
 // TODO: Set up struct or whatever for more permanent (or doesn't change frame to frame) state that gets passed around (input mapping etc, ggpo stuff)
 // TODO: Set up controls properly
 //			- Read input mapping from file
@@ -27,7 +29,7 @@
 // TODO: Streamline asset loading, and only load unique assets ie in case of a mirror match share the assets between both players
 //		 ^ textures would be shared, not sprites
 // TODO: Get a def for Facing
-// TODO: Commands need to be finished, a flag for any similar direction among other things (else walking forward to button won't work etc) 
+// TODO: Move some defs out of the common file, not everything is that general
 
 // DESIGN
 // TODO: The renderer interface is appaling

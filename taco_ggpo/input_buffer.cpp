@@ -1,5 +1,4 @@
 #include "input_buffer.h"
-#include "defs.h"
 
 
 input_buffer::input_buffer()
@@ -38,6 +37,8 @@ int input_buffer::Update(int rawInputs)
 	m_InputStates[0].ButtonStates[0].Update(rawInputs & INPUT_A);
 	m_InputStates[0].ButtonStates[1].Update(rawInputs & INPUT_B);
 	m_InputStates[0].ButtonStates[2].Update(rawInputs & INPUT_C);
+	m_InputStates[0].ButtonStates[3].Update(rawInputs & INPUT_D);
+	m_InputStates[0].ButtonStates[4].Update(rawInputs & INPUT_RUN);
 	m_InputStates[0].DirectionState.Update(rawInputs & (INPUT_DIRECTIONS));
 	
 	return 0;
@@ -61,6 +62,8 @@ int input_buffer::Update(int rawInputs, float Facing)
 	m_InputStates[0].ButtonStates[0].Update(rawInputs & INPUT_A);
 	m_InputStates[0].ButtonStates[1].Update(rawInputs & INPUT_B);
 	m_InputStates[0].ButtonStates[2].Update(rawInputs & INPUT_C);
+	m_InputStates[0].ButtonStates[3].Update(rawInputs & INPUT_D);
+	m_InputStates[0].ButtonStates[4].Update(rawInputs & INPUT_RUN);
 	m_InputStates[0].DirectionState.Update(AdjustedInputs & (INPUT_DIRECTIONS));
 
 	return 0;
@@ -110,6 +113,13 @@ int input_buffer::CheckForCommand(command Command)
 	else if (Command.type == 2)
 	{
 		if (Command.directions[0] == m_InputStates[0].DirectionState.Direction)
+		{
+			return 1;
+		}
+	}
+	else if (Command.type == 3)
+	{
+		if (m_InputStates[0].ButtonStates[Command.button].Held > -1)
 		{
 			return 1;
 		}

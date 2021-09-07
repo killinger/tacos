@@ -1,9 +1,12 @@
 #pragma once
 
+#include"defs.h"
 #include "command.h"
 
 #define INPUT_BUFFER_SIZE 60
 
+// TODO: Move the implementation of struct functions to the cpp
+// TODO: Use smaller data types + numpad notation for directions isn't needed, stick with bits
 struct button_state
 {
 	int Held;
@@ -63,7 +66,7 @@ struct direction_state
 
 struct input_states
 {
-	button_state ButtonStates[4];
+	button_state ButtonStates[BUTTON_COUNT];
 	direction_state DirectionState;
 };
 

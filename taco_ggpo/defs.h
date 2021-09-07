@@ -9,15 +9,15 @@
 #define INPUT_B 0x20
 #define INPUT_C 0x40
 #define INPUT_D 0x80
+#define INPUT_RUN 0x100
 #define INPUT_DIRECTIONS (INPUT_DOWN | INPUT_LEFT | INPUT_RIGHT | INPUT_UP)
 #define INPUT_RELEASE_BIT 0x01
 #define INPUT_CONSUME_BIT 0x02
 
-#define BUTTON_BIND_COUNT 4
-
 #define SCRIPT_TYPE_CONTINUOUS 0
 #define SCRIPT_TYPE_ATTACK 1
 
+#define BUTTON_COUNT 5
 
 typedef int8_t int8;
 typedef int16_t int16;

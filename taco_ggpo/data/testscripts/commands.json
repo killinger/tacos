@@ -16,6 +16,13 @@
             "trigger": "5A"
         },
         {
+            "type": 3,
+            "directions": [5],
+            "button": 4,
+            "bufferTime": 0,
+            "trigger": "run"
+        },
+        {
             "type": 2,
             "directions": [6],
             "button": 4,

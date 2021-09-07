@@ -18,7 +18,7 @@ private:
 			int32 InputBinding;
 		};
 		int32			Device;
-		button_binding	Bindings[BUTTON_BIND_COUNT];
+		button_binding	Bindings[BUTTON_COUNT];
 	};
 
 	input_map m_InputMap;

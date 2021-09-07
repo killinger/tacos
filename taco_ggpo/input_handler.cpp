@@ -22,7 +22,7 @@ uint32 input_handler::GetInputs()
 		InputState |= INPUT_LEFT;
 	if (sf::Joystick::getAxisPosition(m_InputMap.Device, sf::Joystick::PovX) > 1.0)
 		InputState |= INPUT_RIGHT;
-	for (uint32 i = 0; i < BUTTON_BIND_COUNT; i++)
+	for (uint32 i = 0; i < BUTTON_COUNT; i++)
 	{
 		if (sf::Joystick::isButtonPressed(m_InputMap.Device, m_InputMap.Bindings[i].ButtonIndex))
 			InputState |= m_InputMap.Bindings[i].InputBinding;
@@ -126,4 +126,5 @@ void input_handler::CreateDefaultInputMap()
 	m_InputMap.Bindings[1] = { 3, INPUT_B };
 	m_InputMap.Bindings[2] = { 5, INPUT_C };
 	m_InputMap.Bindings[3] = { 7, INPUT_D };
+	m_InputMap.Bindings[4] = { 2, INPUT_RUN };
 }
