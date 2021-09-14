@@ -34,10 +34,10 @@ struct direction_state
 	int FromNeutral;
 	int Consumed;
 
-	void Update(int input)
+	void Update(int Input)
 	{
 		int newDirection = 5;
-		switch (input)
+		switch (Input)
 		{
 		case 1:	newDirection = 2; break;
 		case 2:	newDirection = 4; break;
@@ -60,7 +60,8 @@ struct direction_state
 			FromNeutral = 0;
 		}
 
-		Direction = newDirection;
+		//Direction = newDirection;
+		Direction = Input;
 	}
 };
 
@@ -82,5 +83,5 @@ public:
 	int Update(int rawInputs);
 	int Update(int rawInputs, float Facing);
 	int qcfDetection(int maxFrames);
-	int CheckForCommand(command Command);
+	int CheckForCommand(command* Command);
 };

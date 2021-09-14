@@ -85,44 +85,57 @@ int input_buffer::qcfDetection(int maxFrames)
 	return 0;
 }
 
-int input_buffer::CheckForCommand(command Command)
+int input_buffer::CheckForCommand(command* Command)
 {
-	if (Command.type == 0)
+	// TODO: simplify cases 
+	if (Command->Type == 0)
 	{
-		if (m_InputStates[0].DirectionState.Direction == Command.directions[0] &&
-			m_InputStates[0].ButtonStates[Command.button].Held == 0)
+		if (Command->Restriction == RESTRICTION_NONE)
 		{
-			return 1;
-		}
-	}
-	else if (Command.type == 1)
-	{
-		if (m_InputStates[0].ButtonStates[Command.button].Held == 0)
-		{
-			int foundInputIndex = Command.directionCount - 1;
-
-			for (int i = 0; i < Command.bufferTime; i++)
+			if (Command->Button >= 0)
 			{
-				if (Command.directions[foundInputIndex] == m_InputStates[i].DirectionState.Direction)
-					foundInputIndex--;
-				if (foundInputIndex < 0)
+				if (m_InputStates[0].ButtonStates[Command->Button].Held == 0)
+				{
 					return 1;
+				}
 			}
 		}
 	}
-	else if (Command.type == 2)
+	//else if (Command.type == 1)
+	//{
+	//	if (m_InputStates[0].ButtonStates[Command.button].Held == 0)
+	//	{
+	//		int foundInputIndex = Command.directionCount - 1;
+
+	//		for (int i = 0; i < Command.bufferTime; i++)
+	//		{
+	//			if (Command.directions[foundInputIndex] == m_InputStates[i].DirectionState.Direction)
+	//				foundInputIndex--;
+	//			if (foundInputIndex < 0)
+	//				return 1;
+	//		}
+	//	}
+	//}
+	else if (Command->Type == 2)
 	{
-		if (Command.directions[0] == m_InputStates[0].DirectionState.Direction)
+		if (Command->Restriction == RESTRICTION_EXACT)
 		{
-			return 1;
+			if (m_InputStates[0].DirectionState.Direction & ~Command->Direction)
+				return 0;
+			if (m_InputStates[0].DirectionState.Direction & Command->Direction)
+				return 1;
 		}
 	}
-	else if (Command.type == 3)
+	else if (Command->Type == 3)
 	{
-		if (m_InputStates[0].ButtonStates[Command.button].Held > -1)
+		if (Command->Button >= 0)
 		{
-			return 1;
+			if (m_InputStates[0].ButtonStates[Command->Button].Held >= 0)
+			{
+				return 1;
+			}
 		}
 	}
+	
 	return 0;
 }

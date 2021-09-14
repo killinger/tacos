@@ -3,37 +3,37 @@
     [
         {
             "type": 0,
-            "directions": [5],
+            "direction": 0,
             "button": 1,
-            "bufferTime": 0,
+            "restriction": 0,
             "trigger": "5B"
         },
         {
             "type": 0,
-            "directions": [5],
+            "direction": 0,
             "button": 0,
-            "bufferTime": 0,
+            "restriction": 0,
             "trigger": "5A"
         },
         {
             "type": 3,
-            "directions": [5],
+            "direction": 0,
             "button": 4,
-            "bufferTime": 0,
+            "restriction": 0,
             "trigger": "run"
         },
         {
             "type": 2,
-            "directions": [6],
-            "button": 4,
-            "bufferTime": 0,
+            "direction": 4,
+            "button": -1,
+            "restriction": 2,
             "trigger": "forward"
         },
         {
             "type": 2,
-            "directions": [4],
-            "button": 4,
-            "bufferTime": 0,
+            "direction": 2,
+            "button": -1,
+            "restriction": 2,
             "trigger": "back"
         }
     ]

@@ -15,6 +15,10 @@ struct playerstate
 	input_buffer	InputBuffer;
 	float			PositionX;
 	float			PositionY;
+	float			VelocityX;
+	float			VelocityY;
+	float			AccelerationX;
+	float			AccelerationY;
 	float			Facing;
 };
 

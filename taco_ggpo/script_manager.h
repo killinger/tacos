@@ -29,9 +29,10 @@ class frame_info
 {
 public:
 	int m_cancelList;
-	int m_hitboxes;
-	int m_hurtboxes;
+	int m_Hitboxes;
+	int m_Hurtboxes;
 	int m_AnimationIndex;
+	int m_ApplyRun;
 	float m_xShift;
 };
 

@@ -247,14 +247,14 @@ void script_manager::readTestDataFromFile2()
 		assert(document.IsObject());
 		assert(document.HasMember("command"));
 
-		command Command = { 0 };
+		command Command;
 
 		for (unsigned int i = 0; i < document["command"].Size(); i++)
 		{
-			Command.type = document["command"][i]["type"].GetInt();
-			Command.button = document["command"][i]["button"].GetInt();
-			Command.bufferTime = document["command"][i]["bufferTime"].GetInt();
-			Command.directions[0] = document["command"][i]["directions"][0].GetInt();
+			Command.Type = document["command"][i]["type"].GetUint();
+			Command.Direction = document["command"][i]["direction"].GetUint();
+			Command.Button = document["command"][i]["button"].GetInt();
+			Command.Restriction = document["command"][i]["restriction"].GetUint();
 			Command.Trigger = document["command"][i]["trigger"].GetString();
 			m_Commands.push_back(Command);
 		}
@@ -303,7 +303,8 @@ void script_manager::readTestDataFromFile2()
 
 		for (int j = 0; j < m_Scripts[i].m_FrameCount; j++)
 		{
-			m_Scripts[i].m_Frames[j].m_hurtboxes = document["frames"][j]["hurtboxes"].GetInt();
+			m_Scripts[i].m_Frames[j].m_Hurtboxes = document["frames"][j]["hurtboxes"].GetInt();
+			m_Scripts[i].m_Frames[j].m_Hitboxes = document["frames"][j]["hitboxes"].GetInt();
 
 			if (document["frames"][j].HasMember("animationIndex"))
 			{
@@ -321,6 +322,14 @@ void script_manager::readTestDataFromFile2()
 			else
 			{
 				m_Scripts[i].m_Frames[j].m_xShift = 0.0f;
+			}
+			if (document["frames"][j].HasMember("applyRun"))
+			{
+				m_Scripts[i].m_Frames[j].m_ApplyRun = document["frames"][j]["applyRun"].GetInt();
+			}
+			else
+			{
+				m_Scripts[i].m_Frames[j].m_ApplyRun = 0.0f;
 			}
 		}
 	}

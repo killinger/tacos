@@ -1,0 +1,39 @@
+{
+    "Name": "STANDING",
+    "TotalFrames": 2,
+    "ScalingXV": 0,
+    "ScalingYV": 0,
+    "ScalingXA": 0,
+    "ScalingYA": 0,
+    "HurtboxElements":
+    [
+        {
+            "FrameStart": 0,
+            "FrameEnd": 2,
+            "X": -15.0,
+            "Y": 0.0,
+            "Width": 30.0,
+            "Height": 70.0
+        }
+
+    ],
+    "PushboxElements":
+    [
+        {
+            "FrameStart": 0,
+            "FrameEnd": 2,
+            "X": -10.0,
+            "Y": 0.0,
+            "Width": 20.0,
+            "Height": 60.0
+        }
+    ],
+    "CancelElements":
+    [
+        {
+            "FrameStart": 0,
+            "FrameEnd": 2,
+            "CancelList": "CANCEL_REST_0"
+        }
+    ]
+}

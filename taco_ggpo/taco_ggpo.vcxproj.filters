@@ -42,6 +42,9 @@
     <ClCompile Include="input_handler.cpp">
       <Filter>Subsystems</Filter>
     </ClCompile>
+    <ClCompile Include="script_handler.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="input_buffer.h">
@@ -82,6 +85,12 @@
     </ClInclude>
     <ClInclude Include="input_handler.h">
       <Filter>Subsystems</Filter>
+    </ClInclude>
+    <ClInclude Include="script_handler.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="state_script.h">
+      <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

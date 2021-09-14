@@ -123,6 +123,7 @@
     <ClCompile Include="console_system.cpp" />
     <ClCompile Include="input_buffer.cpp" />
     <ClCompile Include="input_handler.cpp" />
+    <ClCompile Include="script_handler.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="player_graphics.cpp" />
     <ClCompile Include="render_system.cpp" />
@@ -137,10 +138,12 @@
     <ClInclude Include="gamestate.h" />
     <ClInclude Include="input_buffer.h" />
     <ClInclude Include="input_handler.h" />
+    <ClInclude Include="script_handler.h" />
     <ClInclude Include="permanent_state.h" />
     <ClInclude Include="player_graphics.h" />
     <ClInclude Include="render_system.h" />
     <ClInclude Include="script_manager.h" />
+    <ClInclude Include="state_script.h" />
     <ClInclude Include="subsystems.h" />
     <ClInclude Include="taco_game.h" />
   </ItemGroup>

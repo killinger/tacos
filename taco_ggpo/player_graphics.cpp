@@ -52,20 +52,14 @@ void player_graphics::SetAnimation(uint32 Index)
 
 void player_graphics::SetAnimation(uint32 Index, float Facing)
 {
-	sf::IntRect TextureRect = m_AnimationFrames[Index];
-	if (Facing == -1.0f)
-	{
-		TextureRect.left += TextureRect.width;
-		TextureRect.width = -TextureRect.width;
-	}
-	m_CharacterSprite.setTextureRect(TextureRect);
+	m_CharacterSprite.setTextureRect(m_AnimationFrames[Index]);
 }
 
 void player_graphics::SetPosition(float PositionX, float PositionY, int Facing)
 {
 	sf::Vector2f ViewCenter = RenderSystem->GetViewCenter();
-	float Adjustment = (float)Facing * (m_CharacterSprite.getTextureRect().width / 2.0f);
-	m_CharacterSprite.setPosition(sf::Vector2f(PositionX - Adjustment, -PositionY - ViewCenter.y - m_CharacterSprite.getTextureRect().height));
+	m_CharacterSprite.setScale(sf::Vector2f(Facing, 1.0f));
+	m_CharacterSprite.setPosition(sf::Vector2f(PositionX, -PositionY - ViewCenter.y - m_CharacterSprite.getTextureRect().height));
 }
 
 void player_graphics::NextFrame()
