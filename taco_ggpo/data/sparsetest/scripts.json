@@ -1,4 +1,9 @@
 [
     "standing",
+    "jump",
+    "forward",
+    "back",
+    "jump_f",
+    "jump_b",
     "5A"
 ]

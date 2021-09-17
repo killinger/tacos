@@ -1,0 +1,31 @@
+// down 1
+// left 2
+// right 4
+// up 8
+// a 16
+// b 32
+// c 64
+// d 128
+// run  256
+[
+    {
+        "Name": "5A",
+        "InputMask": 16
+    },
+    {
+        "Name": "jump_f",
+        "InputMask": 12
+    },
+    {
+        "Name": "jump_b",
+        "InputMask": 10
+    },
+    {
+        "Name": "forward",
+        "InputMask": 4
+    },
+    {
+        "Name": "back",
+        "InputMask": 2
+    }
+]

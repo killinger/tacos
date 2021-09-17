@@ -45,6 +45,9 @@
     <ClCompile Include="script_handler.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="collisions.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="input_buffer.h">
@@ -90,6 +93,12 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="state_script.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="script_elements.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="collisions.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

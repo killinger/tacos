@@ -120,6 +120,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="collisions.cpp" />
     <ClCompile Include="console_system.cpp" />
     <ClCompile Include="input_buffer.cpp" />
     <ClCompile Include="input_handler.cpp" />
@@ -131,6 +132,7 @@
     <ClCompile Include="taco_game.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="collisions.h" />
     <ClInclude Include="command.h" />
     <ClInclude Include="console_system.h" />
     <ClInclude Include="debug_output.h" />
@@ -138,6 +140,7 @@
     <ClInclude Include="gamestate.h" />
     <ClInclude Include="input_buffer.h" />
     <ClInclude Include="input_handler.h" />
+    <ClInclude Include="script_elements.h" />
     <ClInclude Include="script_handler.h" />
     <ClInclude Include="permanent_state.h" />
     <ClInclude Include="player_graphics.h" />

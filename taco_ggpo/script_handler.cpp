@@ -24,6 +24,16 @@ state_script* script_handler::GetScript(playbackstate* PlaybackState)
 	return &m_Scripts[PlaybackState->Script];
 }
 
+cancel_list* script_handler::GetCancelList(uint16 Index)
+{
+	return &m_CancelLists[Index];
+}
+
+move_list* script_handler::GetMove(uint32 Index)
+{
+	return &m_Moves[Index];
+}
+
 void script_handler::ReadFromDirectory(const char* Path)
 {
 	FILE* filePointer;
@@ -51,6 +61,24 @@ void script_handler::ReadFromDirectory(const char* Path)
 		}
 	}
 
+	Filepath = Path + (std::string)"/moves.json";
+	{
+		fopen_s(&filePointer, Filepath.c_str(), "rb");
+		rapidjson::FileReadStream fileReadStream(filePointer, fileBuffer, sizeof(fileBuffer));
+		Document.ParseStream<rapidjson::kParseCommentsFlag>(fileReadStream);
+		fclose(filePointer);
+
+		m_MoveCount = Document.Size();
+		m_Moves = new move_list[m_MoveCount];
+
+		for (unsigned int i = 0; i < m_MoveCount; i++)
+		{
+			m_Moves[i].ScriptIndex = ScriptHandleToIndexMap[Document[i]["Name"].GetString()];
+			m_Moves[i].InputMask = Document[i]["InputMask"].GetUint();
+			MoveHandleToIndexMap[Document[i]["Name"].GetString()] = i;
+		}
+	}
+
 	Filepath = Path + (std::string)"/cancellists.json";
 	{
 		fopen_s(&filePointer, Filepath.c_str(), "rb");
@@ -66,10 +94,10 @@ void script_handler::ReadFromDirectory(const char* Path)
 			CancelHandleToIndexMap[Document[i]["Handle"].GetString()] = i;
 			m_CancelLists[i].MoveCount = Document[i]["List"].Size();
 			m_CancelLists[i].Moves = new uint8[m_CancelLists[i].MoveCount];
-			/*for (unsigned int j = 0; j < m_CancelLists[i].MoveCount; j++)
+			for (unsigned int j = 0; j < m_CancelLists[i].MoveCount; j++)
 			{
 				m_CancelLists[i].Moves[j] = MoveHandleToIndexMap[Document[i]["List"][j].GetString()];
-			}*/
+			}
 		}
 	}
 
@@ -88,10 +116,14 @@ void script_handler::ReadFromDirectory(const char* Path)
 
 		m_Scripts[i].Name = Document["Name"].GetString();
 		m_Scripts[i].TotalFrames = Document["TotalFrames"].GetInt();
+		// First and last hitbox frames are inferred 
 		m_Scripts[i].ScalingXV = Document["ScalingXV"].GetFloat();
 		m_Scripts[i].ScalingYV = Document["ScalingYV"].GetFloat();
 		m_Scripts[i].ScalingXA = Document["ScalingXA"].GetFloat();
 		m_Scripts[i].ScalingYA = Document["ScalingYA"].GetFloat();
+		
+		m_Scripts[i].Flags = 0;
+		m_Scripts[i].Flags |= Document["Flags"].GetUint();
 		
 		if (Document.HasMember("HitboxElements"))
 		{
@@ -99,7 +131,7 @@ void script_handler::ReadFromDirectory(const char* Path)
 			m_Scripts[i].Elements.HitboxElements = new hitbox_element[m_Scripts[i].Elements.HitboxCount];
 			for (unsigned int j = 0; j < m_Scripts[i].Elements.HitboxCount; j++)
 			{
-				//m_Scripts[i].Elements.HitboxElements[j].InfoIndex = HitEffectToHandleToIndexMap[Document["HitboxElements"][j]["Info"].GetString()];
+				//m_Scripts[i].Elements.HitboxElements[j].EfectIndex = HitEffectToHandleToIndexMap[Document["HitboxElements"][j]["Effect"].GetString()];
 				m_Scripts[i].Elements.HitboxElements[j].FrameStart = (int8)Document["HitboxElements"][j]["FrameStart"].GetUint();
 				m_Scripts[i].Elements.HitboxElements[j].FrameEnd = (int8)Document["HitboxElements"][j]["FrameEnd"].GetUint();
 				m_Scripts[i].Elements.HitboxElements[j].Box.X = Document["HitboxElements"][j]["X"].GetFloat();
@@ -116,6 +148,7 @@ void script_handler::ReadFromDirectory(const char* Path)
 		else
 		{
 			m_Scripts[i].Elements.HitboxCount = 0;
+			m_Scripts[i].Elements.HitboxElements = NULL;
 			m_Scripts[i].FirstHitboxFrame = -1;
 			m_Scripts[i].LastHitboxFrame = -1;
 		}
@@ -137,6 +170,7 @@ void script_handler::ReadFromDirectory(const char* Path)
 		else
 		{
 			m_Scripts[i].Elements.HurtboxCount = 0;
+			m_Scripts[i].Elements.HurtboxElements = NULL;
 		}
 
 		if (Document.HasMember("PushboxElements"))
@@ -156,6 +190,7 @@ void script_handler::ReadFromDirectory(const char* Path)
 		else
 		{
 			m_Scripts[i].Elements.PushboxCount = 0;
+			m_Scripts[i].Elements.PushboxElements = NULL;
 		}
 
 		if (Document.HasMember("CancelElements"))
@@ -169,5 +204,29 @@ void script_handler::ReadFromDirectory(const char* Path)
 				m_Scripts[i].Elements.CancelElements[j].Index = CancelHandleToIndexMap[Document["CancelElements"][j]["CancelList"].GetString()];
 			}
 		}
+		else
+		{
+			m_Scripts[i].Elements.CancelCount = 0;
+			m_Scripts[i].Elements.CancelElements = NULL;
+		}
+
+		if (Document.HasMember("ForceElements"))
+		{
+			m_Scripts[i].Elements.ForceCount = Document["ForceElements"].Size();
+			m_Scripts[i].Elements.ForceElements = new force_element[m_Scripts[i].Elements.ForceCount];
+			for (unsigned int j = 0; j < m_Scripts[i].Elements.ForceCount; j++)
+			{
+				m_Scripts[i].Elements.ForceElements[j].FrameStart = (uint8)Document["ForceElements"][j]["FrameStart"].GetUint();
+				m_Scripts[i].Elements.ForceElements[j].FrameEnd = (uint8)Document["ForceElements"][j]["FrameEnd"].GetUint();
+				m_Scripts[i].Elements.ForceElements[j].Target = Document["ForceElements"][j]["Target"].GetUint();
+				m_Scripts[i].Elements.ForceElements[j].Amount = Document["ForceElements"][j]["Amount"].GetFloat();
+			}
+		}
+		else
+		{
+			m_Scripts[i].Elements.ForceCount = 0;
+			m_Scripts[i].Elements.ForceElements = NULL;
+		}
+
 	}
 }

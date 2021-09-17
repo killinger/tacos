@@ -25,11 +25,11 @@ struct playerstate
 // TODO: Move playerstate to a proper class? possibly the entirety of gamestate?
 struct gamestate
 {
-	playerstate PlayerState[2];
+	playerstate Player[2];
 	int32		FrameCount;
 	void Initialize()
 	{
-		PlayerState[0].InputBuffer.Initialize();
-		PlayerState[1].InputBuffer.Initialize();
+		Player[0].InputBuffer.Initialize();
+		Player[1].InputBuffer.Initialize();
 	}
 };

@@ -1,0 +1,54 @@
+{
+    "Name": "jump_f",
+    "TotalFrames": 1,
+    "ScalingXV": 1,
+    "ScalingYV": 1,
+    "ScalingXA": 1,
+    "ScalingYA": 1,
+    "Friction": 0,
+    "Flags": 1,
+    "LoopTo": -1,
+    "HurtboxElements":
+    [
+        {
+            "FrameStart": 0,
+            "FrameEnd": 1,
+            "X": -15.0,
+            "Y": 0.0,
+            "Width": 30.0,
+            "Height": 70.0
+        }
+    ],
+    "PushboxElements":
+    [
+        {
+            "FrameStart": 0,
+            "FrameEnd": 1,
+            "X": -10.0,
+            "Y": 0.0,
+            "Width": 20.0,
+            "Height": 60.0
+        }
+    ],
+    "ForceElements":
+    [
+        {
+            "FrameStart": 0,
+            "FrameEnd": 1,
+            "Target": 1,
+            "Amount": 0.36
+        },
+        {
+            "FrameStart": 0,
+            "FrameEnd": 1,
+            "Target": 2,
+            "Amount": 6.8
+        },
+        {
+            "FrameStart": 0,
+            "FrameEnd": 1,
+            "Target": 8,
+            "Amount": -0.18
+        }
+    ]
+}

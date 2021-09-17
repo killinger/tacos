@@ -1,5 +1,6 @@
 #pragma once
 #include "defs.h"
+#include "input_buffer.h"
 
 enum player_type
 {
@@ -10,10 +11,11 @@ enum player_type
 
 struct player_info
 {
-	player_type Type;
+	player_type		Type;
+	input_buffer	InputBuffer;
 };
 
 struct permanent_state
 {
-	player_info Players[2];
+	player_info Player[2];
 };

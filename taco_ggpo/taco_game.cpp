@@ -12,7 +12,9 @@
 #include "script_handler.h"
 
 // TASKS
-// TODO: Commands need to be finished, a flag for any similar direction among other things (else walking forward to button won't work etc) 
+// TODO: Input buffers can not be a part of game state. It would cause inputs to drop like a motherfucker.
+//		 ^ i don't know how we'd deal with inputs possibly ending up in the wrong direction but it's much less of a problem than dropped inputs on every rollback
+// TODO: Redo input
 //		 ^ priority, will write up requirements
 // TODO: Set up struct or whatever for more permanent (or doesn't change frame to frame) state that gets passed around (input mapping etc, ggpo stuff)
 // TODO: Set up controls properly
@@ -56,9 +58,9 @@
 #define PLAYER_STARTING_POSITIONS 80.0f
 
 // Subsystems
-console_system*	ConsoleSystem;
-render_system*	RenderSystem;
-input_handler*	InputHandler;
+console_system* ConsoleSystem;
+render_system* RenderSystem;
+input_handler* InputHandler;
 
 // State
 gamestate		GameState = { 0 };
@@ -70,15 +72,11 @@ script_manager	ScriptManager;
 debug_output	DebugOutput;
 
 // TEST TINGS REMOVE AFTER IMPLEMENTATION
-hurtbox_info*	Hurtboxes[2];
-hitbox_info*	Hitboxes[2];
-bool			Collision = false;
 script_handler	ScriptHandler;
 
 namespace taco
 {
 	void AdvanceFrame(uint32* Inputs);
-	void UpdatePlayerState(uint32* Inputs);
 
 	// TEST TINGS REMOVE AFTER IMPLEMENTATION
 	void UpdateTest(uint32* Inputs);
@@ -91,13 +89,17 @@ namespace taco
 		InputHandler = new input_handler();
 
 		GameState.Initialize();
-		GameState.PlayerState[0].PositionX = -PLAYER_STARTING_POSITIONS;
-		GameState.PlayerState[0].Facing = 1.0f;
-		GameState.PlayerState[1].PositionX = PLAYER_STARTING_POSITIONS;
-		GameState.PlayerState[1].Facing = -1.0f;
+		GameState.Player[0].PositionX = -PLAYER_STARTING_POSITIONS;
+		GameState.Player[0].Facing = 1.0f;
+		GameState.Player[1].PositionX = PLAYER_STARTING_POSITIONS;
+		GameState.Player[1].Facing = -1.0f;
 
-		PermanentState.Players[0].Type = PLAYER_TYPE_LOCAL;
-		PermanentState.Players[1].Type = PLAYER_TYPE_DUMMY;
+		PermanentState.Player[0].Type = PLAYER_TYPE_LOCAL;
+		PermanentState.Player[0].InputBuffer.Initialize();
+		
+		PermanentState.Player[1].Type = PLAYER_TYPE_DUMMY;
+		PermanentState.Player[1].InputBuffer.Initialize();
+
 
 		PlayerGraphics[0].Initialize("data/sphere");
 		PlayerGraphics[1].Initialize("data/sphere");
@@ -105,10 +107,12 @@ namespace taco
 		DebugOutput.OutputMode = DEBUG_DRAW_NONE;
 
 		ConsoleSystem->RegisterCVar("debug", &DebugOutput.OutputMode, "0", "1", "Display debug string\n0: none\n1: script playback", CVAR_INT);
+		ConsoleSystem->RegisterCVar("script", &GameState.Player[0].PlaybackState.Script, "0", "3", "Set script", CVAR_INT);
 
 		// TEST TINGS REMOVE AFTER IMPLEMENTATION
 		ScriptHandler.Initialize();
-		GameState.PlayerState[0].PlaybackState.Script = 1;
+		GameState.Player[0].PlaybackState.Script = 0;
+		GameState.Player[0].PlaybackState.PendingScript = 0;
 	}
 
 	/* TODO:
@@ -125,7 +129,7 @@ namespace taco
 		uint32 Inputs[2] = { 0 };
 		for (uint32 i = 0; i < 2; i++)
 		{
-			if (PermanentState.Players[i].Type == PLAYER_TYPE_LOCAL)
+			if (PermanentState.Player[i].Type == PLAYER_TYPE_LOCAL)
 				Inputs[i] = InputHandler->GetInputs();
 		}
 
@@ -162,148 +166,93 @@ namespace taco
 		GameState.FrameCount++;
 	}
 
-	/* TODO:
-	1. Get current frame for both players
-	2. Check collisions for both players
-	3. Rest can be sequential
-	*/
-	void UpdatePlayerState(uint32* Inputs)
+	void UpdateTest(uint32* Inputs)
 	{
-		character_script* Scripts[2] =
+		PermanentState.Player[0].InputBuffer.Update(Inputs[0], GameState.Player[0].Facing);
+		PermanentState.Player[1].InputBuffer.Update(Inputs[1], GameState.Player[1].Facing);
+
+		state_script* Script[2] =
 		{
-			&ScriptManager.m_Scripts[GameState.PlayerState[0].PlaybackState.Script],
-			&ScriptManager.m_Scripts[GameState.PlayerState[1].PlaybackState.Script]
-		};
-		frame_info* Frames[2] =
-		{
-			&Scripts[0]->m_Frames[GameState.PlayerState[0].PlaybackState.PlaybackCursor],
-			&Scripts[1]->m_Frames[GameState.PlayerState[1].PlaybackState.PlaybackCursor]
+			ScriptHandler.GetScript(&GameState.Player[0].PlaybackState),
+			ScriptHandler.GetScript(&GameState.Player[1].PlaybackState)
 		};
 
-		if (GameState.PlayerState[0].PositionX < GameState.PlayerState[1].PositionX)
+		cancel_list* CancelList = NULL;
+		int32 NextScript = -1;
+		if ((Script[0]->Flags & 0x03) == SCRIPT_RESTING)
 		{
-			GameState.PlayerState[0].Facing = 1.0f;
-			GameState.PlayerState[1].Facing = -1.0f;
+			CancelList = ScriptHandler.GetCancelList(0);
+		}
+		else if ((Script[0]->Flags & 0x03) == 0x03)
+		{
+			CancelList = NULL;
 		}
 		else
 		{
-			GameState.PlayerState[0].Facing = -1.0f;
-			GameState.PlayerState[1].Facing = 1.0f;
-		}
-
-		// TODO: Collision detection. It's ok for collision detection to be ineffective as there aren't going to be all that many checks per frame even in the worst case
-		Collision = false;
-		if (Hitboxes[0] != NULL &&
-			Hurtboxes[1] != NULL)
-		{
-			sf::FloatRect Boxes[2] = 
-			{ 
-				{ Hitboxes[0]->x, Hitboxes[0]->x, Hitboxes[0]->width, Hitboxes[0]->height }, 
-				{ Hurtboxes[1]->x, Hurtboxes[1]->y, Hurtboxes[1]->width, Hurtboxes[1]->height }
-			};
-
-			Boxes[0] = PlayerGraphics[0].m_CharacterSprite.getTransform().transformRect(Boxes[0]);
-			Boxes[1] = PlayerGraphics[1].m_CharacterSprite.getTransform().transformRect(Boxes[1]);
-
-			if (Boxes[0].intersects(Boxes[1]))
+			for (uint32 i = 0; i < Script[0]->Elements.CancelCount; i++)
 			{
-				Collision = true;
-			}
-		}
-
-		DebugOutput.Update(Scripts[0], &GameState);
-
-		for (uint32 j = 0; j < 2; j++)
-		{
-			// TODO: There needs to be quite a bit of rules for changing position
-			GameState.PlayerState[j].PositionX += (Frames[j]->m_xShift * GameState.PlayerState[j].Facing);
-			if (Frames[j]->m_ApplyRun)
-			{
-				GameState.PlayerState[j].AccelerationX = 0.5f;
-				GameState.PlayerState[j].VelocityX += GameState.PlayerState[j].AccelerationX;
-				if (GameState.PlayerState[j].VelocityX >= 5.0f)
-					GameState.PlayerState[j].VelocityX = 5.0f;
-			}
-			else if (GameState.PlayerState[j].VelocityX > 0.0f)
-			{
-				GameState.PlayerState[j].VelocityX -= 0.2f;
-				if (GameState.PlayerState[j].VelocityX < 0.0f)
-					GameState.PlayerState[j].VelocityX = 0.0f;
-			}
-			GameState.PlayerState[j].PositionX += (GameState.PlayerState[j].VelocityX * GameState.PlayerState[j].Facing);
-
-			GameState.PlayerState[j].InputBuffer.Update(Inputs[j], GameState.PlayerState[j].Facing);
-			std::string Trigger = "";
-
-			// TODO: Add another one of those script managers
-			// TODO: There needs to be additional checks, such as meter requirement/availability 
-			for (uint32 i = 0; i < ScriptManager.m_Commands.size(); i++)
-			{
-				if (GameState.PlayerState[j].InputBuffer.CheckForCommand(&ScriptManager.m_Commands[i]))
+				if (Script[0]->Elements.CancelElements[i].InRange(GameState.Player[0].PlaybackState.PlaybackCursor))
 				{
-					Trigger = ScriptManager.m_Commands[i].Trigger;
+					CancelList = ScriptHandler.GetCancelList(Script[0]->Elements.CancelElements[i].Index);
+				}
+			}
+		}
+		
+		if (CancelList != NULL)
+		{
+			move_list* Move;
+			for (int i = 0; i < CancelList->MoveCount; i++)
+			{
+				Move = ScriptHandler.GetMove(CancelList->Moves[i]);
+				if ((PermanentState.Player[0].InputBuffer.m_InputStates[0].DirectionState.Direction & Move->InputMask) == Move->InputMask)
+				{
+					NextScript = Move->ScriptIndex;
 					break;
 				}
 			}
-
-			// TODO: -1 should be a define, not magic number. also should never happen
-			if (Frames[j]->m_AnimationIndex != -1)
-			{
-				PlayerGraphics[j].SetAnimation(Frames[j]->m_AnimationIndex, GameState.PlayerState[j].Facing);
-			}
-			PlayerGraphics[j].SetPosition(
-				GameState.PlayerState[j].PositionX, 
-				GameState.PlayerState[j].PositionY, 
-				GameState.PlayerState[j].Facing);
-
-			// TODO: this be test shit
-			if (Frames[j]->m_Hurtboxes != -1)
-			{
-				Hurtboxes[j] = &ScriptManager.m_hurtboxes[Frames[j]->m_Hurtboxes];
-			}
-			else
-			{
-				Hurtboxes[j] = NULL;
-			}
-			
-			if (Frames[j]->m_Hitboxes != -1)
-			{
-				Hitboxes[j] = &ScriptManager.m_hitboxes[Frames[j]->m_Hitboxes];
-			}
-			else
-			{
-				Hitboxes[j] = NULL;
-			}
-
-			// TODO: At this stage, is there a point to having a pending script if updating the playback state is the last operation? 
-			// Is there ever anything you'd want to do between updating the playback state and committing to switching script?
-			ScriptManager.Update(&GameState.PlayerState[j].PlaybackState, Trigger);
-			GameState.PlayerState[j].PlaybackState.Script = GameState.PlayerState[j].PlaybackState.PendingScript;
 		}
-	}
-	
-	void UpdateTest(uint32* Inputs)
-	{
-		// TODO: What is the actual order of operations supposed to be?
-		// in sfv collisions aren't resolved until the next frame ie a character will start reeling on frame 4 after being hit by a 3f button
-		// * collisions after movement/shifts seems obvious - else the movement would lag behind a frame + repulsion would be shit
-		// * update script playback before movement? otherwise forces would bleed over for a frame on script transition i think?
-		//		^ not if V/A scaling is applied immediately after transition
-		//		^ when the heck does friction get applied then? probably with the rest of the movement.
-		//			^ whenever friction is set accel must be set to 0?
-		// * but script update depends on collisions.. ay caramba
-		// * if updating script playback goes first the first frame would be skipped  
 
-		state_script* Script[2] = 
-		{	
-			ScriptHandler.GetScript(&GameState.PlayerState[0].PlaybackState),
-			ScriptHandler.GetScript(&GameState.PlayerState[1].PlaybackState)
-		};
+		if (NextScript == -1)
+		{
+			if ((Script[0]->Flags & SCRIPT_AIRBORNE))
+			{
+				NextScript = 1;
 
-		GameState.PlayerState[0].PositionX += GameState.PlayerState[0].VelocityX;
-		GameState.PlayerState[0].PositionY += GameState.PlayerState[0].VelocityY;
-		GameState.PlayerState[0].VelocityX += GameState.PlayerState[0].AccelerationX;
-		GameState.PlayerState[0].VelocityY += GameState.PlayerState[0].AccelerationY;
+				if (GameState.Player[0].PositionY < 0.0f)
+				{
+					GameState.Player[0].VelocityX = 0.0f;
+					GameState.Player[0].VelocityY = 0.0f;
+					GameState.Player[0].AccelerationY = 0.0f;
+					GameState.Player[0].AccelerationY = 0.0f;
+					GameState.Player[0].PositionY = 0.0f;
+
+					NextScript = 0;
+				}
+			}
+			else
+			{
+				NextScript = 0;
+			}
+		}
+
+		int32 OldScript = GameState.Player[0].PlaybackState.Script;
+		GameState.Player[0].PlaybackState.Script = NextScript;
+		Script[0] = ScriptHandler.GetScript(&GameState.Player[0].PlaybackState);
+
+		if (NextScript == OldScript)
+		{
+			GameState.Player[0].PlaybackState.PlaybackCursor++;
+			if (GameState.Player[0].PlaybackState.PlaybackCursor >= Script[0]->TotalFrames - 1)
+				GameState.Player[0].PlaybackState.PlaybackCursor = 0;
+		}
+		else
+		{
+			GameState.Player[0].PlaybackState.PlaybackCursor = 0;
+			GameState.Player[0].VelocityX *= Script[0]->ScalingXV;
+			GameState.Player[0].VelocityY *= Script[0]->ScalingYV;
+			GameState.Player[0].AccelerationX *= Script[0]->ScalingXA;
+			GameState.Player[0].AccelerationY *= Script[0]->ScalingYA;
+		}
 
 		// TODO: This condition aint ok
 		//if (GameState.PlayerState[0].PlaybackState.PendingScript != GameState.PlayerState[0].PlaybackState.Script)
@@ -314,45 +263,118 @@ namespace taco
 		//	GameState.PlayerState[0].AccelerationY *= Script[0]->ScalingYA;
 		//}
 
-		GameState.PlayerState[0].InputBuffer.Update(Inputs[0], GameState.PlayerState[0].Facing);
-		GameState.PlayerState[1].InputBuffer.Update(Inputs[1], GameState.PlayerState[1].Facing);
+		for (uint32 i = 0; i < Script[0]->Elements.ForceCount; i++)
+		{
+			if (Script[0]->Elements.ForceElements[i].InRange(GameState.Player[0].PlaybackState.PlaybackCursor))
+			{
+				switch (Script[0]->Elements.ForceElements[i].Target)
+				{
+				case FORCE_VELOCITY_X:
+					GameState.Player[0].VelocityX = Script[0]->Elements.ForceElements[i].Amount; break;
+				case FORCE_VELOCITY_Y:
+					GameState.Player[0].VelocityY = Script[0]->Elements.ForceElements[i].Amount; break;
+				case FORCE_ACCELERATION_X:
+					GameState.Player[0].AccelerationX = Script[0]->Elements.ForceElements[i].Amount; break;
+				case FORCE_ACCELERATION_Y:
+					GameState.Player[0].AccelerationY = Script[0]->Elements.ForceElements[i].Amount; break;
+				default:
+					break;
+				}
+			}
+		}
 
-		ScriptHandler.Update(&GameState.PlayerState[0].PlaybackState);
-		ScriptHandler.Update(&GameState.PlayerState[1].PlaybackState);
+		GameState.Player[0].PositionX += GameState.Player[0].VelocityX;
+		GameState.Player[0].PositionY += GameState.Player[0].VelocityY;
+		GameState.Player[0].VelocityX += GameState.Player[0].AccelerationX;
+		GameState.Player[0].VelocityY += GameState.Player[0].AccelerationY;
 
+		// TODO: if the pushboxes never change during the course of a single script execution this can be simplified
+		collision_box Pushbox[2];
+		for (uint32 i = 0; i < 2; i++)
+		{
+			for (uint32 j = 0; j < Script[i]->Elements.PushboxCount; j++)
+			{
+				if (Script[i]->Elements.PushboxElements[j].InRange(GameState.Player[i].PlaybackState.PlaybackCursor))
+				{
+					if (GameState.Player[i].Facing > 0.0f)
+					{
+						Pushbox[i].X = Script[i]->Elements.PushboxElements[j].Box.X + GameState.Player[i].PositionX;
+						Pushbox[i].Y = Script[i]->Elements.PushboxElements[j].Box.Y + GameState.Player[i].PositionY;
+						Pushbox[i].Width = Script[i]->Elements.PushboxElements[j].Box.Width;
+						Pushbox[i].Height = Script[i]->Elements.PushboxElements[j].Box.Height;
+					}
+					else
+					{
+
+
+						Pushbox[i].X = GameState.Player[i].PositionX - (Script[i]->Elements.PushboxElements[j].Box.X + Script[i]->Elements.PushboxElements[j].Box.Width);
+						Pushbox[i].Y = Script[i]->Elements.PushboxElements[j].Box.Y + GameState.Player[i].PositionY;
+						Pushbox[i].Width = Script[i]->Elements.PushboxElements[j].Box.Width;
+						Pushbox[i].Height = Script[i]->Elements.PushboxElements[j].Box.Height;
+					}
+				}
+			}
+		}
+
+		collision_box Result;
+		if (BoxIntersection(&Pushbox[0], &Pushbox[1], &Result))
+		{
+			// Repulsion
+			// TODO: Corner correction and edge cases
+			GameState.Player[0].PositionX -= GameState.Player[0].Facing * (Result.Width / 2.0f);
+			GameState.Player[1].PositionX -= GameState.Player[1].Facing * (Result.Width / 2.0f);
+		}
+		RenderSystem->Clear();
 		DrawCollisionBoxes();
+		RenderSystem->DrawDebugString(Script[0]->Name.c_str());
+		if (ConsoleSystem->m_IsActive)
+			ConsoleSystem->DrawConsole();
 
+		RenderSystem->Display();
 	}
-	
+
 	void DrawCollisionBoxes()
 	{
 		state_script* Script[2] =
 		{
-			ScriptHandler.GetScript(&GameState.PlayerState[0].PlaybackState),
-			ScriptHandler.GetScript(&GameState.PlayerState[1].PlaybackState)
+			ScriptHandler.GetScript(&GameState.Player[0].PlaybackState),
+			ScriptHandler.GetScript(&GameState.Player[1].PlaybackState)
 		};
 
-		RenderSystem->Clear();
+		
 
 		for (uint32 i = 0; i < 2; i++)
 		{
 			if (Script[i]->Elements.HurtboxCount)
 			{
 				sf::RectangleShape HurtboxRect;
-				HurtboxRect.setFillColor(sf::Color(25, 220, 0, 180));
-				HurtboxRect.setOutlineColor(sf::Color(10, 80, 0, 160));
+				HurtboxRect.setFillColor(sf::Color(25, 220, 0, 120));
+				HurtboxRect.setOutlineColor(sf::Color(10, 80, 0, 100));
 				HurtboxRect.setOutlineThickness(-2.0f);
 
 				for (uint32 j = 0; j < Script[i]->Elements.HurtboxCount; j++)
 				{
-					if (Script[i]->Elements.HurtboxElements[j].InRange(GameState.PlayerState[i].PlaybackState.PlaybackCursor))
+					if (Script[i]->Elements.HurtboxElements[j].InRange(GameState.Player[i].PlaybackState.PlaybackCursor))
 					{
-						HurtboxRect.setPosition(sf::Vector2f(
-							GameState.PlayerState[i].PositionX + Script[i]->Elements.HurtboxElements[j].Box.X,
-							-(GameState.PlayerState[i].PositionY +
-								Script[i]->Elements.HurtboxElements[j].Box.Y +
-								RenderSystem->GetViewCenter().y +
-								Script[i]->Elements.HurtboxElements[j].Box.Height)));
+						if (GameState.Player[i].Facing > 0.0f)
+						{
+							HurtboxRect.setPosition(sf::Vector2f(
+								GameState.Player[i].PositionX + Script[i]->Elements.HurtboxElements[j].Box.X,
+								-(GameState.Player[i].PositionY +
+									Script[i]->Elements.HurtboxElements[j].Box.Y +
+									RenderSystem->GetViewCenter().y +
+									Script[i]->Elements.HurtboxElements[j].Box.Height)));
+						}
+						else
+						{
+							HurtboxRect.setPosition(sf::Vector2f(
+								GameState.Player[i].PositionX - (Script[i]->Elements.HurtboxElements[j].Box.X + Script[i]->Elements.HurtboxElements[j].Box.Width),
+								-(GameState.Player[i].PositionY +
+									Script[i]->Elements.HurtboxElements[j].Box.Y +
+									RenderSystem->GetViewCenter().y +
+									Script[i]->Elements.HurtboxElements[j].Box.Height)));
+						}
+
 						HurtboxRect.setSize(sf::Vector2f(Script[i]->Elements.HurtboxElements[j].Box.Width, Script[i]->Elements.HurtboxElements[j].Box.Height));
 						RenderSystem->Draw(HurtboxRect);
 					}
@@ -362,20 +384,32 @@ namespace taco
 			if (Script[i]->Elements.HitboxCount)
 			{
 				sf::RectangleShape HitboxRect;
-				HitboxRect.setFillColor(sf::Color(220, 0, 0, 180));
-				HitboxRect.setOutlineColor(sf::Color(140, 0, 0, 160));
+				HitboxRect.setFillColor(sf::Color(220, 0, 0, 120));
+				HitboxRect.setOutlineColor(sf::Color(140, 0, 0, 100));
 				HitboxRect.setOutlineThickness(-2.0f);
 
 				for (uint32 j = 0; j < Script[i]->Elements.HitboxCount; j++)
 				{
-					if (Script[i]->Elements.HitboxElements[j].InRange(GameState.PlayerState[i].PlaybackState.PlaybackCursor))
+					if (Script[i]->Elements.HitboxElements[j].InRange(GameState.Player[i].PlaybackState.PlaybackCursor))
 					{
-						HitboxRect.setPosition(sf::Vector2f(
-							GameState.PlayerState[i].PositionX + Script[i]->Elements.HitboxElements[j].Box.X,
-							-(GameState.PlayerState[i].PositionY +
-								Script[i]->Elements.HitboxElements[j].Box.Y +
-								RenderSystem->GetViewCenter().y +
-								Script[i]->Elements.HitboxElements[j].Box.Height)));
+						if (GameState.Player[i].Facing > 0.0f)
+						{
+							HitboxRect.setPosition(sf::Vector2f(
+								GameState.Player[i].PositionX + Script[i]->Elements.HitboxElements[j].Box.X,
+								-(GameState.Player[i].PositionY +
+									Script[i]->Elements.HitboxElements[j].Box.Y +
+									RenderSystem->GetViewCenter().y +
+									Script[i]->Elements.HitboxElements[j].Box.Height)));
+						}
+						else
+						{
+							HitboxRect.setPosition(sf::Vector2f(
+								GameState.Player[i].PositionX - (Script[i]->Elements.HitboxElements[j].Box.X + Script[i]->Elements.HitboxElements[j].Box.Width),
+								-(GameState.Player[i].PositionY +
+									Script[i]->Elements.HitboxElements[j].Box.Y +
+									RenderSystem->GetViewCenter().y +
+									Script[i]->Elements.HitboxElements[j].Box.Height)));
+						}
 						HitboxRect.setSize(sf::Vector2f(Script[i]->Elements.HitboxElements[j].Box.Width, Script[i]->Elements.HitboxElements[j].Box.Height));
 						RenderSystem->Draw(HitboxRect);
 					}
@@ -385,27 +419,37 @@ namespace taco
 			if (Script[i]->Elements.PushboxCount)
 			{
 				sf::RectangleShape PushboxRect;
-				PushboxRect.setFillColor(sf::Color(200, 200, 0, 180));
-				PushboxRect.setOutlineColor(sf::Color(120, 120, 0, 160));
+				PushboxRect.setFillColor(sf::Color(200, 200, 0, 120));
+				PushboxRect.setOutlineColor(sf::Color(120, 120, 0, 100));
 				PushboxRect.setOutlineThickness(-2.0f);
 
 				for (uint32 j = 0; j < Script[i]->Elements.PushboxCount; j++)
 				{
-					if (Script[i]->Elements.PushboxElements[j].InRange(GameState.PlayerState[i].PlaybackState.PlaybackCursor))
+					if (Script[i]->Elements.PushboxElements[j].InRange(GameState.Player[i].PlaybackState.PlaybackCursor))
 					{
-						PushboxRect.setPosition(sf::Vector2f(
-							GameState.PlayerState[i].PositionX + Script[i]->Elements.PushboxElements[j].Box.X,
-							-(GameState.PlayerState[i].PositionY +
-								Script[i]->Elements.PushboxElements[j].Box.Y +
-								RenderSystem->GetViewCenter().y +
-								Script[i]->Elements.PushboxElements[j].Box.Height)));
+						if (GameState.Player[i].Facing > 0.0f)
+						{
+							PushboxRect.setPosition(sf::Vector2f(
+								GameState.Player[i].PositionX + Script[i]->Elements.PushboxElements[j].Box.X,
+								-(GameState.Player[i].PositionY +
+									Script[i]->Elements.PushboxElements[j].Box.Y +
+									RenderSystem->GetViewCenter().y +
+									Script[i]->Elements.PushboxElements[j].Box.Height)));
+						}
+						else
+						{
+							PushboxRect.setPosition(sf::Vector2f(
+								GameState.Player[i].PositionX - (Script[i]->Elements.PushboxElements[j].Box.X + Script[i]->Elements.PushboxElements[j].Box.Width),
+								-(GameState.Player[i].PositionY +
+									Script[i]->Elements.PushboxElements[j].Box.Y +
+									RenderSystem->GetViewCenter().y +
+									Script[i]->Elements.PushboxElements[j].Box.Height)));
+						}
 						PushboxRect.setSize(sf::Vector2f(Script[i]->Elements.PushboxElements[j].Box.Width, Script[i]->Elements.PushboxElements[j].Box.Height));
 						RenderSystem->Draw(PushboxRect);
 					}
 				}
 			}
 		}
-
-		RenderSystem->Display();
 	}
 }
