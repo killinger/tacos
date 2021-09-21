@@ -3,7 +3,6 @@
 #include "logging_system.h"
 #include "subsystems.h"
 
-
 void input_buf::Initialize()
 {
 	memset(m_Buffer, 0, sizeof(m_Buffer));
@@ -44,8 +43,10 @@ bool input_buf::MatchInputs(move_description* MoveDescription, uint32 Buffer)
 		CurrentEntry = MatchInputs(CurrentEntry, &MoveDescription->m_Motion[i].m_Input, (int32)MoveDescription->m_Motion[i].m_BufferFrames);
 		if (CurrentEntry == NULL)
 			return false;
+		
 		CurrentEntry = CurrentEntry->m_pPrevEntry;
 	}
+
 	return true;
 }
 
@@ -61,7 +62,6 @@ input_buf::buffer_entry* input_buf::MatchInputs(buffer_entry* CurrentEntry, inpu
 	{
 		if ((CurrentEntry->m_InputMask & RestrictionMask) == InputDescription->m_InputMask)
 			return CurrentEntry;
-
 		if (CurrentEntry->m_TimeStamp <= CurrentEntry->m_pPrevEntry->m_TimeStamp)
 			return NULL;
 

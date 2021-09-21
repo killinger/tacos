@@ -23,7 +23,6 @@ struct move_description
 	uint32				m_MotionCount;
 };
 
-
 class input_buf
 {
 public:

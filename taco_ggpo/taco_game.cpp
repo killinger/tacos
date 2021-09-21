@@ -792,12 +792,7 @@ namespace taco
 		PermanentState.Player[0].InputBuffer.Update(Inputs[0], GameState.Player[0].Facing);
 		PermanentState.Player[1].InputBuffer.Update(Inputs[1], GameState.Player[1].Facing);
 
-		InputBuffer.Update(ReplayData.GetNextInput(GameState.FrameCount), GameState.FrameCount, 1.0f);
-		
-		if (InputBuffer.MatchInputs(&TestMove, 3))
-		{
-			int g = 2;
-		}
+		InputBuffer.Update(Inputs[0], GameState.FrameCount, 1.0f);
 
 		state_script* Script[2];
 		Script[1] = ScriptHandler.GetScript(&GameState.Player[1].PlaybackState);
