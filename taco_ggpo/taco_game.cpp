@@ -8,8 +8,11 @@
 #include "player_graphics.h"
 #include "script_manager.h"
 #include "debug_output.h"
+#include "logging_system.h"
 // TEST TINGS REMOVE AFTER IMPLEMENTATION
 #include "script_handler.h"
+#include "input_buf.h"
+#include <unordered_map>
 
 // TASKS
 // TODO: Input buffers can not be a part of game state. It would cause inputs to drop like a motherfucker.
@@ -60,6 +63,7 @@
 // Subsystems
 console_system* ConsoleSystem;
 render_system* RenderSystem;
+logging_system* LoggingSystem;
 input_handler* InputHandler;
 
 // State
@@ -73,12 +77,56 @@ debug_output	DebugOutput;
 
 // TEST TINGS REMOVE AFTER IMPLEMENTATION
 script_handler	ScriptHandler;
+input_buf		InputBuffer;
+move_description TestMove;
+
+struct input_frame
+{
+	uint32 InputMask;
+	uint32 FrameNumber;
+};
+
+struct input_sequence
+{
+	input_sequence()
+	{
+		memset(Inputs, 0, sizeof(Inputs));
+		Cursor = 0;
+		InputCount = 0;
+	}
+
+	void SetInputAtFrame(uint32 InputMask, uint32 Frame)
+	{
+		Inputs[InputCount].InputMask = InputMask;
+		Inputs[InputCount].FrameNumber = Frame;
+
+		InputCount++;
+	}
+
+	uint32 GetNextInput(uint32 Frame)
+	{
+		uint32 ReturnValue = 0;
+		if (Inputs[Cursor].FrameNumber == Frame)
+		{
+			ReturnValue = Inputs[Cursor].InputMask;
+			Cursor++;
+		}
+		return ReturnValue;
+	}
+
+	input_frame Inputs[30];
+	uint32		Cursor;
+	uint32		InputCount;
+};
+
+input_sequence ReplayData;
 
 namespace taco
 {
 	void AdvanceFrame(uint32* Inputs);
 
 	// TEST TINGS REMOVE AFTER IMPLEMENTATION
+	void UpdateGameState(uint32* Inputs);
 	void UpdateTest(uint32* Inputs);
 	void DrawCollisionBoxes();
 
@@ -86,6 +134,7 @@ namespace taco
 	{
 		ConsoleSystem = new console_system();
 		RenderSystem = new render_system(Window);
+		LoggingSystem = new logging_system();
 		InputHandler = new input_handler();
 
 		GameState.Initialize();
@@ -96,7 +145,11 @@ namespace taco
 
 		PermanentState.Player[0].Type = PLAYER_TYPE_LOCAL;
 		PermanentState.Player[0].InputBuffer.Initialize();
-		
+		PermanentState.Player[0].WalkspeedForward = 1.34f;
+		PermanentState.Player[0].JumpGravity = -0.21f;
+		PermanentState.Player[0].JumpInitialVelocity = 8.2f;
+		PermanentState.Player[0].JumpForwardVelocity = 0.36f;
+
 		PermanentState.Player[1].Type = PLAYER_TYPE_DUMMY;
 		PermanentState.Player[1].InputBuffer.Initialize();
 
@@ -108,11 +161,35 @@ namespace taco
 
 		ConsoleSystem->RegisterCVar("debug", &DebugOutput.OutputMode, "0", "1", "Display debug string\n0: none\n1: script playback", CVAR_INT);
 		ConsoleSystem->RegisterCVar("script", &GameState.Player[0].PlaybackState.Script, "0", "3", "Set script", CVAR_INT);
+		ConsoleSystem->RegisterCVar("fspeed", &PermanentState.Player[0].WalkspeedForward, "0.0", "10.0", "Forward walkspeed", CVAR_FLOAT);
+		ConsoleSystem->RegisterCVar("jgravity", &PermanentState.Player[0].JumpGravity, "-10.0", "0.0", "Jump gravity", CVAR_FLOAT);
+		ConsoleSystem->RegisterCVar("jvelocity", &PermanentState.Player[0].JumpInitialVelocity, "0.0", "30.0", "Jump velocity", CVAR_FLOAT);
 
 		// TEST TINGS REMOVE AFTER IMPLEMENTATION
 		ScriptHandler.Initialize();
 		GameState.Player[0].PlaybackState.Script = 0;
 		GameState.Player[0].PlaybackState.PendingScript = 0;
+		GameState.Player[0].PlaybackState.New = 1;
+		GameState.Player[1].PlaybackState.New = 1;
+		
+		InputBuffer.Initialize();
+		TestMove.m_Input.m_InputMask = INPUT_B;
+		TestMove.m_Input.m_PropertyFlags = 0;
+		TestMove.m_MotionCount = 3;
+		TestMove.m_Motion[0].m_BufferFrames = 8;
+		TestMove.m_Motion[0].m_Input.m_InputMask = INPUT_DOWN;
+		TestMove.m_Motion[0].m_Input.m_PropertyFlags = 2;
+		TestMove.m_Motion[1].m_BufferFrames = 8;
+		TestMove.m_Motion[1].m_Input.m_InputMask = INPUT_DOWN | INPUT_RIGHT;
+		TestMove.m_Motion[1].m_Input.m_PropertyFlags = 2;
+		TestMove.m_Motion[2].m_BufferFrames = 1;
+		TestMove.m_Motion[2].m_Input.m_InputMask = INPUT_RIGHT;
+		TestMove.m_Motion[2].m_Input.m_PropertyFlags = 2;
+
+		ReplayData.SetInputAtFrame(INPUT_DOWN, 0);
+		ReplayData.SetInputAtFrame(INPUT_DOWN | INPUT_RIGHT, 1);
+		ReplayData.SetInputAtFrame(INPUT_RIGHT, 2);
+		ReplayData.SetInputAtFrame(INPUT_B, 3);
 	}
 
 	/* TODO:
@@ -140,36 +217,35 @@ namespace taco
 
 	void AdvanceFrame(uint32* Inputs)
 	{
+		/*LOG("[ FRAME START: %d ]\n", GameState.FrameCount);
+		UpdateGameState(Inputs);*/
+
+		RenderSystem->Clear();
 		UpdateTest(Inputs);
 
-		//RenderSystem->Clear();
-		//// TODO: What's the draw order rules? Last character to land a hit on top?
-		////RenderSystem->Draw(PlayerGraphics[0].m_CharacterSprite);
-		////RenderSystem->Draw(PlayerGraphics[1].m_CharacterSprite);
-		//for (uint32 i = 0; i < 2; i++)
-		//{
-		//	if (Hurtboxes[i] != NULL)
-		//		DrawHurtboxes(i);
-		//	if (Hitboxes[i] != NULL)
-		//		DrawHitboxes(i);
-		//}
+		DrawCollisionBoxes();
+		LoggingSystem->DrawLog();
 		//if (ConsoleSystem->m_IsActive)
 		//	ConsoleSystem->DrawConsole();
-		//else if (DebugOutput.OutputMode != DEBUG_DRAW_NONE)
-		//	RenderSystem->DrawDebugString(DebugOutput.String.c_str());
-		//RenderSystem->DrawLine(	GameState.PlayerState[0].PositionX, -80.0f, 
-		//						GameState.PlayerState[0].PositionX, 80.0f);
-		//RenderSystem->DrawLine(	GameState.PlayerState[1].PositionX, -80.0f, 
-		//						GameState.PlayerState[1].PositionX, 80.0f);
-		//RenderSystem->Display();
+
+		RenderSystem->Display();
 
 		GameState.FrameCount++;
 	}
 
-	void UpdateTest(uint32* Inputs)
+	// 1. Get correct script and cursor position
+	// 		if cursor at last frame then end
+	//			current script -> resting state (temporary or not depending on inputs)
+	//			new -> true
+	//		else if !new then step
+	// 2. Get cancels 
+
+	void UpdateGameState(uint32* Inputs)
 	{
 		PermanentState.Player[0].InputBuffer.Update(Inputs[0], GameState.Player[0].Facing);
 		PermanentState.Player[1].InputBuffer.Update(Inputs[1], GameState.Player[1].Facing);
+
+		// TODO: change script to pendingscript before final decision
 
 		state_script* Script[2] =
 		{
@@ -177,8 +253,51 @@ namespace taco
 			ScriptHandler.GetScript(&GameState.Player[1].PlaybackState)
 		};
 
+		uint32 InitialScript = GameState.Player[0].PlaybackState.Script;
+
+		LOG("Initial script: %s\n", Script[0]->Name.c_str());
+		LOG("Initial script total frames: %d\n", Script[0]->TotalFrames);
+		LOG("Initial cursor position: %d\n", GameState.Player[0].PlaybackState.PlaybackCursor);
+		LOG("New: %d\n", GameState.Player[0].PlaybackState.New);
+
+		LOG("Script is stepping\n");
+		if (!GameState.Player[0].PlaybackState.New)
+		{
+			GameState.Player[0].PlaybackState.PlaybackCursor++;
+			if (GameState.Player[0].PlaybackState.PlaybackCursor >= Script[0]->TotalFrames)
+			{
+				LOG("Script ending due to cursor reaching end of timeline\n");
+				GameState.Player[0].PlaybackState.New = 1;
+
+				LOG("Script is preliminarily set to resting state: ");
+				if ((Script[0]->Flags & SCRIPT_AIRBORNE))
+				{
+					GameState.Player[0].PlaybackState.Script = 1;
+					LOG("airborne\n");
+
+					if (GameState.Player[0].PositionY < 0.0f)
+					{
+						GameState.Player[0].VelocityX = 0.0f;
+						GameState.Player[0].VelocityY = 0.0f;
+						GameState.Player[0].AccelerationY = 0.0f;
+						GameState.Player[0].AccelerationY = 0.0f;
+						GameState.Player[0].PositionY = 0.0f;
+
+						GameState.Player[0].PlaybackState.Script = 0;
+						LOG("Script is airborne but has reached the ground\n");
+					}
+				}
+				else
+				{
+					LOG("grounded\n");
+					GameState.Player[0].PlaybackState.Script = 0;
+				}
+			}
+		}
+
+		Script[0] = ScriptHandler.GetScript(&GameState.Player[0].PlaybackState);
+
 		cancel_list* CancelList = NULL;
-		int32 NextScript = -1;
 		if ((Script[0]->Flags & 0x03) == SCRIPT_RESTING)
 		{
 			CancelList = ScriptHandler.GetCancelList(0);
@@ -197,7 +316,7 @@ namespace taco
 				}
 			}
 		}
-		
+
 		if (CancelList != NULL)
 		{
 			move_list* Move;
@@ -206,62 +325,44 @@ namespace taco
 				Move = ScriptHandler.GetMove(CancelList->Moves[i]);
 				if ((PermanentState.Player[0].InputBuffer.m_InputStates[0].DirectionState.Direction & Move->InputMask) == Move->InputMask)
 				{
-					NextScript = Move->ScriptIndex;
+					if (GameState.Player[0].PlaybackState.Script == Move->ScriptIndex)
+					{
+						GameState.Player[0].PlaybackState.New = 0;
+						LOG("Continue playback\n");
+					}
+					//else if (	InitialScript == Move->ScriptIndex && 
+					//			GameState.Player[0].PlaybackState.New)
+					//{
+					//	GameState.Player[0].PlaybackState.New = 0;
+					//	LOG("Script is looping\n");
+					//}
+					else // if can cancel
+					{
+						GameState.Player[0].PlaybackState.New = 1;
+						LOG("Transition due to cancel\n");
+					}
+					GameState.Player[0].PlaybackState.Script = Move->ScriptIndex;
+					Script[0] = ScriptHandler.GetScript(&GameState.Player[0].PlaybackState);
+
 					break;
 				}
 			}
 		}
 
-		if (NextScript == -1)
-		{
-			if ((Script[0]->Flags & SCRIPT_AIRBORNE))
-			{
-				NextScript = 1;
+		LOG("Script decided: %s\n", Script[0]->Name.c_str());
 
-				if (GameState.Player[0].PositionY < 0.0f)
-				{
-					GameState.Player[0].VelocityX = 0.0f;
-					GameState.Player[0].VelocityY = 0.0f;
-					GameState.Player[0].AccelerationY = 0.0f;
-					GameState.Player[0].AccelerationY = 0.0f;
-					GameState.Player[0].PositionY = 0.0f;
-
-					NextScript = 0;
-				}
-			}
-			else
-			{
-				NextScript = 0;
-			}
-		}
-
-		int32 OldScript = GameState.Player[0].PlaybackState.Script;
-		GameState.Player[0].PlaybackState.Script = NextScript;
-		Script[0] = ScriptHandler.GetScript(&GameState.Player[0].PlaybackState);
-
-		if (NextScript == OldScript)
-		{
-			GameState.Player[0].PlaybackState.PlaybackCursor++;
-			if (GameState.Player[0].PlaybackState.PlaybackCursor >= Script[0]->TotalFrames - 1)
-				GameState.Player[0].PlaybackState.PlaybackCursor = 0;
-		}
-		else
+		if (GameState.Player[0].PlaybackState.New)
 		{
 			GameState.Player[0].PlaybackState.PlaybackCursor = 0;
 			GameState.Player[0].VelocityX *= Script[0]->ScalingXV;
 			GameState.Player[0].VelocityY *= Script[0]->ScalingYV;
 			GameState.Player[0].AccelerationX *= Script[0]->ScalingXA;
 			GameState.Player[0].AccelerationY *= Script[0]->ScalingYA;
+			GameState.Player[0].PlaybackState.New = 0;
+			LOG("Script is initialized\n");
 		}
 
-		// TODO: This condition aint ok
-		//if (GameState.PlayerState[0].PlaybackState.PendingScript != GameState.PlayerState[0].PlaybackState.Script)
-		//{
-		//	GameState.PlayerState[0].VelocityX *= Script[0]->ScalingXV;
-		//	GameState.PlayerState[0].VelocityY *= Script[0]->ScalingYV;
-		//	GameState.PlayerState[0].AccelerationX *= Script[0]->ScalingXA;
-		//	GameState.PlayerState[0].AccelerationY *= Script[0]->ScalingYA;
-		//}
+		LOG("Cursor: %d, Duration %d\n", GameState.Player[0].PlaybackState.PlaybackCursor, Script[0]->TotalFrames);
 
 		for (uint32 i = 0; i < Script[0]->Elements.ForceCount; i++)
 		{
@@ -287,6 +388,7 @@ namespace taco
 		GameState.Player[0].PositionY += GameState.Player[0].VelocityY;
 		GameState.Player[0].VelocityX += GameState.Player[0].AccelerationX;
 		GameState.Player[0].VelocityY += GameState.Player[0].AccelerationY;
+
 
 		// TODO: if the pushboxes never change during the course of a single script execution this can be simplified
 		collision_box Pushbox[2];
@@ -324,13 +426,490 @@ namespace taco
 			GameState.Player[0].PositionX -= GameState.Player[0].Facing * (Result.Width / 2.0f);
 			GameState.Player[1].PositionX -= GameState.Player[1].Facing * (Result.Width / 2.0f);
 		}
-		RenderSystem->Clear();
-		DrawCollisionBoxes();
-		RenderSystem->DrawDebugString(Script[0]->Name.c_str());
-		if (ConsoleSystem->m_IsActive)
-			ConsoleSystem->DrawConsole();
 
-		RenderSystem->Display();
+		LOG("[END OF FRAME]\n\n");
+	}
+
+	enum jump_direction
+	{
+		None,
+		NeutralJump,
+		ForwardJump,
+		BackJump
+	};
+
+	enum state
+	{
+		Standing,
+		Forward,
+		Back,
+		Crouch,
+		Prejump,
+		Jump,
+		Stand2Crouch,
+		Crouch2Stand,
+		Move,
+		StateCount
+	};
+
+	state State = Standing;
+	jump_direction BufferedJump = None;
+
+	typedef state_script* (*script_selector)(playerstate* PlayerState, uint32 Inputs, player_info* PlayerInfo);
+
+	state_script* StandingScriptSelector(playerstate* PlayerState, uint32 Inputs, player_info* PlayerInfo)
+	{
+		//LOG("%s\n", __FUNCTION__);
+		
+		state_script* Script = ScriptHandler.GetScript(&PlayerState->PlaybackState);
+		bool ScriptFinished = false;
+		if (!PlayerState->PlaybackState.New)
+		{
+			PlayerState->PlaybackState.PlaybackCursor++;
+			if (PlayerState->PlaybackState.PlaybackCursor >= Script->TotalFrames)
+			{
+				PlayerState->PlaybackState.PlaybackCursor = 0;
+				ScriptFinished = true;
+			}
+		}
+		PlayerState->PlaybackState.New = 0;
+
+		BufferedJump = None;
+		if (Inputs & INPUT_UP)
+		{
+			//LOG("TRANSITION: Prejump, ");
+			PlayerState->PlaybackState.PlaybackCursor = 0;
+			PlayerState->PlaybackState.Script = 4;
+			Script = ScriptHandler.GetScript(&PlayerState->PlaybackState);
+			State = Prejump;
+			if (Inputs & INPUT_RIGHT)
+			{
+				//LOG("buffered forward jump\n");
+				BufferedJump = ForwardJump;
+			}
+			else if (Inputs & INPUT_LEFT)
+			{
+				//LOG("buffered back jump\n");
+				BufferedJump = BackJump;
+			}
+			else
+			{
+				//LOG("buffered neutral jump\n");
+				BufferedJump = NeutralJump;
+			}
+		}
+		else if (Inputs & INPUT_RIGHT)
+		{
+			//LOG("TRANSITION: Forward\n");
+			PlayerState->PlaybackState.PlaybackCursor = 0;
+			PlayerState->PlaybackState.Script = 2;
+			Script = ScriptHandler.GetScript(&PlayerState->PlaybackState);
+			State = Forward;
+		}
+		else if (Inputs & INPUT_LEFT)
+		{
+			//LOG("TRANSITION: Back\n");
+			PlayerState->PlaybackState.PlaybackCursor = 0;
+			PlayerState->PlaybackState.Script = 3;
+			Script = ScriptHandler.GetScript(&PlayerState->PlaybackState);
+			State = Back;
+		}
+		else if (Inputs & INPUT_A)
+		{
+			PlayerState->PlaybackState.PlaybackCursor = 0;
+			PlayerState->PlaybackState.Script = 6;
+			Script = ScriptHandler.GetScript(&PlayerState->PlaybackState);
+			//LOG("TRANSITION: Move, script name: %s\n", Script->Name.c_str());
+			State = Move;
+		}
+		else
+		{
+			if (ScriptFinished)
+			{
+				//LOG("Script finished, looping\n");
+				PlayerState->PlaybackState.PlaybackCursor = 0;
+			}
+			PlayerState->PlaybackState.Script = 0;
+			Script = ScriptHandler.GetScript(&GameState.Player[0].PlaybackState);
+		}
+		return Script;
+	}
+	state_script* ForwardScriptSelector(playerstate* PlayerState, uint32 Inputs, player_info* PlayerInfo)
+	{
+		//LOG("%s\n", __FUNCTION__);
+
+		state_script* Script = ScriptHandler.GetScript(&PlayerState->PlaybackState);
+		bool ScriptFinished = false;
+		if (!PlayerState->PlaybackState.New)
+		{
+			PlayerState->PlaybackState.PlaybackCursor++;
+			if (PlayerState->PlaybackState.PlaybackCursor >= Script->TotalFrames)
+			{
+				PlayerState->PlaybackState.PlaybackCursor = 0;
+				ScriptFinished = true;
+			}
+		}
+		PlayerState->PlaybackState.New = 0;
+		if (Inputs & INPUT_UP)
+		{
+			//LOG("TRANSITION: Prejump, ");
+			PlayerState->PlaybackState.PlaybackCursor = 0;
+			PlayerState->PlaybackState.Script = 4;
+			Script = ScriptHandler.GetScript(&PlayerState->PlaybackState);
+			State = Prejump;
+			if (Inputs & INPUT_RIGHT)
+			{
+				//LOG("buffered forward jump\n");
+				BufferedJump = ForwardJump;
+			}
+			else if (Inputs & INPUT_LEFT)
+			{
+				//LOG("buffered back jump\n");
+				BufferedJump = BackJump;
+			}
+			else
+			{
+				//LOG("buffered neutral jump\n");
+				BufferedJump = NeutralJump;
+			}
+		}
+		else if (Inputs & INPUT_RIGHT)
+		{
+			if (ScriptFinished)
+			{
+				//LOG("Script finished, looping\n");
+				PlayerState->PlaybackState.PlaybackCursor = 0;
+			}
+			PlayerState->PlaybackState.Script = 2;
+			Script = ScriptHandler.GetScript(&PlayerState->PlaybackState);
+			State = Forward;
+		}
+		else if (Inputs & INPUT_LEFT)
+		{
+			//LOG("TRANSITION: Back\n");
+			PlayerState->PlaybackState.PlaybackCursor = 0;
+			PlayerState->PlaybackState.Script = 3;
+			Script = ScriptHandler.GetScript(&PlayerState->PlaybackState);
+			State = Back;
+		}
+		else if (Inputs & INPUT_A)
+		{
+			PlayerState->PlaybackState.PlaybackCursor = 0;
+			PlayerState->PlaybackState.Script = 6;
+			Script = ScriptHandler.GetScript(&PlayerState->PlaybackState);
+			//LOG("TRANSITION: Move, script name: %s\n", Script->Name.c_str());
+			State = Move;
+		}
+		else
+		{
+			//LOG("TRANSITION: Standing\n");
+			PlayerState->PlaybackState.PlaybackCursor = 0;
+			PlayerState->PlaybackState.Script = 0;
+			Script = ScriptHandler.GetScript(&PlayerState->PlaybackState);
+			State = Standing;
+		}
+
+		return Script;
+	}
+	state_script* BackScriptSelector(playerstate* PlayerState, uint32 Inputs, player_info* PlayerInfo)
+	{
+		//LOG("%s\n", __FUNCTION__);
+
+		state_script* Script = ScriptHandler.GetScript(&PlayerState->PlaybackState);
+		bool ScriptFinished = false;
+		if (!PlayerState->PlaybackState.New)
+		{
+			PlayerState->PlaybackState.PlaybackCursor++;
+			if (PlayerState->PlaybackState.PlaybackCursor >= Script->TotalFrames)
+			{
+				PlayerState->PlaybackState.PlaybackCursor = 0;
+				ScriptFinished = true;
+			}
+		}
+		PlayerState->PlaybackState.New = 0;
+		if (Inputs & INPUT_UP)
+		{
+			//LOG("TRANSITION: Prejump, ");
+			PlayerState->PlaybackState.PlaybackCursor = 0;
+			PlayerState->PlaybackState.Script = 4;
+			Script = ScriptHandler.GetScript(&PlayerState->PlaybackState);
+			State = Prejump;
+			if (Inputs & INPUT_RIGHT)
+			{
+				//LOG("buffered forward jump\n");
+				BufferedJump = ForwardJump;
+			}
+			else if (Inputs & INPUT_LEFT)
+			{
+				//LOG("buffered back jump\n");
+				BufferedJump = BackJump;
+			}
+			else
+			{
+				//LOG("buffered neutral jump\n");
+				BufferedJump = NeutralJump;
+			}
+		}
+		else if (Inputs & INPUT_LEFT)
+		{
+			if (ScriptFinished)
+			{
+				//LOG("Script finished, looping\n");
+				PlayerState->PlaybackState.PlaybackCursor = 0;
+			}
+			PlayerState->PlaybackState.Script = 3;
+			Script = ScriptHandler.GetScript(&PlayerState->PlaybackState);
+			State = Back;
+		}
+		else if (Inputs & INPUT_RIGHT)
+		{
+			//LOG("TRANSITION: Forward\n");
+			PlayerState->PlaybackState.PlaybackCursor = 0;
+			PlayerState->PlaybackState.Script = 2;
+			Script = ScriptHandler.GetScript(&PlayerState->PlaybackState);
+			State = Forward;
+		}
+		else if (Inputs & INPUT_A)
+		{
+			PlayerState->PlaybackState.PlaybackCursor = 0;
+			PlayerState->PlaybackState.Script = 6;
+			Script = ScriptHandler.GetScript(&PlayerState->PlaybackState);
+			//LOG("TRANSITION: Move, script name: %s\n", Script->Name.c_str());
+			State = Move;
+		}
+		else
+		{
+			//LOG("TRANSITION: Standing\n");
+			PlayerState->PlaybackState.PlaybackCursor = 0;
+			PlayerState->PlaybackState.Script = 0;
+			Script = ScriptHandler.GetScript(&PlayerState->PlaybackState);
+			State = Standing;
+		}
+
+		return Script;
+	}
+	state_script* CrouchScriptSelector(playerstate* PlayerState, uint32 Inputs, player_info* PlayerInfo)
+	{
+		//LOG("%s not implemented\n", __FUNCTION__);
+		return NULL;
+	}
+	state_script* PrejumpScriptSelector(playerstate* PlayerState, uint32 Inputs, player_info* PlayerInfo)
+	{
+		//LOG("%s\n", __FUNCTION__);
+
+		state_script* Script = ScriptHandler.GetScript(&PlayerState->PlaybackState);
+		bool ScriptFinished = false;
+		if (!PlayerState->PlaybackState.New)
+		{
+			PlayerState->PlaybackState.PlaybackCursor++;
+			if (PlayerState->PlaybackState.PlaybackCursor >= Script->TotalFrames)
+			{
+				PlayerState->PlaybackState.PlaybackCursor = 0;
+				ScriptFinished = true;
+			}
+		}
+		PlayerState->PlaybackState.New = 0;
+
+		if (ScriptFinished)
+		{
+			//LOG("TRANSITION: Jump\n");
+			PlayerState->PlaybackState.Script = 1;
+			Script = ScriptHandler.GetScript(&PlayerState->PlaybackState);
+			State = Jump;
+			PlayerState->PlaybackState.New = 1;
+		}
+		else
+		{
+			if (Inputs & INPUT_UP)
+			{
+				State = Prejump;
+				if (Inputs & INPUT_RIGHT)
+				{
+					//LOG("buffered forward jump\n");
+					BufferedJump = ForwardJump;
+				}
+				else if (Inputs & INPUT_LEFT)
+				{
+					//LOG("buffered back jump\n");
+					BufferedJump = BackJump;
+				}
+				else
+				{
+					//LOG("buffered neutral jump\n");
+					BufferedJump = NeutralJump;
+				}
+			}
+		}
+
+		return Script;
+	}
+	state_script* JumpScriptSelector(playerstate* PlayerState, uint32 Inputs, player_info* PlayerInfo)
+	{
+		//LOG("%s\n", __FUNCTION__);
+
+		state_script* Script = ScriptHandler.GetScript(&PlayerState->PlaybackState);
+		bool ScriptFinished = false;
+		if (!PlayerState->PlaybackState.New)
+		{
+			PlayerState->PlaybackState.PlaybackCursor++;
+			if (PlayerState->PlaybackState.PlaybackCursor >= Script->TotalFrames)
+			{
+				PlayerState->PlaybackState.PlaybackCursor = 0;
+				ScriptFinished = true;
+			}
+		}
+		PlayerState->PlaybackState.New = 0;
+
+		return Script;
+	}
+	state_script* Stand2CrouchScriptSelector(playerstate* PlayerState, uint32 Inputs, player_info* PlayerInfo)
+	{
+		//LOG("%s not implemented\n", __FUNCTION__);
+		return NULL;
+	}
+	state_script* Crouch2StandScriptSelector(playerstate* PlayerState, uint32 Inputs, player_info* PlayerInfo)
+	{
+		//LOG("%s not implemented\n", __FUNCTION__);
+		return NULL;
+	}
+
+	script_selector ScriptSelector[StateCount] =
+	{
+		&StandingScriptSelector,
+		&ForwardScriptSelector,
+		&BackScriptSelector,
+		&CrouchScriptSelector,
+		&PrejumpScriptSelector,
+		&JumpScriptSelector,
+		&Stand2CrouchScriptSelector,
+		&Crouch2StandScriptSelector
+	};
+
+	void UpdateTest(uint32* Inputs)
+	{
+		//LOG("[FRAME START %d]\n", GameState.FrameCount);
+
+		PermanentState.Player[0].InputBuffer.Update(Inputs[0], GameState.Player[0].Facing);
+		PermanentState.Player[1].InputBuffer.Update(Inputs[1], GameState.Player[1].Facing);
+
+		InputBuffer.Update(ReplayData.GetNextInput(GameState.FrameCount), GameState.FrameCount, 1.0f);
+		
+		if (InputBuffer.MatchInputs(&TestMove, 3))
+		{
+			int g = 2;
+		}
+
+		state_script* Script[2];
+		Script[1] = ScriptHandler.GetScript(&GameState.Player[1].PlaybackState);
+		
+		Script[0] = ScriptSelector[State](&GameState.Player[0], Inputs[0], &PermanentState.Player[0]);
+		if (Script[0] == NULL)
+		{
+			GameState.Player[0].PlaybackState.Script = 0;
+			Script[0] = ScriptHandler.GetScript(&GameState.Player[0].PlaybackState);
+			State = Standing;
+		}
+
+		if (GameState.Player[0].PlaybackState.PlaybackCursor == 0)
+		{
+			switch (State)
+			{
+			case taco::Forward:
+				GameState.Player[0].VelocityX = PermanentState.Player[0].WalkspeedForward;
+				break;
+			case taco::Back:
+				GameState.Player[0].VelocityX = -PermanentState.Player[0].WalkspeedForward;
+				break;
+			case taco::Jump:
+				if (GameState.Player[0].PlaybackState.New)
+				{
+					GameState.Player[0].VelocityY = PermanentState.Player[0].JumpInitialVelocity;
+					GameState.Player[0].AccelerationY = PermanentState.Player[0].JumpGravity;
+
+					if (BufferedJump == ForwardJump)
+					{
+						GameState.Player[0].VelocityX = PermanentState.Player[0].JumpForwardVelocity;
+					}
+					else if (BufferedJump == BackJump)
+					{
+						GameState.Player[0].VelocityX = -PermanentState.Player[0].JumpForwardVelocity;
+					}
+
+					GameState.Player[0].PlaybackState.New = 0;
+				}
+				break;
+			
+			default:
+				GameState.Player[0].VelocityX = 0.0f;
+				GameState.Player[0].VelocityY = 0.0f;
+				GameState.Player[0].AccelerationX = 0.0f;
+				GameState.Player[0].AccelerationY = 0.0f;
+				break;
+			}
+		}
+
+		GameState.Player[0].PositionX += GameState.Player[0].VelocityX;
+		GameState.Player[0].PositionY += GameState.Player[0].VelocityY;
+		GameState.Player[0].VelocityX += GameState.Player[0].AccelerationX;
+		GameState.Player[0].VelocityY += GameState.Player[0].AccelerationY;
+
+		if (GameState.Player[0].PositionY < 0.0f)
+		{
+			GameState.Player[0].VelocityX = 0.0f;
+			GameState.Player[0].VelocityY = 0.0f;
+			GameState.Player[0].AccelerationY = 0.0f;
+			GameState.Player[0].AccelerationY = 0.0f;
+			GameState.Player[0].PositionY = 0.0f;
+
+			GameState.Player[0].PlaybackState.Script = 0;
+			GameState.Player[0].PlaybackState.PlaybackCursor = 0;
+			Script[0] = ScriptHandler.GetScript(&GameState.Player[0].PlaybackState);
+			State = Standing;
+		}
+
+		//LOG("Final script: %s\n", Script[0]->Name.c_str());
+		//LOG("Script duration: %d\n", Script[0]->TotalFrames);
+		//LOG("Cursor position: %d\n", GameState.Player[0].PlaybackState.PlaybackCursor);
+
+		collision_box Pushbox[2];
+		for (uint32 i = 0; i < 2; i++)
+		{
+			for (uint32 j = 0; j < Script[i]->Elements.PushboxCount; j++)
+			{
+				if (Script[i]->Elements.PushboxElements[j].InRange(GameState.Player[i].PlaybackState.PlaybackCursor))
+				{
+					if (GameState.Player[i].Facing > 0.0f)
+					{
+						Pushbox[i].X = Script[i]->Elements.PushboxElements[j].Box.X + GameState.Player[i].PositionX;
+						Pushbox[i].Y = Script[i]->Elements.PushboxElements[j].Box.Y + GameState.Player[i].PositionY;
+						Pushbox[i].Width = Script[i]->Elements.PushboxElements[j].Box.Width;
+						Pushbox[i].Height = Script[i]->Elements.PushboxElements[j].Box.Height;
+					}
+					else
+					{
+
+
+						Pushbox[i].X = GameState.Player[i].PositionX - (Script[i]->Elements.PushboxElements[j].Box.X + Script[i]->Elements.PushboxElements[j].Box.Width);
+						Pushbox[i].Y = Script[i]->Elements.PushboxElements[j].Box.Y + GameState.Player[i].PositionY;
+						Pushbox[i].Width = Script[i]->Elements.PushboxElements[j].Box.Width;
+						Pushbox[i].Height = Script[i]->Elements.PushboxElements[j].Box.Height;
+					}
+				}
+			}
+		}
+
+		collision_box Result;
+		if (BoxIntersection(&Pushbox[0], &Pushbox[1], &Result))
+		{
+			// Repulsion
+			// TODO: Corner correction and edge cases
+			GameState.Player[0].PositionX -= GameState.Player[0].Facing * (Result.Width / 2.0f);
+			GameState.Player[1].PositionX -= GameState.Player[1].Facing * (Result.Width / 2.0f);
+
+			//LOG("Pushbox collision, intersection amount: %f\n", Result.Width);
+		}
+
+		//LOG("[FRAME END %d]\n----------\n\n", GameState.FrameCount);
 	}
 
 	void DrawCollisionBoxes()
@@ -341,7 +920,7 @@ namespace taco
 			ScriptHandler.GetScript(&GameState.Player[1].PlaybackState)
 		};
 
-		
+
 
 		for (uint32 i = 0; i < 2; i++)
 		{

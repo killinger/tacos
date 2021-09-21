@@ -1,5 +1,5 @@
 #pragma once
-#include "input_buffer.h"
+#include "permanent_state.h"
 #include "defs.h"
 
 struct playbackstate
@@ -7,12 +7,12 @@ struct playbackstate
 	int	PlaybackCursor;
 	int Script;
 	int PendingScript;
+	int New;
 };
 
 struct playerstate
 {
 	playbackstate	PlaybackState;
-	input_buffer	InputBuffer;
 	float			PositionX;
 	float			PositionY;
 	float			VelocityX;
@@ -29,7 +29,7 @@ struct gamestate
 	int32		FrameCount;
 	void Initialize()
 	{
-		Player[0].InputBuffer.Initialize();
-		Player[1].InputBuffer.Initialize();
 	}
+
+	void Update(permanent_state* PermanentState, uint32* Inputs);
 };

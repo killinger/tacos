@@ -3,7 +3,6 @@
     "jump",
     "forward",
     "back",
-    "jump_f",
-    "jump_b",
+    "prejump",
     "5A"
 ]
