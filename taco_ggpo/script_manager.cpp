@@ -391,73 +391,73 @@ void script_manager::Update(playbackstate* playbackState, std::string trigger)
 {
 	character_script* script = m_Scripts + playbackState->Script;
 
-	if (trigger != "")
-	{
-		if (script->m_scriptType == SCRIPT_TYPE_CONTINUOUS)
-		{
-			if (playbackState->Script == m_transitionMaps[script->m_transitions][trigger])
-			{
-				if (playbackState->PlaybackCursor < script->m_FrameCount - 1)
-				{
-					playbackState->PlaybackCursor++;
-				}
-				else
-				{
-					playbackState->PlaybackCursor = 0;
-				}
-			}
-			else
-			{
-				playbackState->PendingScript = m_transitionMaps[script->m_transitions][trigger];
-				playbackState->PlaybackCursor = 0;
-			}
-		}
-		else if (script->m_scriptType == SCRIPT_TYPE_ATTACK)
-		{
-			if (playbackState->PlaybackCursor < script->m_FrameCount - 1)
-			{
-				playbackState->PlaybackCursor++;
-			}
-			else
-			{
-				playbackState->PendingScript = m_transitionMaps[script->m_transitions][trigger];
-				playbackState->PlaybackCursor = 0;
-			}
-		}
-	}
-	else
-	{
-		if (script->m_scriptType == SCRIPT_TYPE_CONTINUOUS)
-		{
-			if (playbackState->Script == script->m_defaultTransition)
-			{
-				if (playbackState->PlaybackCursor < script->m_FrameCount - 1)
-				{
-					playbackState->PlaybackCursor++;
-				}
-				else
-				{
-					playbackState->PendingScript = script->m_defaultTransition;
-					playbackState->PlaybackCursor = 0;
-				}
-			}
-			else
-			{
-				playbackState->PendingScript = script->m_defaultTransition;
-				playbackState->PlaybackCursor = 0;
-			}
-		}
-		else
-		{
-			if (playbackState->PlaybackCursor < script->m_FrameCount - 1)
-			{
-				playbackState->PlaybackCursor++;
-			}
-			else
-			{
-				playbackState->PendingScript = script->m_defaultTransition;
-				playbackState->PlaybackCursor = 0;
-			}
-		}
-	}
+	//if (trigger != "")
+	//{
+	//	if (script->m_scriptType == SCRIPT_TYPE_CONTINUOUS)
+	//	{
+	//		if (playbackState->Script == m_transitionMaps[script->m_transitions][trigger])
+	//		{
+	//			if (playbackState->PlaybackCursor < script->m_FrameCount - 1)
+	//			{
+	//				playbackState->PlaybackCursor++;
+	//			}
+	//			else
+	//			{
+	//				playbackState->PlaybackCursor = 0;
+	//			}
+	//		}
+	//		else
+	//		{
+	//			playbackState->PendingScript = m_transitionMaps[script->m_transitions][trigger];
+	//			playbackState->PlaybackCursor = 0;
+	//		}
+	//	}
+	//	else if (script->m_scriptType == SCRIPT_TYPE_ATTACK)
+	//	{
+	//		if (playbackState->PlaybackCursor < script->m_FrameCount - 1)
+	//		{
+	//			playbackState->PlaybackCursor++;
+	//		}
+	//		else
+	//		{
+	//			playbackState->PendingScript = m_transitionMaps[script->m_transitions][trigger];
+	//			playbackState->PlaybackCursor = 0;
+	//		}
+	//	}
+	//}
+	//else
+	//{
+	//	if (script->m_scriptType == SCRIPT_TYPE_CONTINUOUS)
+	//	{
+	//		if (playbackState->Script == script->m_defaultTransition)
+	//		{
+	//			if (playbackState->PlaybackCursor < script->m_FrameCount - 1)
+	//			{
+	//				playbackState->PlaybackCursor++;
+	//			}
+	//			else
+	//			{
+	//				playbackState->PendingScript = script->m_defaultTransition;
+	//				playbackState->PlaybackCursor = 0;
+	//			}
+	//		}
+	//		else
+	//		{
+	//			playbackState->PendingScript = script->m_defaultTransition;
+	//			playbackState->PlaybackCursor = 0;
+	//		}
+	//	}
+	//	else
+	//	{
+	//		if (playbackState->PlaybackCursor < script->m_FrameCount - 1)
+	//		{
+	//			playbackState->PlaybackCursor++;
+	//		}
+	//		else
+	//		{
+	//			playbackState->PendingScript = script->m_defaultTransition;
+	//			playbackState->PlaybackCursor = 0;
+	//		}
+	//	}
+	//}
 }

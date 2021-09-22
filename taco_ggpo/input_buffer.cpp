@@ -1,141 +1,80 @@
 #include "input_buffer.h"
-
-
-input_buffer::input_buffer()
-{
-}
-
-
-input_buffer::~input_buffer()
-{
-}
+#include <string>
+#include "logging_system.h"
+#include "subsystems.h"
 
 void input_buffer::Initialize()
 {
-	for (int i = 0; i < INPUT_BUFFER_SIZE; i++)
+	memset(m_Buffer, 0, sizeof(m_Buffer));
+	for (uint32 i = 0; i < BUF_SIZE; i++)
 	{
-		for (int j = 0; j < 4; j++)
-		{
-			m_InputStates[i].ButtonStates[j].Consumed = 0;
-			m_InputStates[i].ButtonStates[j].Held = -1;
-			m_InputStates[i].ButtonStates[j].Release = 0;
-		}
-		m_InputStates[i].DirectionState.Consumed = 0;
-		m_InputStates[i].DirectionState.Direction = 5;
-		m_InputStates[i].DirectionState.FromNeutral = 0;
+		m_Buffer[(i + 1) % BUF_SIZE].m_pPrevEntry = &m_Buffer[i];
 	}
+	m_Cursor = 0;
 }
 
-int input_buffer::Update(int rawInputs)
+void input_buffer::Update(uint32 InputMask, uint32 TimeStamp, float Facing)
 {
-	//TODO: ring buffer
-	for (int i = INPUT_BUFFER_SIZE - 2; i >= 0; i--)
-	{
-		m_InputStates[i + 1] = m_InputStates[i];
-	}
-
-	m_InputStates[0].ButtonStates[0].Update(rawInputs & INPUT_A);
-	m_InputStates[0].ButtonStates[1].Update(rawInputs & INPUT_B);
-	m_InputStates[0].ButtonStates[2].Update(rawInputs & INPUT_C);
-	m_InputStates[0].ButtonStates[3].Update(rawInputs & INPUT_D);
-	m_InputStates[0].ButtonStates[4].Update(rawInputs & INPUT_RUN);
-	m_InputStates[0].DirectionState.Update(rawInputs & (INPUT_DIRECTIONS));
-	
-	return 0;
-}
-
-int input_buffer::Update(int rawInputs, float Facing)
-{
-	//TODO: ring buffer
-	for (int i = INPUT_BUFFER_SIZE - 2; i >= 0; i--)
-	{
-		m_InputStates[i + 1] = m_InputStates[i];
-	}
-	
-	int32 AdjustedInputs = rawInputs;
 	if (Facing == -1.0f)
 	{
-		AdjustedInputs = ((rawInputs & INPUT_LEFT) << 1);
-		AdjustedInputs |= ((rawInputs & INPUT_RIGHT) >> 1);
+		uint32 AdjustedMask = ((InputMask & INPUT_LEFT) << 1);
+		AdjustedMask |= ((InputMask & INPUT_RIGHT) >> 1);
+		InputMask = (InputMask & ~(INPUT_LEFT | INPUT_RIGHT)) | AdjustedMask;
 	}
 
-	m_InputStates[0].ButtonStates[0].Update(rawInputs & INPUT_A);
-	m_InputStates[0].ButtonStates[1].Update(rawInputs & INPUT_B);
-	m_InputStates[0].ButtonStates[2].Update(rawInputs & INPUT_C);
-	m_InputStates[0].ButtonStates[3].Update(rawInputs & INPUT_D);
-	m_InputStates[0].ButtonStates[4].Update(rawInputs & INPUT_RUN);
-	m_InputStates[0].DirectionState.Update(AdjustedInputs & (INPUT_DIRECTIONS));
+	if (m_Buffer[m_Cursor].m_InputMask != InputMask)
+	{
+		++m_Cursor %= BUF_SIZE;
 
-	return 0;
+		m_Buffer[m_Cursor].m_InputMask = InputMask;
+		m_Buffer[m_Cursor].m_TimeStamp = TimeStamp;
+	}
 }
 
-// TODO: change to something more general, like input being an array with stuff
-int input_buffer::qcfDetection(int maxFrames)
+bool input_buffer::MatchInputs(move_description* MoveDescription, int32 Buffer, uint32 TimeStamp)
 {
-	int foundInputIndex = 2;
-	int directions[3] = { 2, 3, 6 };
+	Buffer -= (int32)(TimeStamp - m_Buffer[m_Cursor].m_TimeStamp);
+	buffer_entry* CurrentEntry = MatchMotion(&m_Buffer[m_Cursor], &MoveDescription->m_Input, Buffer);
 
-	for (int i = 0; i < maxFrames; i++)
+	if (CurrentEntry == NULL)
+		return false;
+
+	for (int32 i = (MoveDescription->m_MotionCount - 1); i >= 0; i--)
 	{
-		if (directions[foundInputIndex] == m_InputStates[i].DirectionState.Direction)
-			foundInputIndex--;
-		if (foundInputIndex < 0)
-			return 1;
+		Buffer = (int32)MoveDescription->m_Motion[i].m_BufferFrames - (int32)(TimeStamp - CurrentEntry->m_TimeStamp);
+		CurrentEntry = MatchMotion(CurrentEntry, &MoveDescription->m_Motion[i].m_Input, Buffer);
+
+		if (CurrentEntry == NULL)
+			return false;
+
+		TimeStamp = CurrentEntry->m_TimeStamp;
+		CurrentEntry = CurrentEntry->m_pPrevEntry;
 	}
-	return 0;
+
+	return true;
 }
 
-int input_buffer::CheckForCommand(command* Command)
+input_buffer::buffer_entry* input_buffer::MatchMotion(buffer_entry* CurrentEntry, input_description* InputDescription, int32 Buffer)
 {
-	// TODO: simplify cases 
-	if (Command->Type == 0)
-	{
-		if (Command->Restriction == RESTRICTION_NONE)
-		{
-			if (Command->Button >= 0)
-			{
-				if (m_InputStates[0].ButtonStates[Command->Button].Held == 0)
-				{
-					return 1;
-				}
-			}
-		}
-	}
-	//else if (Command.type == 1)
-	//{
-	//	if (m_InputStates[0].ButtonStates[Command.button].Held == 0)
-	//	{
-	//		int foundInputIndex = Command.directionCount - 1;
+	uint32 RestrictionMask = 0;
 
-	//		for (int i = 0; i < Command.bufferTime; i++)
-	//		{
-	//			if (Command.directions[foundInputIndex] == m_InputStates[i].DirectionState.Direction)
-	//				foundInputIndex--;
-	//			if (foundInputIndex < 0)
-	//				return 1;
-	//		}
-	//	}
-	//}
-	else if (Command->Type == 2)
+	if (InputDescription->m_PropertyFlags & DIRECTION_RESTRICTION_SIMILAR)
+		RestrictionMask |= InputDescription->m_InputMask;
+	else if (InputDescription->m_PropertyFlags & DIRECTION_RESTRICTION_EXACT)
+		RestrictionMask |= 0xF;
+	if (InputDescription->m_PropertyFlags & BUTTON_RESTRICTION_ALL)
+		RestrictionMask |= INPUT_BUTTONS;
+
+	while (Buffer >= 0)
 	{
-		if (Command->Restriction == RESTRICTION_EXACT)
-		{
-			if (m_InputStates[0].DirectionState.Direction & ~Command->Direction)
-				return 0;
-			if (m_InputStates[0].DirectionState.Direction & Command->Direction)
-				return 1;
-		}
+		if ((CurrentEntry->m_InputMask & RestrictionMask) == InputDescription->m_InputMask)
+			return CurrentEntry;
+		if (CurrentEntry->m_TimeStamp <= CurrentEntry->m_pPrevEntry->m_TimeStamp)
+			return NULL;
+
+		Buffer -= int32(CurrentEntry->m_TimeStamp - CurrentEntry->m_pPrevEntry->m_TimeStamp);
+		CurrentEntry = CurrentEntry->m_pPrevEntry;
 	}
-	else if (Command->Type == 3)
-	{
-		if (Command->Button >= 0)
-		{
-			if (m_InputStates[0].ButtonStates[Command->Button].Held >= 0)
-			{
-				return 1;
-			}
-		}
-	}
-	
-	return 0;
+
+	return NULL;
 }

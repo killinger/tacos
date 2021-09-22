@@ -123,7 +123,6 @@
     <ClCompile Include="collisions.cpp" />
     <ClCompile Include="console_system.cpp" />
     <ClCompile Include="gamestate.cpp" />
-    <ClCompile Include="input_buf.cpp" />
     <ClCompile Include="input_buffer.cpp" />
     <ClCompile Include="input_handler.cpp" />
     <ClCompile Include="logging_system.cpp" />
@@ -141,7 +140,6 @@
     <ClInclude Include="debug_output.h" />
     <ClInclude Include="defs.h" />
     <ClInclude Include="gamestate.h" />
-    <ClInclude Include="input_buf.h" />
     <ClInclude Include="input_buffer.h" />
     <ClInclude Include="input_handler.h" />
     <ClInclude Include="logging_system.h" />

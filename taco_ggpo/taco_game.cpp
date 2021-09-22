@@ -11,7 +11,6 @@
 #include "logging_system.h"
 // TEST TINGS REMOVE AFTER IMPLEMENTATION
 #include "script_handler.h"
-#include "input_buf.h"
 #include <unordered_map>
 
 // TASKS
@@ -77,7 +76,7 @@ debug_output	DebugOutput;
 
 // TEST TINGS REMOVE AFTER IMPLEMENTATION
 script_handler	ScriptHandler;
-input_buf		InputBuffer;
+input_buffer		InputBuffer;
 move_description TestMove;
 
 struct input_frame
@@ -174,22 +173,21 @@ namespace taco
 		
 		InputBuffer.Initialize();
 		TestMove.m_Input.m_InputMask = INPUT_B;
-		TestMove.m_Input.m_PropertyFlags = 0;
+		TestMove.m_Input.m_PropertyFlags = BUTTON_RESTRICTION_ALL;
 		TestMove.m_MotionCount = 3;
 		TestMove.m_Motion[0].m_BufferFrames = 8;
 		TestMove.m_Motion[0].m_Input.m_InputMask = INPUT_DOWN;
-		TestMove.m_Motion[0].m_Input.m_PropertyFlags = 2;
+		TestMove.m_Motion[0].m_Input.m_PropertyFlags = DIRECTION_RESTRICTION_EXACT;
 		TestMove.m_Motion[1].m_BufferFrames = 8;
 		TestMove.m_Motion[1].m_Input.m_InputMask = INPUT_DOWN | INPUT_RIGHT;
-		TestMove.m_Motion[1].m_Input.m_PropertyFlags = 2;
-		TestMove.m_Motion[2].m_BufferFrames = 1;
+		TestMove.m_Motion[1].m_Input.m_PropertyFlags = DIRECTION_RESTRICTION_EXACT;
+		TestMove.m_Motion[2].m_BufferFrames = 8;
 		TestMove.m_Motion[2].m_Input.m_InputMask = INPUT_RIGHT;
-		TestMove.m_Motion[2].m_Input.m_PropertyFlags = 2;
+		TestMove.m_Motion[2].m_Input.m_PropertyFlags = DIRECTION_RESTRICTION_EXACT;
 
 		ReplayData.SetInputAtFrame(INPUT_DOWN, 0);
 		ReplayData.SetInputAtFrame(INPUT_DOWN | INPUT_RIGHT, 1);
-		ReplayData.SetInputAtFrame(INPUT_RIGHT, 2);
-		ReplayData.SetInputAtFrame(INPUT_B, 3);
+		ReplayData.SetInputAtFrame(INPUT_RIGHT | INPUT_B, 2);
 	}
 
 	/* TODO:
@@ -242,8 +240,8 @@ namespace taco
 
 	void UpdateGameState(uint32* Inputs)
 	{
-		PermanentState.Player[0].InputBuffer.Update(Inputs[0], GameState.Player[0].Facing);
-		PermanentState.Player[1].InputBuffer.Update(Inputs[1], GameState.Player[1].Facing);
+		//PermanentState.Player[0].InputBuffer.Update(Inputs[0], GameState.Player[0].Facing);
+		//PermanentState.Player[1].InputBuffer.Update(Inputs[1], GameState.Player[1].Facing);
 
 		// TODO: change script to pendingscript before final decision
 
@@ -322,30 +320,30 @@ namespace taco
 			move_list* Move;
 			for (int i = 0; i < CancelList->MoveCount; i++)
 			{
-				Move = ScriptHandler.GetMove(CancelList->Moves[i]);
-				if ((PermanentState.Player[0].InputBuffer.m_InputStates[0].DirectionState.Direction & Move->InputMask) == Move->InputMask)
-				{
-					if (GameState.Player[0].PlaybackState.Script == Move->ScriptIndex)
-					{
-						GameState.Player[0].PlaybackState.New = 0;
-						LOG("Continue playback\n");
-					}
-					//else if (	InitialScript == Move->ScriptIndex && 
-					//			GameState.Player[0].PlaybackState.New)
-					//{
-					//	GameState.Player[0].PlaybackState.New = 0;
-					//	LOG("Script is looping\n");
-					//}
-					else // if can cancel
-					{
-						GameState.Player[0].PlaybackState.New = 1;
-						LOG("Transition due to cancel\n");
-					}
-					GameState.Player[0].PlaybackState.Script = Move->ScriptIndex;
-					Script[0] = ScriptHandler.GetScript(&GameState.Player[0].PlaybackState);
+				//Move = ScriptHandler.GetMove(CancelList->Moves[i]);
+				//if ((PermanentState.Player[0].InputBuffer.m_InputStates[0].DirectionState.Direction & Move->InputMask) == Move->InputMask)
+				//{
+				//	if (GameState.Player[0].PlaybackState.Script == Move->ScriptIndex)
+				//	{
+				//		GameState.Player[0].PlaybackState.New = 0;
+				//		LOG("Continue playback\n");
+				//	}
+				//	//else if (	InitialScript == Move->ScriptIndex && 
+				//	//			GameState.Player[0].PlaybackState.New)
+				//	//{
+				//	//	GameState.Player[0].PlaybackState.New = 0;
+				//	//	LOG("Script is looping\n");
+				//	//}
+				//	else // if can cancel
+				//	{
+				//		GameState.Player[0].PlaybackState.New = 1;
+				//		LOG("Transition due to cancel\n");
+				//	}
+				//	GameState.Player[0].PlaybackState.Script = Move->ScriptIndex;
+				//	Script[0] = ScriptHandler.GetScript(&GameState.Player[0].PlaybackState);
 
-					break;
-				}
+				//	break;
+				//}
 			}
 		}
 
@@ -789,10 +787,13 @@ namespace taco
 	{
 		//LOG("[FRAME START %d]\n", GameState.FrameCount);
 
-		PermanentState.Player[0].InputBuffer.Update(Inputs[0], GameState.Player[0].Facing);
-		PermanentState.Player[1].InputBuffer.Update(Inputs[1], GameState.Player[1].Facing);
+	/*	PermanentState.Player[0].InputBuffer.Update(Inputs[0], GameState.Player[0].Facing);
+		PermanentState.Player[1].InputBuffer.Update(Inputs[1], GameState.Player[1].Facing);*/
 
-		InputBuffer.Update(Inputs[0], GameState.FrameCount, 1.0f);
+		InputBuffer.Update(ReplayData.GetNextInput(0), 0, 1.0f);
+		InputBuffer.Update(ReplayData.GetNextInput(1), 1, 1.0f);
+		InputBuffer.Update(ReplayData.GetNextInput(2), 2, 1.0f);
+		InputBuffer.MatchInputs(&TestMove, 3, 3);
 
 		state_script* Script[2];
 		Script[1] = ScriptHandler.GetScript(&GameState.Player[1].PlaybackState);

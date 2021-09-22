@@ -1,87 +1,45 @@
 #pragma once
+#include "defs.h"
+#define BUF_SIZE 10
+#define DIRECTION_RESTRICTION_SIMILAR 0x01
+#define DIRECTION_RESTRICTION_EXACT 0x02
+#define BUTTON_RESTRICTION_ALL 0x04
 
-#include"defs.h"
-#include "command.h"
-
-#define INPUT_BUFFER_SIZE 60
-
-// TODO: Move the implementation of struct functions to the cpp
-// TODO: Use smaller data types + numpad notation for directions isn't needed, stick with bits
-struct button_state
+struct input_description
 {
-	int Held;
-	int Release;
-	int Consumed;
-
-	void Update(bool Input)
-	{
-		Release = 0;
-		if (Input)
-		{
-			Held++;
-		}
-		else if (!Input && Held >= 0)
-		{
-			Release = 1;
-			Held = -1;
-		}
-	}
+	uint32 m_InputMask;
+	uint32 m_PropertyFlags;
 };
 
-struct direction_state
+struct mo_entry
 {
-	int Direction;
-	int FromNeutral;
-	int Consumed;
-
-	void Update(int Input)
-	{
-		int newDirection = 5;
-		switch (Input)
-		{
-		case 1:	newDirection = 2; break;
-		case 2:	newDirection = 4; break;
-		case 3: newDirection = 1; break;
-		case 4: newDirection = 6; break;
-		case 5: newDirection = 3; break;
-		case 8: newDirection = 8; break;
-		case 10: newDirection = 7; break;
-		case 12: newDirection = 9; break;
-		default:
-			break;
-		}
-
-		if (Direction == 5 && newDirection != 5)
-		{
-			FromNeutral = 1;
-		}
-		else
-		{
-			FromNeutral = 0;
-		}
-
-		//Direction = newDirection;
-		Direction = Input;
-	}
+	input_description	m_Input;
+	uint32				m_BufferFrames;
 };
 
-struct input_states
+struct move_description
 {
-	button_state ButtonStates[BUTTON_COUNT];
-	direction_state DirectionState;
+	input_description	m_Input;
+	mo_entry			m_Motion[3];
+	uint32				m_MotionCount;
 };
 
 class input_buffer
 {
 public:
-	input_states m_InputStates[INPUT_BUFFER_SIZE];
-
-	input_buffer();
-	~input_buffer();
-
 	void Initialize();
-	int Update(int rawInputs);
-	int Update(int rawInputs, float Facing);
-	int qcfDetection(int maxFrames);
-	int CheckForCommand(command* Command);
+	void Update(uint32 InputMask, uint32 TimeStamp, float Facing);
+	bool MatchInputs(move_description* MoveDescription, int32 Buffer, uint32 TimeStamp);
+private:
+	struct buffer_entry
+	{
+		uint32			m_InputMask;
+		uint32			m_ConsumedMask;
+		uint32			m_TimeStamp;
+		buffer_entry* m_pPrevEntry;
+	};
+	buffer_entry	m_Buffer[BUF_SIZE];
+	uint32			m_Cursor;
+
+	buffer_entry* MatchMotion(buffer_entry* CurrentEntry, input_description* InputDescription, int32 Buffer);
 };
