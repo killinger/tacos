@@ -1,21 +1,19 @@
 #include "input_buffer.h"
 #include <string>
-#include "logging_system.h"
-#include "subsystems.h"
 
 void input_buffer::Initialize()
 {
 	memset(m_Buffer, 0, sizeof(m_Buffer));
-	for (uint32 i = 0; i < BUF_SIZE; i++)
+	for (uint32 i = 0; i < INPUT_BUFFER_SIZE; i++)
 	{
-		m_Buffer[(i + 1) % BUF_SIZE].m_pPrevEntry = &m_Buffer[i];
+		m_Buffer[(i + 1) % INPUT_BUFFER_SIZE].m_pPrevEntry = &m_Buffer[i];
 	}
 	m_Cursor = 0;
 }
 
-void input_buffer::Update(uint32 InputMask, uint32 TimeStamp, float Facing)
+void input_buffer::Update(uint32 InputMask, uint32 TimeStamp, bool FlipDirections)
 {
-	if (Facing == -1.0f)
+	if (FlipDirections)
 	{
 		uint32 AdjustedMask = ((InputMask & INPUT_LEFT) << 1);
 		AdjustedMask |= ((InputMask & INPUT_RIGHT) >> 1);
@@ -24,17 +22,17 @@ void input_buffer::Update(uint32 InputMask, uint32 TimeStamp, float Facing)
 
 	if (m_Buffer[m_Cursor].m_InputMask != InputMask)
 	{
-		++m_Cursor %= BUF_SIZE;
+		++m_Cursor %= INPUT_BUFFER_SIZE;
 
 		m_Buffer[m_Cursor].m_InputMask = InputMask;
 		m_Buffer[m_Cursor].m_TimeStamp = TimeStamp;
 	}
 }
 
-bool input_buffer::MatchInputs(move_description* MoveDescription, int32 Buffer, uint32 TimeStamp)
+bool input_buffer::MatchInputs(move_description* MoveDescription, uint32 TimeStamp, int32 Buffer)
 {
 	Buffer -= (int32)(TimeStamp - m_Buffer[m_Cursor].m_TimeStamp);
-	buffer_entry* CurrentEntry = MatchMotion(&m_Buffer[m_Cursor], &MoveDescription->m_Input, Buffer);
+	buffer_entry* CurrentEntry = MatchInput(&m_Buffer[m_Cursor], &MoveDescription->m_Input, Buffer);
 
 	if (CurrentEntry == NULL)
 		return false;
@@ -42,7 +40,7 @@ bool input_buffer::MatchInputs(move_description* MoveDescription, int32 Buffer, 
 	for (int32 i = (MoveDescription->m_MotionCount - 1); i >= 0; i--)
 	{
 		Buffer = (int32)MoveDescription->m_Motion[i].m_BufferFrames - (int32)(TimeStamp - CurrentEntry->m_TimeStamp);
-		CurrentEntry = MatchMotion(CurrentEntry, &MoveDescription->m_Motion[i].m_Input, Buffer);
+		CurrentEntry = MatchInput(CurrentEntry, &MoveDescription->m_Motion[i].m_Input, Buffer);
 
 		if (CurrentEntry == NULL)
 			return false;
@@ -54,21 +52,28 @@ bool input_buffer::MatchInputs(move_description* MoveDescription, int32 Buffer, 
 	return true;
 }
 
-input_buffer::buffer_entry* input_buffer::MatchMotion(buffer_entry* CurrentEntry, input_description* InputDescription, int32 Buffer)
+input_buffer::buffer_entry* input_buffer::MatchInput(buffer_entry* CurrentEntry, input_description* InputDescription, int32 Buffer)
 {
-	uint32 RestrictionMask = 0;
+	uint32 BufferRestrictionMask = 0;
+	uint32 MoveRestrictionMask = 0xFFFF;
 
 	if (InputDescription->m_PropertyFlags & DIRECTION_RESTRICTION_SIMILAR)
-		RestrictionMask |= InputDescription->m_InputMask;
+		BufferRestrictionMask |= (InputDescription->m_InputMask & INPUT_DIRECTIONS);
 	else if (InputDescription->m_PropertyFlags & DIRECTION_RESTRICTION_EXACT)
-		RestrictionMask |= 0xF;
+		BufferRestrictionMask |= INPUT_DIRECTIONS;
 	if (InputDescription->m_PropertyFlags & BUTTON_RESTRICTION_ALL)
-		RestrictionMask |= INPUT_BUTTONS;
+		BufferRestrictionMask |= (InputDescription->m_InputMask & INPUT_BUTTONS);
+	else if (InputDescription->m_PropertyFlags & BUTTON_RESTRICTION_ANY)
+		MoveRestrictionMask = INPUT_DIRECTIONS;
 
 	while (Buffer >= 0)
 	{
-		if ((CurrentEntry->m_InputMask & RestrictionMask) == InputDescription->m_InputMask)
-			return CurrentEntry;
+		if ((CurrentEntry->m_InputMask & BufferRestrictionMask) == (InputDescription->m_InputMask & MoveRestrictionMask))
+			if (!(InputDescription->m_PropertyFlags & BUTTON_RESTRICTION_ANY))
+				return CurrentEntry;
+			else if ((CurrentEntry->m_InputMask & InputDescription->m_InputMask) & INPUT_BUTTONS)
+				return CurrentEntry;
+
 		if (CurrentEntry->m_TimeStamp <= CurrentEntry->m_pPrevEntry->m_TimeStamp)
 			return NULL;
 

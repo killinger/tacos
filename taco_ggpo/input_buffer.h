@@ -1,9 +1,10 @@
 #pragma once
 #include "defs.h"
-#define BUF_SIZE 10
+#define INPUT_BUFFER_SIZE 40
 #define DIRECTION_RESTRICTION_SIMILAR 0x01
 #define DIRECTION_RESTRICTION_EXACT 0x02
-#define BUTTON_RESTRICTION_ALL 0x04
+#define BUTTON_RESTRICTION_ANY 0x10
+#define BUTTON_RESTRICTION_ALL 0x20
 
 struct input_description
 {
@@ -28,18 +29,18 @@ class input_buffer
 {
 public:
 	void Initialize();
-	void Update(uint32 InputMask, uint32 TimeStamp, float Facing);
-	bool MatchInputs(move_description* MoveDescription, int32 Buffer, uint32 TimeStamp);
+	void Update(uint32 InputMask, uint32 TimeStamp, bool FlipDirections);
+	bool MatchInputs(move_description* MoveDescription, uint32 TimeStamp, int32 Buffer);
 private:
 	struct buffer_entry
 	{
 		uint32			m_InputMask;
 		uint32			m_ConsumedMask;
 		uint32			m_TimeStamp;
-		buffer_entry* m_pPrevEntry;
+		buffer_entry*	m_pPrevEntry;
 	};
-	buffer_entry	m_Buffer[BUF_SIZE];
+	buffer_entry	m_Buffer[INPUT_BUFFER_SIZE];
 	uint32			m_Cursor;
 
-	buffer_entry* MatchMotion(buffer_entry* CurrentEntry, input_description* InputDescription, int32 Buffer);
+	buffer_entry* MatchInput(buffer_entry* CurrentEntry, input_description* InputDescription, int32 Buffer);
 };

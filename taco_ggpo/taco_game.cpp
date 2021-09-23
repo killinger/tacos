@@ -38,6 +38,7 @@
 // TODO: Move some defs out of the common file, not everything is that general
 // TODO: There has to be a better way to deal with transforms. All the shifting shit when doing collision detection and drawing is disgusting
 // TODO: some kinda scene graph shit?
+// TODO: Is there a way to do BUTTON_RESTRICTION_ANY with fewer branches?
 
 // DESIGN
 // TODO: The renderer interface is appaling
@@ -76,7 +77,7 @@ debug_output	DebugOutput;
 
 // TEST TINGS REMOVE AFTER IMPLEMENTATION
 script_handler	ScriptHandler;
-input_buffer		InputBuffer;
+input_buffer	InputBuffer;
 move_description TestMove;
 
 struct input_frame
@@ -172,22 +173,20 @@ namespace taco
 		GameState.Player[1].PlaybackState.New = 1;
 		
 		InputBuffer.Initialize();
-		TestMove.m_Input.m_InputMask = INPUT_B;
-		TestMove.m_Input.m_PropertyFlags = BUTTON_RESTRICTION_ALL;
+		TestMove.m_Input.m_InputMask = INPUT_B | INPUT_DOWN;
+		TestMove.m_Input.m_PropertyFlags = BUTTON_RESTRICTION_ANY | DIRECTION_RESTRICTION_SIMILAR;
 		TestMove.m_MotionCount = 3;
 		TestMove.m_Motion[0].m_BufferFrames = 8;
-		TestMove.m_Motion[0].m_Input.m_InputMask = INPUT_DOWN;
+		TestMove.m_Motion[0].m_Input.m_InputMask = INPUT_FORWARD;
 		TestMove.m_Motion[0].m_Input.m_PropertyFlags = DIRECTION_RESTRICTION_EXACT;
 		TestMove.m_Motion[1].m_BufferFrames = 8;
-		TestMove.m_Motion[1].m_Input.m_InputMask = INPUT_DOWN | INPUT_RIGHT;
+		TestMove.m_Motion[1].m_Input.m_InputMask = INPUT_DOWN;
 		TestMove.m_Motion[1].m_Input.m_PropertyFlags = DIRECTION_RESTRICTION_EXACT;
 		TestMove.m_Motion[2].m_BufferFrames = 8;
-		TestMove.m_Motion[2].m_Input.m_InputMask = INPUT_RIGHT;
+		TestMove.m_Motion[2].m_Input.m_InputMask = INPUT_FORWARD;
 		TestMove.m_Motion[2].m_Input.m_PropertyFlags = DIRECTION_RESTRICTION_EXACT;
 
-		ReplayData.SetInputAtFrame(INPUT_DOWN, 0);
-		ReplayData.SetInputAtFrame(INPUT_DOWN | INPUT_RIGHT, 1);
-		ReplayData.SetInputAtFrame(INPUT_RIGHT | INPUT_B, 2);
+		ReplayData.SetInputAtFrame(INPUT_A | INPUT_B | INPUT_BACK, 0);
 	}
 
 	/* TODO:
@@ -787,13 +786,16 @@ namespace taco
 	{
 		//LOG("[FRAME START %d]\n", GameState.FrameCount);
 
-	/*	PermanentState.Player[0].InputBuffer.Update(Inputs[0], GameState.Player[0].Facing);
-		PermanentState.Player[1].InputBuffer.Update(Inputs[1], GameState.Player[1].Facing);*/
+		PermanentState.Player[0].InputBuffer.Update(Inputs[0], 
+													GameState.FrameCount, 
+													(GameState.Player[0].PositionX > GameState.Player[1].PositionX));
+		PermanentState.Player[1].InputBuffer.Update(Inputs[1], 
+													GameState.FrameCount, 
+													(GameState.Player[1].PositionX > GameState.Player[0].PositionX));
 
-		InputBuffer.Update(ReplayData.GetNextInput(0), 0, 1.0f);
-		InputBuffer.Update(ReplayData.GetNextInput(1), 1, 1.0f);
-		InputBuffer.Update(ReplayData.GetNextInput(2), 2, 1.0f);
-		InputBuffer.MatchInputs(&TestMove, 3, 3);
+		bool FlipDirections = (GameState.Player[0].PositionX > GameState.Player[1].PositionX);
+		InputBuffer.Update(ReplayData.GetNextInput(0), 0, FlipDirections);
+		InputBuffer.MatchInputs(&TestMove, 0, 3);
 
 		state_script* Script[2];
 		Script[1] = ScriptHandler.GetScript(&GameState.Player[1].PlaybackState);
