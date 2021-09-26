@@ -1,40 +1,25 @@
-#include "script_handler.h"
+#include "state_manager.h"
 #include "rapidjson/document.h"
 #include "rapidjson/filereadstream.h"
 #include <unordered_map>
 #include <vector>
 
-void script_handler::Initialize()
+void state_manager::Initialize()
 {
 	ReadFromDirectory("data/sparsetest");
 }
 
-void script_handler::Update(playbackstate* PlaybackState)
+state_script* state_manager::GetScript(playbackstate* PlaybackState)
 {
-	state_script* Script = &m_Scripts[PlaybackState->Script];
-
-	if (PlaybackState->PlaybackCursor < Script->TotalFrames - 1)
-		PlaybackState->PlaybackCursor++;
-	else
-		PlaybackState->PlaybackCursor = 0;
+	return &m_Scripts[PlaybackState->State];
 }
 
-state_script* script_handler::GetScript(playbackstate* PlaybackState)
+state_script* state_manager::GetScript(uint32 Index)
 {
-	return &m_Scripts[PlaybackState->Script];
+	return &m_Scripts[Index];
 }
 
-cancel_list* script_handler::GetCancelList(uint16 Index)
-{
-	return &m_CancelLists[Index];
-}
-
-move_list* script_handler::GetMove(uint32 Index)
-{
-	return &m_Moves[Index];
-}
-
-void script_handler::ReadFromDirectory(const char* Path)
+void state_manager::ReadFromDirectory(const char* Path)
 {
 	FILE* filePointer;
 	char fileBuffer[15000];
@@ -121,10 +106,10 @@ void script_handler::ReadFromDirectory(const char* Path)
 		m_Scripts[i].ScalingYV = Document["ScalingYV"].GetFloat();
 		m_Scripts[i].ScalingXA = Document["ScalingXA"].GetFloat();
 		m_Scripts[i].ScalingYA = Document["ScalingYA"].GetFloat();
-		
+
 		m_Scripts[i].Flags = 0;
 		m_Scripts[i].Flags |= Document["Flags"].GetUint();
-		
+
 		if (Document.HasMember("HitboxElements"))
 		{
 			m_Scripts[i].Elements.HitboxCount = Document["HitboxElements"].Size();
@@ -228,5 +213,21 @@ void script_handler::ReadFromDirectory(const char* Path)
 			m_Scripts[i].Elements.ForceElements = NULL;
 		}
 
+	}
+
+	{
+		std::string ScriptName = "/characterdata.json";
+		Filepath = Path + ScriptName;
+
+		fopen_s(&filePointer, Filepath.c_str(), "rb");
+		rapidjson::FileReadStream fileReadStream(filePointer, fileBuffer, sizeof(fileBuffer));
+		Document.ParseStream<rapidjson::kParseCommentsFlag>(fileReadStream);
+		fclose(filePointer);
+
+		m_CharacterData.WalkFSpeed = Document["WalkFSpeed"].GetFloat();
+		m_CharacterData.WalkBSpeed = Document["WalkBSpeed"].GetFloat();
+		m_CharacterData.JumpGravity = Document["JumpGravity"].GetFloat();
+		m_CharacterData.JumpVelocityY = Document["JumpVelocityY"].GetFloat();
+		m_CharacterData.JumpVelocityX = Document["JumpVelocityX"].GetFloat();
 	}
 }

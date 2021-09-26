@@ -1,35 +1,40 @@
 #pragma once
-#include "permanent_state.h"
 #include "defs.h"
+#include "input_buffer.h"
+#include "state_manager.h"
+
+class state_manager;
 
 struct playbackstate
 {
-	int	PlaybackCursor;
-	int Script;
-	int PendingScript;
-	int New;
+	uint32	PlaybackCursor;
+	uint32	State;
+	bool	New;
 };
 
 struct playerstate
 {
-	playbackstate	PlaybackState;
-	float			PositionX;
-	float			PositionY;
-	float			VelocityX;
-	float			VelocityY;
-	float			AccelerationX;
-	float			AccelerationY;
-	float			Facing;
+	playbackstate		PlaybackState;
+	input_buffer		InputBuffer;
+	float				PositionX;
+	float				PositionY;
+	float				VelocityX;
+	float				VelocityY;
+	float				AccelerationX;
+	float				AccelerationY;
+	float				RunVelocity;
+	float				RunAcceleration;
+	float				Facing;
+	uint32				BufferedJump;
 };
 
 // TODO: Move playerstate to a proper class? possibly the entirety of gamestate?
 struct gamestate
 {
-	playerstate Player[2];
-	int32		FrameCount;
-	void Initialize()
-	{
-	}
-
-	void Update(permanent_state* PermanentState, uint32* Inputs);
+	playerstate m_Player[2];
+	int32		m_FrameCount;
+	
+	void Update(uint32* Inputs, state_manager* StateManager);
+private:
+	void AdvancePlayerState(state_manager* StateManager, playerstate* PlayerState, playerstate* OtherPlayer);
 };

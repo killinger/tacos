@@ -1,7 +1,7 @@
 #include "input_buffer.h"
 #include <string>
 
-void input_buffer::Initialize()
+input_buffer::input_buffer()
 {
 	memset(m_Buffer, 0, sizeof(m_Buffer));
 	for (uint32 i = 0; i < INPUT_BUFFER_SIZE; i++)
@@ -26,6 +26,8 @@ void input_buffer::Update(uint32 InputMask, uint32 TimeStamp, bool FlipDirection
 
 		m_Buffer[m_Cursor].m_InputMask = InputMask;
 		m_Buffer[m_Cursor].m_TimeStamp = TimeStamp;
+
+		// TODO: Send event: Input buffer updated. Should be sent from the calling function so player index can be included
 	}
 }
 
@@ -37,7 +39,7 @@ bool input_buffer::MatchInputs(move_description* MoveDescription, uint32 TimeSta
 	if (CurrentEntry == NULL)
 		return false;
 
-	for (int32 i = (MoveDescription->m_MotionCount - 1); i >= 0; i--)
+	for (int32 i = ((int32)MoveDescription->m_MotionCount - 1); i >= 0; i--)
 	{
 		Buffer = (int32)MoveDescription->m_Motion[i].m_BufferFrames - (int32)(TimeStamp - CurrentEntry->m_TimeStamp);
 		CurrentEntry = MatchInput(CurrentEntry, &MoveDescription->m_Motion[i].m_Input, Buffer);
@@ -52,10 +54,35 @@ bool input_buffer::MatchInputs(move_description* MoveDescription, uint32 TimeSta
 	return true;
 }
 
+bool input_buffer::MatchLastEntry(input_description* InputDescription)
+{
+	uint32 BufferRestrictionMask = 0;
+	uint32 MoveRestrictionMask = 0xFFFFFFFF;
+
+	if (InputDescription->m_PropertyFlags & DIRECTION_RESTRICTION_SIMILAR)
+		BufferRestrictionMask |= (InputDescription->m_InputMask & INPUT_DIRECTIONS);
+	else if (InputDescription->m_PropertyFlags & DIRECTION_RESTRICTION_EXACT)
+		BufferRestrictionMask |= INPUT_DIRECTIONS;
+	if (InputDescription->m_PropertyFlags & BUTTON_RESTRICTION_ALL)
+		BufferRestrictionMask |= (InputDescription->m_InputMask & INPUT_BUTTONS);
+	else if (InputDescription->m_PropertyFlags & BUTTON_RESTRICTION_ANY)
+		MoveRestrictionMask = INPUT_DIRECTIONS;
+
+	buffer_entry* CurrentEntry = &m_Buffer[m_Cursor];
+
+	if ((CurrentEntry->m_InputMask & BufferRestrictionMask) == (InputDescription->m_InputMask & MoveRestrictionMask))
+		if (!(InputDescription->m_PropertyFlags & BUTTON_RESTRICTION_ANY))
+			return true;
+		else if ((CurrentEntry->m_InputMask & InputDescription->m_InputMask) & INPUT_BUTTONS)
+			return true;
+
+	return false;
+}
+
 input_buffer::buffer_entry* input_buffer::MatchInput(buffer_entry* CurrentEntry, input_description* InputDescription, int32 Buffer)
 {
 	uint32 BufferRestrictionMask = 0;
-	uint32 MoveRestrictionMask = 0xFFFF;
+	uint32 MoveRestrictionMask = 0xFFFFFFFF;
 
 	if (InputDescription->m_PropertyFlags & DIRECTION_RESTRICTION_SIMILAR)
 		BufferRestrictionMask |= (InputDescription->m_InputMask & INPUT_DIRECTIONS);

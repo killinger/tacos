@@ -1,8 +1,8 @@
 [
     "standing",
-    "jump",
     "forward",
     "back",
     "prejump",
+    "jump",
     "5A"
 ]

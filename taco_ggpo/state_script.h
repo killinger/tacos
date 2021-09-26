@@ -8,6 +8,7 @@
 
 struct state_script
 {
+	frame_elements	Elements;
 	std::string		Name;
 	float			ScalingXV;
 	float			ScalingYV;
@@ -15,8 +16,7 @@ struct state_script
 	float			ScalingYA;
 	float			Friction;
 	uint32			Flags;
+	uint8			TotalFrames;
 	int8			FirstHitboxFrame;
 	int8			LastHitboxFrame;
-	uint8			TotalFrames;
-	frame_elements	Elements;
 };

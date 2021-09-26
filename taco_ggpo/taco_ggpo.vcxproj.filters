@@ -16,15 +16,18 @@
     <Filter Include="Subsystems">
       <UniqueIdentifier>{9d268f73-4838-4d63-a024-6a42f9f2b733}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Input">
+      <UniqueIdentifier>{811958c2-a46c-4655-8946-4feaec1b1363}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Rendering">
+      <UniqueIdentifier>{89c3b8c9-07ed-4cdb-b063-8d3afc918f0d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Character state &amp; scripts">
+      <UniqueIdentifier>{85df1231-073d-4465-b155-6beebcc8d8f0}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="input_buffer.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="script_manager.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="taco_game.cpp">
@@ -33,16 +36,7 @@
     <ClCompile Include="console_system.cpp">
       <Filter>Subsystems</Filter>
     </ClCompile>
-    <ClCompile Include="render_system.cpp">
-      <Filter>Subsystems</Filter>
-    </ClCompile>
     <ClCompile Include="player_graphics.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="input_handler.cpp">
-      <Filter>Subsystems</Filter>
-    </ClCompile>
-    <ClCompile Include="script_handler.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="collisions.cpp">
@@ -51,21 +45,24 @@
     <ClCompile Include="logging_system.cpp">
       <Filter>Subsystems</Filter>
     </ClCompile>
+    <ClCompile Include="input_buffer.cpp">
+      <Filter>Input</Filter>
+    </ClCompile>
+    <ClCompile Include="input_handler.cpp">
+      <Filter>Input</Filter>
+    </ClCompile>
+    <ClCompile Include="render_system.cpp">
+      <Filter>Rendering</Filter>
+    </ClCompile>
     <ClCompile Include="gamestate.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="state_manager.cpp">
+      <Filter>Character state &amp; scripts</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="input_buffer.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="defs.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="script_manager.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="command.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="gamestate.h">
@@ -80,28 +77,10 @@
     <ClInclude Include="console_system.h">
       <Filter>Subsystems</Filter>
     </ClInclude>
-    <ClInclude Include="render_system.h">
-      <Filter>Subsystems</Filter>
-    </ClInclude>
     <ClInclude Include="player_graphics.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="debug_output.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="permanent_state.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="input_handler.h">
-      <Filter>Subsystems</Filter>
-    </ClInclude>
-    <ClInclude Include="script_handler.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="state_script.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="script_elements.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="collisions.h">
@@ -109,6 +88,30 @@
     </ClInclude>
     <ClInclude Include="logging_system.h">
       <Filter>Subsystems</Filter>
+    </ClInclude>
+    <ClInclude Include="input_buffer.h">
+      <Filter>Input</Filter>
+    </ClInclude>
+    <ClInclude Include="input_handler.h">
+      <Filter>Input</Filter>
+    </ClInclude>
+    <ClInclude Include="render_system.h">
+      <Filter>Rendering</Filter>
+    </ClInclude>
+    <ClInclude Include="state_script.h">
+      <Filter>Character state &amp; scripts</Filter>
+    </ClInclude>
+    <ClInclude Include="state_manager.h">
+      <Filter>Character state &amp; scripts</Filter>
+    </ClInclude>
+    <ClInclude Include="script_elements.h">
+      <Filter>Character state &amp; scripts</Filter>
+    </ClInclude>
+    <ClInclude Include="move_description.h">
+      <Filter>Character state &amp; scripts</Filter>
+    </ClInclude>
+    <ClInclude Include="character_cmn_states.h">
+      <Filter>Character state &amp; scripts</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

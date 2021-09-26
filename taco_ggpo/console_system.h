@@ -17,7 +17,7 @@ enum
 	CVAR_UINT = 1 << 3
 };
 
-// TODO: Proper repeat protection
+// TODO: Proper repeat protection, use messages from OS message pump
 
 class console_system
 {
@@ -55,10 +55,10 @@ private:
 	cvar	m_CVars[CVAR_MAX_COUNT];
 	uint32	m_HistorySize;
 	uint32	m_KeyLastFrame;
-	uint8	m_CVarCount;
-	uint8	m_Cursor;
 	char	m_InputBuffer[CONSOLE_FIELD_LENGTH];
 	char	m_ConsoleHistory[CONSOLE_HISTORY_LENGTH];
+	uint8	m_CVarCount;
+	uint8	m_Cursor;
 
 	void ProcessChar(uint32 Key);
 	void ProcessInput();

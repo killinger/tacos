@@ -1,6 +1,5 @@
 #pragma once
 #include "defs.h"
-#include "input_buffer.h"
 
 enum player_type
 {
@@ -12,12 +11,6 @@ enum player_type
 struct player_info
 {
 	player_type		Type;
-	input_buffer	InputBuffer;
-	float			WalkspeedForward;
-	float			WalkspeedBack;
-	float			JumpGravity;
-	float			JumpInitialVelocity;
-	float			JumpForwardVelocity;
 };
 
 struct permanent_state

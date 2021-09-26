@@ -11,6 +11,10 @@
 #define POSITION_X_AXIS 0x01
 #define POSITION_Y_AXIS 0x02
 
+struct gamestate;
+struct playerstate;
+struct playbackstate;
+
 struct cancel_list
 {
 	uint8*	Moves;
@@ -23,15 +27,23 @@ struct move_list
 	uint32 ScriptIndex;
 };
 
-class script_handler
+struct character_data
+{
+	float			WalkFSpeed;
+	float			WalkBSpeed;
+	float			JumpGravity;
+	float			JumpVelocityY;
+	float			JumpVelocityX;
+};
+
+class state_manager
 {
 public:
 	void			Initialize();
-	void			Update(playbackstate* PlaybackState);
 	state_script*	GetScript(playbackstate* PlaybackState);
-	cancel_list*	GetCancelList(uint16 Index);
-	cancel_list*	GetReservedCancelList(uint32 Index);
-	move_list*		GetMove(uint32 Index);
+	state_script*	GetScript(uint32 Index);
+
+	character_data	m_CharacterData;
 private:
 	state_script*	m_Scripts;
 	cancel_list*	m_CancelLists;
