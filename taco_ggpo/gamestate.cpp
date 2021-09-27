@@ -18,8 +18,8 @@ void gamestate::Update(uint32* Inputs, state_manager* StateManager)
 	AdvancePlayerState(StateManager, &m_Player[0], &m_Player[1]);
 	AdvancePlayerState(StateManager, &m_Player[1], &m_Player[0]);
 
-	UpdatePosition(&m_Player[0]);
-	UpdatePosition(&m_Player[1]);
+	UpdateMovement(&m_Player[0]);
+	UpdateMovement(&m_Player[1]);
 
 	m_FrameCount++;
 }
@@ -33,7 +33,7 @@ void gamestate::AdvancePlayerState(state_manager* StateManager, playerstate* Pla
 	// Ground bounds check if airborne
 }
 
-void gamestate::UpdatePosition(playerstate* PlayerState)
+void gamestate::UpdateMovement(playerstate* PlayerState)
 {
 	PlayerState->PositionX += PlayerState->VelocityX;
 	PlayerState->PositionY += PlayerState->VelocityY;

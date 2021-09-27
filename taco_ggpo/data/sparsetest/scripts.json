@@ -7,7 +7,8 @@
     "CmnStateCrouch2Stand",
     "CmnStateFWalk",
     "CmnStateBWalk",
+    "CmnStateRunStart",
+    "CmnStateRunLoop",
     "CmnStatePrejump",
-    "jump",
     "5A"
 ]

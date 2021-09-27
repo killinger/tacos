@@ -195,19 +195,10 @@ namespace taco
 
 	void AdvanceFrame(uint32* Inputs)
 	{
-		/*LOG("[ FRAME START: %d ]\n", GameState.FrameCount);
-		UpdateGameState(Inputs);*/
 		GameState.Update(Inputs, &StateManager);
 
 		RenderSystem->Clear();
 		DrawCollisionBoxes();
-		
-		state_script* Script = StateManager.GetScript(GameState.m_Player[0].PlaybackState.State);
-		uint32 Cursor = GameState.m_Player[0].PlaybackState.PlaybackCursor + 1;
-		std::string DebugString("%d", GameState.m_FrameCount);
-		char Buffer[256];
-		sprintf_s(Buffer, 256, "%d\n%s\n%d / %d", GameState.m_FrameCount, Script->Name.c_str(), Cursor, Script->TotalFrames);
-		RenderSystem->DrawDebugString(Buffer);
 
 		//if (ConsoleSystem->m_IsActive)
 		//	ConsoleSystem->DrawConsole();
