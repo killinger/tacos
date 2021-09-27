@@ -38,4 +38,5 @@ struct gamestate
 private:
 	void AdvancePlayerState(state_manager* StateManager, playerstate* PlayerState, playerstate* OtherPlayer);
 	void UpdateMovement(playerstate* PlayerState);
+	void PerformPositionCorrection(state_manager* StateManager);
 };

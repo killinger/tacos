@@ -10,7 +10,8 @@ enum cmn_states
 	CMN_STATE_FWALK, 
 	CMN_STATE_BWALK,
 	CMN_STATE_RUNSTART, 
-	CMN_STATE_RUNLOOP, 
+	CMN_STATE_RUNLOOP,
+	CMN_STATE_RUNBRAKE,
 	CMN_STATE_PREJUMP, 
 	CMN_STATE_COUNT
 };
@@ -52,6 +53,7 @@ CMN_STATE(CmnStateFWalk);
 CMN_STATE(CmnStateBWalk);
 CMN_STATE(CmnStateRunStart);
 CMN_STATE(CmnStateRunLoop);
+CMN_STATE(CmnStateRunBrake);
 CMN_STATE(CmnStatePrejump);
 
 CMN_STATE_RETURN_TYPE(*UpdateCmnState[CMN_STATE_COUNT])(CMN_STATE_SIG) =
@@ -66,6 +68,7 @@ CMN_STATE_RETURN_TYPE(*UpdateCmnState[CMN_STATE_COUNT])(CMN_STATE_SIG) =
 	&CmnStateBWalk,
 	&CmnStateRunStart,
 	&CmnStateRunLoop,
+	&CmnStateRunBrake,
 	&CmnStatePrejump
 };
 
@@ -109,6 +112,7 @@ CMN_STATE(CmnStateStand)
 {
 	state_script* Script = StateManager->GetScript(PlayerState->PlaybackState.State);
 
+	// TODO: Needs some testing to figure when to actually apply this
 	float NewFacing = 1.0f;
 	if (PlayerState->PositionX > OtherPlayer->PositionX)
 		NewFacing = -1.0f;
@@ -123,14 +127,21 @@ CMN_STATE(CmnStateStand)
 			PlayerState->BufferedJump = 7;
 		else
 			PlayerState->BufferedJump = 8;
+		
 		CMN_DEF_TRANSITION(CMN_STATE_PREJUMP);
 	}
 	else if (PlayerState->InputBuffer.MatchLastEntry(&CmnInputs[CMN_INPUT_FORWARD_EX]))
+	{
 		CMN_FWALK_TRANSITION(CMN_STATE_FWALK);
+	}
 	else if (PlayerState->InputBuffer.MatchLastEntry(&CmnInputs[CMN_INPUT_BACK_EX]))
+	{
 		CMN_BWALK_TRANSITION(CMN_STATE_BWALK);
+	}
 	else if (PlayerState->InputBuffer.MatchLastEntry(&CmnInputs[CMN_INPUT_DOWN]))
+	{
 		CMN_DEF_TRANSITION(CMN_STATE_STAND2CROUCH);
+	}
 	else
 	{
 		if (NewFacing != PlayerState->Facing)
@@ -187,6 +198,7 @@ CMN_STATE(CmnStateCrouch)
 {
 	state_script* Script = StateManager->GetScript(PlayerState->PlaybackState.State);
 	
+	// TODO: Needs some testing to figure when to actually apply this
 	float NewFacing = 1.0f;
 	if (PlayerState->PositionX > OtherPlayer->PositionX)
 		NewFacing = -1.0f;
@@ -263,6 +275,7 @@ CMN_STATE(CmnStateFWalk)
 {
 	state_script* Script = StateManager->GetScript(PlayerState->PlaybackState.State);
 
+	// TODO: Needs some testing to figure out if the turn state should happen
 	if (PlayerState->PositionX > OtherPlayer->PositionX)
 		PlayerState->Facing = -1.0f;
 	else
@@ -339,6 +352,11 @@ CMN_STATE(CmnStateRunStart)
 }
 
 CMN_STATE(CmnStateRunLoop)
+{
+	state_script* Script = StateManager->GetScript(PlayerState->PlaybackState.State);
+}
+
+CMN_STATE(CmnStateRunBrake)
 {
 	state_script* Script = StateManager->GetScript(PlayerState->PlaybackState.State);
 }

@@ -7,73 +7,24 @@
 #include "permanent_state.h"
 #include "player_graphics.h"
 #include "logging_system.h"
-// TEST TINGS REMOVE AFTER IMPLEMENTATION
 #include "state_manager.h"
-
-// TASKS
-// TODO: Input buffers can not be a part of game state. It would cause inputs to drop like a motherfucker.
-//		 ^ i don't know how we'd deal with inputs possibly ending up in the wrong direction but it's much less of a problem than dropped inputs on every rollback
-// TODO: Redo input
-//		 ^ priority, will write up requirements
-// TODO: Set up struct or whatever for more permanent (or doesn't change frame to frame) state that gets passed around (input mapping etc, ggpo stuff)
-// TODO: Set up controls properly
-//			- Read input mapping from file
-//			- Some way to set up controls at runtime
-// TODO: Set up everything to account for two players instead of this test shit
-// TODO: Set up stage + camera rules + debug camera to visualize bounds
-// TODO: Script manager tings only halfway renamed to non-disgusting convention
-// TODO: Same for input buffer
-// TODO: Script manager is overall hella messy, streamline that update function
-// TODO: Audio shit
-// TODO: Is a custom memory allocator worth it? There isn't a lot of (if any) allocations during gameplay, but locality might be nice?
-// TODO: Basic menus
-// TODO: Reloading scripts at runtime (either through menu or console)
-// TODO: When things are more comfortable, move all these non-detail TODOs outta here
-// TODO: Streamline asset loading, and only load unique assets ie in case of a mirror match share the assets between both players
-//		 ^ textures would be shared, not sprites
-// TODO: Get a def for Facing
-// TODO: Move some defs out of the common file, not everything is that general
-// TODO: There has to be a better way to deal with transforms. All the shifting shit when doing collision detection and drawing is disgusting
-// TODO: some kinda scene graph shit?
-// TODO: Is there a way to do BUTTON_RESTRICTION_ANY with fewer branches?
-
-// DESIGN
-// TODO: The renderer interface is appaling
-// TODO: Every other interface is also appaling
-// TODO: Figure out where to house/how to work with assets
-// TODO: Figure out where to house the camera (or let the renderer handle it)
-// TODO: Is a renderer class even necessary? It's useful but doesn't really do renderer tings rn
-//		 ^ use RenderTexture to render off-screen, to set internal resolution
-//		 ^ maybe some neat shader effects?
-// TODO: Name some of these enums perhaps? Undecided
-// TODO: A lot of shit that probably shouldn't be is header only rn, figure out what to do with them
-// TODO: Should playerstate->script be index or pointer?
-// TODO: Should animation be separated from scripts?
-// TODO: Consider having an "apply walkspeed" flag in scripts instead of using x shift, so walkspeed can easily be changed at runtime.
-//		 ^ same deal with run etc
-//		 ^ x shift would be used for small shifts during moves 
-// TODO: Consider changing the format of collision boxes to left/right/top/bottom as it's better for collision detection
 
 // TODO: This should find a more suitable home
 #define PLAYER_STARTING_POSITIONS 80.0f
 
 // Subsystems
-console_system* ConsoleSystem;
-render_system* RenderSystem;
-logging_system* LoggingSystem;
-input_handler* InputHandler;
+console_system*		ConsoleSystem;
+render_system*		RenderSystem;
+logging_system*		LoggingSystem;
+input_handler*		InputHandler;
 
 // State
-gamestate		GameState = { 0 };
-permanent_state PermanentState;
+gamestate			GameState = { 0 };
+permanent_state		PermanentState;
 
 // Assets/other
-player_graphics	PlayerGraphics[2];
-
-// TEST TINGS REMOVE AFTER IMPLEMENTATION
+player_graphics		PlayerGraphics[2];
 state_manager		StateManager;
-input_buffer		InputBuffer;
-move_description	TestMove;
 
 struct input_frame
 {
@@ -121,7 +72,6 @@ namespace taco
 	void AdvanceFrame(uint32* Inputs);
 
 	// TEST TINGS REMOVE AFTER IMPLEMENTATION
-	void UpdateTest(uint32* Inputs);
 	void DrawCollisionBoxes();
 
 	void Initialize(sf::RenderWindow* Window)
@@ -137,13 +87,7 @@ namespace taco
 		GameState.m_Player[1].Facing = -1.0f;
 
 		PermanentState.Player[0].Type = PLAYER_TYPE_LOCAL;
-		//PermanentState.Player[0].WalkspeedForward = 1.34f;
-		//PermanentState.Player[0].JumpGravity = -0.21f;
-		//PermanentState.Player[0].JumpInitialVelocity = 8.2f;
-		//PermanentState.Player[0].JumpForwardVelocity = 0.36f;
-
 		PermanentState.Player[1].Type = PLAYER_TYPE_DUMMY;
-
 
 		PlayerGraphics[0].Initialize("data/sphere");
 		PlayerGraphics[1].Initialize("data/sphere");
@@ -155,21 +99,6 @@ namespace taco
 		GameState.m_Player[0].PlaybackState.New = true;
 		GameState.m_Player[1].PlaybackState.State = 0;
 		GameState.m_Player[1].PlaybackState.New = true;
-
-		TestMove.m_Input.m_InputMask = INPUT_B | INPUT_DOWN;
-		TestMove.m_Input.m_PropertyFlags = BUTTON_RESTRICTION_ANY | DIRECTION_RESTRICTION_SIMILAR;
-		TestMove.m_MotionCount = 3;
-		TestMove.m_Motion[0].m_BufferFrames = 8;
-		TestMove.m_Motion[0].m_Input.m_InputMask = INPUT_FORWARD;
-		TestMove.m_Motion[0].m_Input.m_PropertyFlags = DIRECTION_RESTRICTION_EXACT;
-		TestMove.m_Motion[1].m_BufferFrames = 8;
-		TestMove.m_Motion[1].m_Input.m_InputMask = INPUT_DOWN;
-		TestMove.m_Motion[1].m_Input.m_PropertyFlags = DIRECTION_RESTRICTION_EXACT;
-		TestMove.m_Motion[2].m_BufferFrames = 8;
-		TestMove.m_Motion[2].m_Input.m_InputMask = INPUT_FORWARD;
-		TestMove.m_Motion[2].m_Input.m_PropertyFlags = DIRECTION_RESTRICTION_EXACT;
-
-		ReplayData.SetInputAtFrame(INPUT_A | INPUT_B | INPUT_BACK, 0);
 	}
 
 	/* TODO:
@@ -198,6 +127,7 @@ namespace taco
 		GameState.Update(Inputs, &StateManager);
 
 		RenderSystem->Clear();
+
 		DrawCollisionBoxes();
 
 		//if (ConsoleSystem->m_IsActive)
@@ -205,88 +135,6 @@ namespace taco
 		RenderSystem->Display();
 
 		GameState.m_FrameCount++;
-	}
-
-	
-	void UpdateTest(uint32* Inputs)
-	{
-		//LOG("[FRAME START %d]\n", GameState.FrameCount);
-
-		GameState.m_Player[0].InputBuffer.Update(	Inputs[0], 
-												GameState.m_FrameCount, 
-												(GameState.m_Player[0].PositionX > GameState.m_Player[1].PositionX));
-		GameState.m_Player[1].InputBuffer.Update(	Inputs[1],
-												GameState.m_FrameCount, 
-												(GameState.m_Player[1].PositionX > GameState.m_Player[0].PositionX));
-
-		bool FlipDirections = (GameState.m_Player[0].PositionX > GameState.m_Player[1].PositionX);
-		InputBuffer.Update(ReplayData.GetNextInput(0), 0, FlipDirections);
-		InputBuffer.MatchInputs(&TestMove, 0, 3);
-
-		state_script* Script[2];
-		Script[1] = StateManager.GetScript(&GameState.m_Player[1].PlaybackState);
-		
-		GameState.m_Player[0].PositionX += GameState.m_Player[0].VelocityX;
-		GameState.m_Player[0].PositionY += GameState.m_Player[0].VelocityY;
-		GameState.m_Player[0].VelocityX += GameState.m_Player[0].AccelerationX;
-		GameState.m_Player[0].VelocityY += GameState.m_Player[0].AccelerationY;
-
-		if (GameState.m_Player[0].PositionY < 0.0f)
-		{
-			GameState.m_Player[0].VelocityX = 0.0f;
-			GameState.m_Player[0].VelocityY = 0.0f;
-			GameState.m_Player[0].AccelerationY = 0.0f;
-			GameState.m_Player[0].AccelerationY = 0.0f;
-			GameState.m_Player[0].PositionY = 0.0f;
-
-			GameState.m_Player[0].PlaybackState.State = 0;
-			GameState.m_Player[0].PlaybackState.PlaybackCursor = 0;
-			Script[0] = StateManager.GetScript(&GameState.m_Player[0].PlaybackState);
-		}
-
-		//LOG("Final script: %s\n", Script[0]->Name.c_str());
-		//LOG("Script duration: %d\n", Script[0]->TotalFrames);
-		//LOG("Cursor position: %d\n", GameState.Player[0].PlaybackState.PlaybackCursor);
-
-		collision_box Pushbox[2];
-		for (uint32 i = 0; i < 2; i++)
-		{
-			for (uint32 j = 0; j < Script[i]->Elements.PushboxCount; j++)
-			{
-				if (Script[i]->Elements.PushboxElements[j].InRange(GameState.m_Player[i].PlaybackState.PlaybackCursor))
-				{
-					if (GameState.m_Player[i].Facing > 0.0f)
-					{
-						Pushbox[i].X = Script[i]->Elements.PushboxElements[j].Box.X + GameState.m_Player[i].PositionX;
-						Pushbox[i].Y = Script[i]->Elements.PushboxElements[j].Box.Y + GameState.m_Player[i].PositionY;
-						Pushbox[i].Width = Script[i]->Elements.PushboxElements[j].Box.Width;
-						Pushbox[i].Height = Script[i]->Elements.PushboxElements[j].Box.Height;
-					}
-					else
-					{
-
-
-						Pushbox[i].X = GameState.m_Player[i].PositionX - (Script[i]->Elements.PushboxElements[j].Box.X + Script[i]->Elements.PushboxElements[j].Box.Width);
-						Pushbox[i].Y = Script[i]->Elements.PushboxElements[j].Box.Y + GameState.m_Player[i].PositionY;
-						Pushbox[i].Width = Script[i]->Elements.PushboxElements[j].Box.Width;
-						Pushbox[i].Height = Script[i]->Elements.PushboxElements[j].Box.Height;
-					}
-				}
-			}
-		}
-
-		collision_box Result;
-		if (BoxIntersection(&Pushbox[0], &Pushbox[1], &Result))
-		{
-			// Repulsion
-			// TODO: Corner correction and edge cases
-			GameState.m_Player[0].PositionX -= GameState.m_Player[0].Facing * (Result.Width / 2.0f);
-			GameState.m_Player[1].PositionX -= GameState.m_Player[1].Facing * (Result.Width / 2.0f);
-
-			//LOG("Pushbox collision, intersection amount: %f\n", Result.Width);
-		}
-
-		//LOG("[FRAME END %d]\n----------\n\n", GameState.FrameCount);
 	}
 
 	void DrawCollisionBoxes()

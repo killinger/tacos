@@ -9,6 +9,7 @@
     "CmnStateBWalk",
     "CmnStateRunStart",
     "CmnStateRunLoop",
+    "CmnStateRunBrake",
     "CmnStatePrejump",
     "5A"
 ]
