@@ -1,6 +1,6 @@
 {
-    "Name": "prejump",
-    "TotalFrames": 3,
+    "Name": "CmnStateCrouchTurn",
+    "TotalFrames": 2,
     "ScalingXV": 0,
     "ScalingYV": 0,
     "ScalingXA": 0,
@@ -10,7 +10,7 @@
     [
         {
             "FrameStart": 0,
-            "FrameEnd": 3,
+            "FrameEnd": 2,
             "X": -15.0,
             "Y": 0.0,
             "Width": 30.0,
@@ -22,7 +22,7 @@
     [
         {
             "FrameStart": 0,
-            "FrameEnd": 3,
+            "FrameEnd": 2,
             "X": -10.0,
             "Y": 0.0,
             "Width": 20.0,

@@ -23,6 +23,7 @@ public:
 private:
 	sf::RenderWindow*	m_Window;
 	sf::RenderTexture	m_MainFramebuffer;
+	sf::Shader			m_Shader;
 	sf::View			m_MainView;
 	sf::View			m_DebugView;
 	sf::Font			m_ConsoleFont;

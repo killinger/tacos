@@ -1,16 +1,24 @@
 {
-    "Name": "standing",
-    "TotalFrames": 2,
+    "Name": "CmnStateCrouch2Stand",
+    "TotalFrames": 4,
     "ScalingXV": 0,
     "ScalingYV": 0,
     "ScalingXA": 0,
     "ScalingYA": 0,
     "Flags": 2,
-    "HurtboxElements":
+    "StatusElements":
     [
         {
             "FrameStart": 0,
             "FrameEnd": 2,
+            "Flags": 2
+        }
+    ],
+    "HurtboxElements":
+    [
+        {
+            "FrameStart": 0,
+            "FrameEnd": 4,
             "X": -15.0,
             "Y": 0.0,
             "Width": 30.0,
@@ -22,7 +30,7 @@
     [
         {
             "FrameStart": 0,
-            "FrameEnd": 2,
+            "FrameEnd": 4,
             "X": -10.0,
             "Y": 0.0,
             "Width": 20.0,

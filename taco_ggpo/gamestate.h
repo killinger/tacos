@@ -37,4 +37,5 @@ struct gamestate
 	void Update(uint32* Inputs, state_manager* StateManager);
 private:
 	void AdvancePlayerState(state_manager* StateManager, playerstate* PlayerState, playerstate* OtherPlayer);
+	void UpdatePosition(playerstate* PlayerState);
 };

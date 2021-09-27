@@ -12,21 +12,4 @@
         "Name": "5A",
         "InputMask": 16
     }
-    // ,
-    // {
-    //     "Name": "jump_f",
-    //     "InputMask": 12
-    // },
-    // {
-    //     "Name": "jump_b",
-    //     "InputMask": 10
-    // },
-    // {
-    //     "Name": "forward",
-    //     "InputMask": 4
-    // },
-    // {
-    //     "Name": "back",
-    //     "InputMask": 2
-    // }
 ]

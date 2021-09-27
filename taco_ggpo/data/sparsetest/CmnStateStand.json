@@ -1,13 +1,11 @@
 {
-    "Name": "forward",
+    "Name": "CmnStateStand",
     "TotalFrames": 2,
     "ScalingXV": 0,
     "ScalingYV": 0,
     "ScalingXA": 0,
     "ScalingYA": 0,
-    "Friction": 0,
     "Flags": 2,
-    "LoopTo": 0,
     "HurtboxElements":
     [
         {
@@ -29,23 +27,6 @@
             "Y": 0.0,
             "Width": 20.0,
             "Height": 60.0
-        }
-    ],
-    "CancelElements":
-    [
-        {
-            "FrameStart": 0,
-            "FrameEnd": 2,
-            "CancelList": "CANCEL_REST_0"
-        }
-    ],
-    "ForceElements":
-    [
-        {
-            "FrameStart": 0,
-            "FrameEnd": 1,
-            "Target": 1,
-            "Amount": 1.34
         }
     ]
 }

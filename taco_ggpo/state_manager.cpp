@@ -110,6 +110,19 @@ void state_manager::ReadFromDirectory(const char* Path)
 		m_Scripts[i].Flags = 0;
 		m_Scripts[i].Flags |= Document["Flags"].GetUint();
 
+		if (Document.HasMember("StatusElements"))
+		{
+			m_Scripts[i].Elements.StatusCount = Document["StatusElements"].Size();
+			m_Scripts[i].Elements.StatusElements = new status_element[m_Scripts[i].Elements.StatusCount];
+			for (unsigned int j = 0; j < m_Scripts[i].Elements.StatusCount; j++)
+			{
+				m_Scripts[i].Elements.StatusElements[j].FrameStart = (int8)Document["StatusElements"][j]["FrameStart"].GetUint();
+				m_Scripts[i].Elements.StatusElements[j].FrameEnd = (int8)Document["StatusElements"][j]["FrameEnd"].GetUint();
+				m_Scripts[i].Elements.StatusElements[j].StatusFlags = 0;
+				m_Scripts[i].Elements.StatusElements[j].StatusFlags |= Document["StatusElements"][j]["Flags"].GetUint();
+			}
+		}
+
 		if (Document.HasMember("HitboxElements"))
 		{
 			m_Scripts[i].Elements.HitboxCount = Document["HitboxElements"].Size();

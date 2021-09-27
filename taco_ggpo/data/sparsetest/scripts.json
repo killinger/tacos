@@ -1,8 +1,13 @@
 [
-    "standing",
-    "forward",
-    "back",
-    "prejump",
+    "CmnStateStand",
+    "CmnStateStandTurn",
+    "CmnStateStand2Crouch",
+    "CmnStateCrouch",
+    "CmnStateCrouchTurn",
+    "CmnStateCrouch2Stand",
+    "CmnStateFWalk",
+    "CmnStateBWalk",
+    "CmnStatePrejump",
     "jump",
     "5A"
 ]

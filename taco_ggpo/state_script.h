@@ -6,6 +6,10 @@
 #define SCRIPT_AIRBORNE 0x01
 #define SCRIPT_RESTING 0x02
 
+#define STATUS_COUNTERHIT 0x01
+#define STATUS_CROUCHING 0x02
+#define STATUS_AIRBORNE 0x04
+
 struct state_script
 {
 	frame_elements	Elements;
@@ -14,7 +18,6 @@ struct state_script
 	float			ScalingYV;
 	float			ScalingXA;
 	float			ScalingYA;
-	float			Friction;
 	uint32			Flags;
 	uint8			TotalFrames;
 	int8			FirstHitboxFrame;

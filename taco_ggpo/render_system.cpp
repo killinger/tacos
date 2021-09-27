@@ -30,6 +30,25 @@ render_system::render_system(sf::RenderWindow* Window)
 	m_DebugString.setPosition(-320.0f, -260.0f);
 
 	//m_Window->setView(m_MainView);
+
+	const std::string FragmentShader = \
+		"uniform sampler2D texture;" \
+		"uniform vec2 Offset;"
+		"void main()" \
+		"{" \
+		"vec2 Resolution = vec2(1280.0, 720.0);" \
+		"vec2 UV = gl_FragCoord.xy / Resolution.xy;" \
+		"vec4 Color;" \
+		"Color.r = texture2D(texture, UV).r;" \
+		"Color.g = texture2D(texture, UV - Offset).g;" \
+		"Color.b = texture2D(texture, UV + Offset).b;" \
+		"Color.a = 1.0;" \
+		"gl_FragColor = gl_Color * Color;" \
+		"}";
+	if (!m_Shader.loadFromMemory(FragmentShader, sf::Shader::Fragment))
+	{
+		int g = 2;
+	}
 }
 
 render_system::~render_system()
@@ -54,7 +73,7 @@ void render_system::DrawDebugString(const char* DebugString)
 void render_system::Clear()
 {
 	m_Window->clear();
-	m_MainFramebuffer.clear(sf::Color(45, 45, 45));
+	m_MainFramebuffer.clear(sf::Color(25, 25, 25));
 }
 
 void render_system::Draw(sf::Sprite Sprite)
@@ -86,6 +105,7 @@ void render_system::Display()
 	Framebuffer.setScale({ 2.0f, 2.0f });
 	Framebuffer.setOrigin(sf::Vector2f(m_MainFramebuffer.getTexture().getSize() / 2u));
 	Framebuffer.setPosition(m_Window->getView().getCenter());
+
 	m_Window->draw(Framebuffer);
 	m_Window->display();
 }

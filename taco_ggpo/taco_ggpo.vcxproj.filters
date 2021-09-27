@@ -51,14 +51,14 @@
     <ClCompile Include="input_handler.cpp">
       <Filter>Input</Filter>
     </ClCompile>
-    <ClCompile Include="render_system.cpp">
-      <Filter>Rendering</Filter>
-    </ClCompile>
     <ClCompile Include="gamestate.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="state_manager.cpp">
       <Filter>Character state &amp; scripts</Filter>
+    </ClCompile>
+    <ClCompile Include="render_system.cpp">
+      <Filter>Subsystems</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -95,9 +95,6 @@
     <ClInclude Include="input_handler.h">
       <Filter>Input</Filter>
     </ClInclude>
-    <ClInclude Include="render_system.h">
-      <Filter>Rendering</Filter>
-    </ClInclude>
     <ClInclude Include="state_script.h">
       <Filter>Character state &amp; scripts</Filter>
     </ClInclude>
@@ -112,6 +109,9 @@
     </ClInclude>
     <ClInclude Include="character_cmn_states.h">
       <Filter>Character state &amp; scripts</Filter>
+    </ClInclude>
+    <ClInclude Include="render_system.h">
+      <Filter>Subsystems</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

@@ -2,11 +2,13 @@
 enum cmn_states
 {
 	CMN_STATE_STAND = 0,
+	CMN_STATE_STANDTURN,
+	CMN_STATE_STAND2CROUCH,
 	CMN_STATE_CROUCH,
+	CMN_STATE_CROUCHTURN,
+	CMN_STATE_CROUCH2STAND,
 	CMN_STATE_FWALK,
 	CMN_STATE_BWALK,
-	CMN_STATE_STAND2CROUCH,
-	CMN_STATE_CROUCH2STAND,
 	CMN_STATE_PREJUMP,
 	CMN_STATE_COUNT
 };
@@ -35,18 +37,30 @@ input_description CmnInputs[]
 #define CMN_STATE_RETURN_TYPE void
 #define CMN_STATE(state) CMN_STATE_RETURN_TYPE state(CMN_STATE_SIG)
 #define CMN_DEF_TRANSITION(state) do { CmnStateDefInit(Script, PlayerState); PlayerState->PlaybackState.State = state; } while(0)
+#define CMN_FWALK_TRANSITION(state) do { CmnStateFWalkInit(StateManager, Script, PlayerState); PlayerState->PlaybackState.State = state; } while(0)
+#define CMN_BWALK_TRANSITION(state) do { CmnStateBWalkInit(StateManager, Script, PlayerState); PlayerState->PlaybackState.State = state; } while(0)
 
 CMN_STATE(CmnStateStand);
+CMN_STATE(CmnStateStandTurn);
+CMN_STATE(CmnStateStand2Crouch);
+CMN_STATE(CmnStateCrouch);
+CMN_STATE(CmnStateCrouchTurn);
+CMN_STATE(CmnStateCrouch2Stand);
 CMN_STATE(CmnStateFWalk);
 CMN_STATE(CmnStateBWalk);
-CMN_STATE(CmnStateCrouch);
 CMN_STATE(CmnStatePrejump);
 
 CMN_STATE_RETURN_TYPE(*UpdateCmnState[CMN_STATE_COUNT])(CMN_STATE_SIG) =
 {
 	&CmnStateStand,
+	&CmnStateStandTurn,
+	&CmnStateStand2Crouch,
+	&CmnStateCrouch,
+	&CmnStateCrouchTurn,
+	&CmnStateCrouch2Stand,
 	&CmnStateFWalk,
 	&CmnStateBWalk,
+	&CmnStatePrejump,
 };
 
 inline void CmnStateDefInit(state_script* Script, playerstate* PlayerState)
@@ -58,7 +72,31 @@ inline void CmnStateDefInit(state_script* Script, playerstate* PlayerState)
 	PlayerState->AccelerationX *= Script->ScalingXA;
 	PlayerState->AccelerationY *= Script->ScalingYA;
 
-	// TODO: Add run shit
+	// TODO: Add run velocity and friction shit
+}
+
+inline void CmnStateFWalkInit(state_manager* StateManager, state_script* Script, playerstate* PlayerState)
+{
+	PlayerState->PlaybackState.PlaybackCursor = 0;
+	PlayerState->BufferedJump = 0;
+	PlayerState->VelocityX = StateManager->m_CharacterData.WalkFSpeed * PlayerState->Facing;
+	PlayerState->VelocityY *= Script->ScalingYV;
+	PlayerState->AccelerationX *= Script->ScalingXA;
+	PlayerState->AccelerationY *= Script->ScalingYA;
+
+	// TODO: Add run velocity and friction shit
+}
+
+inline void CmnStateBWalkInit(state_manager* StateManager, state_script* Script, playerstate* PlayerState)
+{
+	PlayerState->PlaybackState.PlaybackCursor = 0;
+	PlayerState->BufferedJump = 0;
+	PlayerState->VelocityX = -StateManager->m_CharacterData.WalkBSpeed * PlayerState->Facing;
+	PlayerState->VelocityY *= Script->ScalingYV;
+	PlayerState->AccelerationX *= Script->ScalingXA;
+	PlayerState->AccelerationY *= Script->ScalingYA;
+
+	// TODO: Add run velocity and friction shit
 }
 
 CMN_STATE(CmnStateStand)
@@ -80,11 +118,9 @@ CMN_STATE(CmnStateStand)
 			PlayerState->BufferedJump = 8;
 	}
 	else if (PlayerState->InputBuffer.MatchLastEntry(&CmnInputs[CMN_INPUT_FORWARD_EX]))
-		//TODO: Apply walkspeed to velocity
-		CMN_DEF_TRANSITION(CMN_STATE_FWALK);
+		CMN_FWALK_TRANSITION(CMN_STATE_FWALK);
 	else if (PlayerState->InputBuffer.MatchLastEntry(&CmnInputs[CMN_INPUT_BACK_EX]))
-		//TODO: Apply walkspeed to velocity
-		CMN_DEF_TRANSITION(CMN_STATE_BWALK);
+		CMN_BWALK_TRANSITION(CMN_STATE_BWALK);
 	else if (PlayerState->InputBuffer.MatchLastEntry(&CmnInputs[CMN_INPUT_DOWN]))
 		CMN_DEF_TRANSITION(CMN_STATE_STAND2CROUCH);
 	else
@@ -97,12 +133,14 @@ CMN_STATE(CmnStateStand)
 	}
 }
 
-CMN_STATE(CmnStateFWalk)
+CMN_STATE(CmnStateStandTurn)
 {
 	state_script* Script = StateManager->GetScript(PlayerState->PlaybackState.State);
+}
 
-	// Check cancel list first
-	// TODO: Update facing
+CMN_STATE(CmnStateStand2Crouch)
+{
+	state_script* Script = StateManager->GetScript(PlayerState->PlaybackState.State);
 
 	if (PlayerState->InputBuffer.MatchLastEntry(&CmnInputs[CMN_INPUT_UP]))
 	{
@@ -116,6 +154,117 @@ CMN_STATE(CmnStateFWalk)
 			PlayerState->BufferedJump = 8;
 	}
 	else if (PlayerState->InputBuffer.MatchLastEntry(&CmnInputs[CMN_INPUT_FORWARD_EX]))
+		CMN_FWALK_TRANSITION(CMN_STATE_FWALK);
+	else if (PlayerState->InputBuffer.MatchLastEntry(&CmnInputs[CMN_INPUT_BACK_EX]))
+		CMN_BWALK_TRANSITION(CMN_STATE_BWALK);
+	else if (PlayerState->InputBuffer.MatchLastEntry(&CmnInputs[CMN_INPUT_DOWN]))
+	{
+		if (++PlayerState->PlaybackState.PlaybackCursor >= Script->TotalFrames)
+			CMN_DEF_TRANSITION(CMN_STATE_CROUCH);
+	}
+	else
+	{
+		if (Script->Elements.StatusElements[0].InRange(PlayerState->PlaybackState.PlaybackCursor))
+		{
+			if (Script->Elements.StatusElements[0].StatusFlags & STATUS_CROUCHING)
+				CMN_DEF_TRANSITION(CMN_STATE_CROUCH2STAND);
+			else
+				CMN_DEF_TRANSITION(CMN_STATE_STAND);
+		}
+	}
+}
+
+CMN_STATE(CmnStateCrouch)
+{
+	state_script* Script = StateManager->GetScript(PlayerState->PlaybackState.State);
+
+	if (PlayerState->InputBuffer.MatchLastEntry(&CmnInputs[CMN_INPUT_UP]))
+	{
+		CMN_DEF_TRANSITION(CMN_STATE_PREJUMP);
+
+		if (PlayerState->InputBuffer.MatchLastEntry(&CmnInputs[CMN_INPUT_FORWARD_SIM]))
+			PlayerState->BufferedJump = 9;
+		else if (PlayerState->InputBuffer.MatchLastEntry(&CmnInputs[CMN_INPUT_BACK_SIM]))
+			PlayerState->BufferedJump = 7;
+		else
+			PlayerState->BufferedJump = 8;
+	}
+	else if (PlayerState->InputBuffer.MatchLastEntry(&CmnInputs[CMN_INPUT_FORWARD_EX]))
+		CMN_FWALK_TRANSITION(CMN_STATE_FWALK);
+	else if (PlayerState->InputBuffer.MatchLastEntry(&CmnInputs[CMN_INPUT_BACK_EX]))
+		CMN_BWALK_TRANSITION(CMN_STATE_BWALK);
+	else if (PlayerState->InputBuffer.MatchLastEntry(&CmnInputs[CMN_INPUT_DOWN]))
+	{
+		if (++PlayerState->PlaybackState.PlaybackCursor >= Script->TotalFrames)
+		{
+			// TODO: Get loop point
+			PlayerState->PlaybackState.PlaybackCursor = 0;
+		}		
+	}
+	else
+		CMN_DEF_TRANSITION(CMN_STATE_CROUCH2STAND);
+}
+
+CMN_STATE(CmnStateCrouchTurn)
+{
+	state_script* Script = StateManager->GetScript(PlayerState->PlaybackState.State);
+}
+
+CMN_STATE(CmnStateCrouch2Stand)
+{
+	state_script* Script = StateManager->GetScript(PlayerState->PlaybackState.State);
+
+	if (PlayerState->InputBuffer.MatchLastEntry(&CmnInputs[CMN_INPUT_UP]))
+	{
+		CMN_DEF_TRANSITION(CMN_STATE_PREJUMP);
+
+		if (PlayerState->InputBuffer.MatchLastEntry(&CmnInputs[CMN_INPUT_FORWARD_SIM]))
+			PlayerState->BufferedJump = 9;
+		else if (PlayerState->InputBuffer.MatchLastEntry(&CmnInputs[CMN_INPUT_BACK_SIM]))
+			PlayerState->BufferedJump = 7;
+		else
+			PlayerState->BufferedJump = 8;
+	}
+	else if (PlayerState->InputBuffer.MatchLastEntry(&CmnInputs[CMN_INPUT_FORWARD_EX]))
+		CMN_FWALK_TRANSITION(CMN_STATE_FWALK);
+	else if (PlayerState->InputBuffer.MatchLastEntry(&CmnInputs[CMN_INPUT_BACK_EX]))
+		CMN_BWALK_TRANSITION(CMN_STATE_BWALK);
+	else if (PlayerState->InputBuffer.MatchLastEntry(&CmnInputs[CMN_INPUT_DOWN]))
+	{
+		if (Script->Elements.StatusElements[0].InRange(PlayerState->PlaybackState.PlaybackCursor))
+		{
+			if (Script->Elements.StatusElements[0].StatusFlags & STATUS_CROUCHING)
+				CMN_DEF_TRANSITION(CMN_STATE_CROUCH);
+			else
+				CMN_DEF_TRANSITION(CMN_STATE_STAND2CROUCH);
+		}
+	}
+	else
+	{
+		if (++PlayerState->PlaybackState.PlaybackCursor >= Script->TotalFrames)
+			CMN_DEF_TRANSITION(CMN_STATE_STAND);
+	}
+}
+
+CMN_STATE(CmnStateFWalk)
+{
+	state_script* Script = StateManager->GetScript(PlayerState->PlaybackState.State);
+
+	// Check cancel list first
+	// TODO: Update facing
+
+	if (PlayerState->InputBuffer.MatchLastEntry(&CmnInputs[CMN_INPUT_UP]))
+	{
+		CMN_DEF_TRANSITION(CMN_STATE_PREJUMP);
+		
+		PlayerState->BufferedJump = 8;
+
+		if (PlayerState->InputBuffer.MatchLastEntry(&CmnInputs[CMN_INPUT_FORWARD_SIM]))
+			PlayerState->BufferedJump = 9;
+		else if (PlayerState->InputBuffer.MatchLastEntry(&CmnInputs[CMN_INPUT_BACK_SIM]))
+			PlayerState->BufferedJump = 7;
+	}
+	else if (PlayerState->InputBuffer.MatchLastEntry(&CmnInputs[CMN_INPUT_FORWARD_EX]))
 	{
 		//TODO: Apply walkspeed to velocity
 		if (++PlayerState->PlaybackState.PlaybackCursor >= Script->TotalFrames)
@@ -125,8 +274,7 @@ CMN_STATE(CmnStateFWalk)
 		}
 	}
 	else if (PlayerState->InputBuffer.MatchLastEntry(&CmnInputs[CMN_INPUT_BACK_EX]))
-		//TODO: Apply walkspeed to velocity
-		CMN_DEF_TRANSITION(CMN_STATE_BWALK);
+		CMN_BWALK_TRANSITION(CMN_STATE_BWALK);
 	else if (PlayerState->InputBuffer.MatchLastEntry(&CmnInputs[CMN_INPUT_DOWN]))
 		CMN_DEF_TRANSITION(CMN_STATE_STAND2CROUCH);
 	else
@@ -152,11 +300,9 @@ CMN_STATE(CmnStateBWalk)
 			PlayerState->BufferedJump = 8;
 	}
 	else if (PlayerState->InputBuffer.MatchLastEntry(&CmnInputs[CMN_INPUT_FORWARD_EX]))
-		//TODO: Apply walkspeed to velocity
-		CMN_DEF_TRANSITION(CMN_STATE_FWALK);
+		CMN_FWALK_TRANSITION(CMN_STATE_FWALK);
 	else if (PlayerState->InputBuffer.MatchLastEntry(&CmnInputs[CMN_INPUT_BACK_EX]))
 	{
-		//TODO: Apply walkspeed to velocity
 		if (++PlayerState->PlaybackState.PlaybackCursor >= Script->TotalFrames)
 		{
 			// TODO: Get loop point
@@ -167,4 +313,9 @@ CMN_STATE(CmnStateBWalk)
 		CMN_DEF_TRANSITION(CMN_STATE_STAND2CROUCH);
 	else
 		CMN_DEF_TRANSITION(CMN_STATE_STAND);
+}
+
+CMN_STATE(CmnStatePrejump)
+{
+	state_script* Script = StateManager->GetScript(PlayerState->PlaybackState.State);
 }
