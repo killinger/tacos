@@ -60,6 +60,12 @@
     <ClCompile Include="render_system.cpp">
       <Filter>Subsystems</Filter>
     </ClCompile>
+    <ClCompile Include="system_event_queue.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="event_queue.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="defs.h">
@@ -112,6 +118,15 @@
     </ClInclude>
     <ClInclude Include="render_system.h">
       <Filter>Subsystems</Filter>
+    </ClInclude>
+    <ClInclude Include="system_event_queue.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="event_queue.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="system_event.h">
+      <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

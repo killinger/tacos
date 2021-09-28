@@ -36,7 +36,7 @@ struct gamestate
 	
 	void Update(uint32* Inputs, state_manager* StateManager);
 private:
-	void AdvancePlayerState(state_manager* StateManager, playerstate* PlayerState, playerstate* OtherPlayer);
+	state_script* AdvancePlayerState(state_manager* StateManager, playerstate* PlayerState, playerstate* OtherPlayer);
 	void UpdateMovement(playerstate* PlayerState);
-	void PerformPositionCorrection(state_manager* StateManager);
+	void PerformPositionCorrection(state_script* Script[2]);
 };

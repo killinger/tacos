@@ -17,6 +17,7 @@ console_system*		ConsoleSystem;
 render_system*		RenderSystem;
 logging_system*		LoggingSystem;
 input_handler*		InputHandler;
+event_queue*		EventQueue;
 
 // State
 gamestate			GameState = { 0 };
@@ -74,12 +75,13 @@ namespace taco
 	// TEST TINGS REMOVE AFTER IMPLEMENTATION
 	void DrawCollisionBoxes();
 
-	void Initialize(sf::RenderWindow* Window)
+	void Initialize(sf::RenderWindow* Window, system_event_queue* SystemEventQueue)
 	{
 		ConsoleSystem = new console_system();
 		RenderSystem = new render_system(Window);
 		LoggingSystem = new logging_system();
 		InputHandler = new input_handler();
+		EventQueue = new event_queue(SystemEventQueue);
 
 		GameState.m_Player[0].PositionX = -PLAYER_STARTING_POSITIONS;
 		GameState.m_Player[0].Facing = 1.0f;
@@ -107,8 +109,7 @@ namespace taco
 	*/
 	void RunFrame()
 	{
-		uint32 Key = InputHandler->GetKey();
-		ConsoleSystem->Update(Key);
+		EventQueue->ProcessSystemQueue();
 
 		uint32 Inputs[2] = { 0 };
 		for (uint32 i = 0; i < 2; i++)
@@ -127,11 +128,9 @@ namespace taco
 		GameState.Update(Inputs, &StateManager);
 
 		RenderSystem->Clear();
-
 		DrawCollisionBoxes();
-
-		//if (ConsoleSystem->m_IsActive)
-		//	ConsoleSystem->DrawConsole();
+		if (ConsoleSystem->m_IsActive)
+			ConsoleSystem->DrawConsole();
 		RenderSystem->Display();
 
 		GameState.m_FrameCount++;

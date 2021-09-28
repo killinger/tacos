@@ -1,5 +1,6 @@
 #pragma once
 #include "defs.h"
+#include "system_event.h"
 
 #define CVAR_NAME_LENGTH		32
 #define CVAR_VALUE_LENGTH		8
@@ -39,7 +40,7 @@ public:
 						const char* MaxValue,
 						const char* Description,
 						uint8		Type);
-	void Update(uint32 Key);
+	bool ProcessEvent(system_event Event);
 	void DrawConsole();
 	// ** TEST/DEBUG/DEV FUNCTIONS, REMOVE AFTER IMPLEMENTATION IS COMPLETE **
 private:

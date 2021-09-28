@@ -4,6 +4,7 @@
 #include <string>
 #include <assert.h>
 
+#define CONSOLE_KEYCODE 167
 
 console_system::console_system()
 {
@@ -11,7 +12,6 @@ console_system::console_system()
 	m_CVarCount = 0;
 	m_Cursor = 0;
 	m_HistorySize = 0;
-	m_KeyLastFrame = 0;
 	memset(m_InputBuffer, 0, CONSOLE_FIELD_LENGTH);
 	memset(m_ConsoleHistory, 0, CONSOLE_HISTORY_LENGTH);
 }
@@ -52,23 +52,21 @@ void console_system::RegisterCVar(const char* Name,
 	m_CVarCount++;
 }
 
-void console_system::Update(uint32 Key)
+bool console_system::ProcessEvent(system_event Event)
 {
-	if (Key)
+	if (Event.Type == EVENT_CHAR)
 	{
-		if (Key != m_KeyLastFrame)
+		if (Event.Parameters[0] == CONSOLE_KEYCODE)
 		{
-			if (Key == 92)
-			{
-				m_IsActive = !m_IsActive;
-			}
-			else if (m_IsActive)
-			{
-				ProcessChar(Key);
-			}
+			m_IsActive = 1 - m_IsActive;
 		}
+		else if (m_IsActive)
+		{
+			ProcessChar(Event.Parameters[0]);
+		}
+		return true;
 	}
-	m_KeyLastFrame = Key;
+	return false;
 }
 
 void console_system::DrawConsole()

@@ -1,14 +1,29 @@
 #include <SFML\Graphics.hpp>
 #include <Windows.h>
 #include "taco_game.h"
+#include "system_event_queue.h"
 
-// TODO: different frame limiting scheme, maybe
+system_event_queue SystemEventQueue;
+
+void ProcessSystemEvents(sf::RenderWindow& window)
+{
+	sf::Event event;
+	while (window.pollEvent(event))
+	{
+		if (event.type == sf::Event::Closed)
+			window.close();
+		if (event.type == sf::Event::TextEntered)
+		{
+			SystemEventQueue.Enqueue(EVENT_CHAR, (int32)event.text.unicode, 0);
+		}
+	}
+}
 
 int main()
 {
 	sf::RenderWindow window(sf::VideoMode(1280, 720), "Tacos");
 
-	taco::Initialize(&window);
+	taco::Initialize(&window, &SystemEventQueue);
 
 	LARGE_INTEGER startCounter, endCounter;
 	LARGE_INTEGER frequency;
@@ -19,14 +34,8 @@ int main()
 	float Now = 0.0f;
 
 	while (window.isOpen())
-	{	
-		sf::Event event;
-		while (window.pollEvent(event))
-		{
-			if (event.type == sf::Event::Closed)
-				window.close();
-		}
-
+	{
+		ProcessSystemEvents(window);
 		QueryPerformanceCounter(&endCounter);
 		Now = (float)(endCounter.QuadPart - startCounter.QuadPart) / (float)frequency.QuadPart;
 		if (Now >= Next)
