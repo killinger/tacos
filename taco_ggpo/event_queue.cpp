@@ -18,11 +18,12 @@ void event_queue::ProcessSystemQueue()
 			break;
 		else if (ConsoleSystem->ProcessEvent(Event))
 			continue;
+#ifdef _DEBUG
 		else if (Event.Type == EVENT_KEY)
 		{
-			if (Event.Parameters[0] >= 27 && Event.Parameters[0] <= 29)
+			if (Event.Parameters[0] >= 26 && Event.Parameters[0] <= 35)
 			{
-				GameStateBuffer->SetSaveSlot((uint8)(Event.Parameters[0] - 27));
+				GameStateBuffer->SetSaveSlot((uint8)(Event.Parameters[0] - 26));
 			}
 			else if (Event.Parameters[0] == 85)
 			{
@@ -33,5 +34,6 @@ void event_queue::ProcessSystemQueue()
 				GameStateBuffer->LoadGameState();
 			}
 		}
+#endif
 	}
 }

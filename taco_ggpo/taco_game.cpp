@@ -106,10 +106,6 @@ namespace taco
 		GameState.m_Player[1].PlaybackState.New = true;
 	}
 
-	/* TODO:
-	RunFrame should pass inputs OK:d by GGPO to AdvanceFrame. AdvanceFrame (and whatever will handling updating gamestate) should only have to care about
-	what inputs belong to which player,	not the details of those players (local/remote/dummy).
-	*/
 	void RunFrame()
 	{
 		EventQueue->ProcessSystemQueue();

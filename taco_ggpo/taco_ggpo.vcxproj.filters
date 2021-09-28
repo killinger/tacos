@@ -67,7 +67,7 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="gamestate_buffer.cpp">
-      <Filter>Source Files</Filter>
+      <Filter>Subsystems</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -132,7 +132,7 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="gamestate_buffer.h">
-      <Filter>Header Files</Filter>
+      <Filter>Subsystems</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

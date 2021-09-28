@@ -4,35 +4,41 @@
 
 gamestate_buffer::gamestate_buffer(gamestate* GameState)
 {
-	m_SaveSlot = 0;
+	m_SaveSlot = 1;
 	m_GameState = GameState;
 }
 
 void gamestate_buffer::SetSaveSlot(uint8 Slot)
 {
-	if (Slot < GAMESTATE_BUFFER_SLOT_COUNT)
-	{
-		m_SaveSlot = Slot;
-		std::string OutputString("GameStateBuffer slot #" + std::to_string(m_SaveSlot) + " selected");
-		RenderSystem->SetDebugString(OutputString.c_str());
-	}
+	m_SaveSlot = Slot;
+	std::string OutputString("GameStateBuffer slot #" + std::to_string(m_SaveSlot) + " selected");
+	RenderSystem->SetDebugString(OutputString.c_str());
 }
 
 void gamestate_buffer::SaveGameState()
 {
-	memcpy_s(&m_SavedGameStates[m_SaveSlot].m_GameState, sizeof(gamestate), m_GameState, sizeof(gamestate));
-	m_SavedGameStates[m_SaveSlot].m_HasSavedState = true;
+	std::string FileName = "Captured data/Gamestate_" + std::to_string(m_SaveSlot) + ".gs";
+	FILE* FilePtr;
+	if (fopen_s(&FilePtr, FileName.c_str(), "wb") == 0)
+	{
+		fwrite(m_GameState, sizeof(gamestate), 1, FilePtr);
+		fclose(FilePtr);
+	}
 
-	std::string OutputString("GameState saved in buffer slot #" + std::to_string(m_SaveSlot));
+	std::string OutputString("GameState saved in slot #" + std::to_string(m_SaveSlot));
 	RenderSystem->SetDebugString(OutputString.c_str());
 }
 
 void gamestate_buffer::LoadGameState()
 {
-	if (m_SavedGameStates[m_SaveSlot].m_HasSavedState)
+	std::string FileName = "Captured data/Gamestate_" + std::to_string(m_SaveSlot) + ".gs";
+	FILE* FilePtr;
+	if (fopen_s(&FilePtr, FileName.c_str(), "rb") == 0)
 	{
-		memcpy_s(m_GameState, sizeof(gamestate), &m_SavedGameStates[m_SaveSlot].m_GameState, sizeof(gamestate));
-		std::string OutputString("GameState loaded from buffer slot #" + std::to_string(m_SaveSlot));
+		fread(m_GameState, sizeof(gamestate), 1, FilePtr);
+		fclose(FilePtr);
+
+		std::string OutputString("GameState loaded from slot #" + std::to_string(m_SaveSlot));
 		RenderSystem->SetDebugString(OutputString.c_str());
 	}
 	else
