@@ -8,7 +8,6 @@ public:
 	~input_handler();
 
 	uint32 GetInputs();
-	uint32 GetKey();
 private:
 	struct input_map
 	{

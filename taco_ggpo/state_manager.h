@@ -2,6 +2,7 @@
 #include "defs.h"
 #include "state_script.h"
 #include "gamestate.h"
+#include "move_description.h"
 
 #define FORCE_VELOCITY_X 0x01
 #define FORCE_VELOCITY_Y 0x02
@@ -21,12 +22,6 @@ struct cancel_list
 	uint8	MoveCount;
 };
 
-struct move_list
-{
-	uint32 InputMask;
-	uint32 ScriptIndex;
-};
-
 struct character_data
 {
 	float			WalkFSpeed;
@@ -39,19 +34,17 @@ struct character_data
 class state_manager
 {
 public:
-	void			Initialize();
-	state_script*	GetScript(playbackstate* PlaybackState);
-	state_script*	GetScript(uint32 Index);
+	character_data		m_CharacterData;
 
-	character_data	m_CharacterData;
+	void				Initialize();
+	state_script*		GetScript(uint32 Index);
 private:
-	state_script*	m_Scripts;
-	cancel_list*	m_CancelLists;
-	move_list*		m_Moves;
-	uint32			m_ScriptCount;
-	uint32			m_CancelCount;
-	uint32			m_MoveCount;
-
+	state_script*		m_Scripts;
+	cancel_list*		m_CancelLists;
+	move_description*	m_Moves;
+	uint32				m_ScriptCount;
+	uint32				m_CancelCount;
+	uint32				m_MoveCount;
 
 	void ReadFromDirectory(const char* Path);
 };

@@ -16,6 +16,10 @@ void ProcessSystemEvents(sf::RenderWindow& window)
 		{
 			SystemEventQueue.Enqueue(EVENT_CHAR, (int32)event.text.unicode, 0);
 		}
+		if (event.type == sf::Event::KeyPressed)
+		{
+			SystemEventQueue.Enqueue(EVENT_KEY, (int32)event.key.code, 0);
+		}
 	}
 }
 

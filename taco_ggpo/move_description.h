@@ -25,4 +25,5 @@ struct move_description
 	input_description	m_Input;
 	motion_entry		m_Motion[MOTION_MAX_ENTRIES];
 	uint32				m_MotionCount;
+	uint32				m_ScriptIndex;
 };

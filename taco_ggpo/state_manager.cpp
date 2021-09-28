@@ -9,11 +9,6 @@ void state_manager::Initialize()
 	ReadFromDirectory("data/sparsetest");
 }
 
-state_script* state_manager::GetScript(playbackstate* PlaybackState)
-{
-	return &m_Scripts[PlaybackState->State];
-}
-
 state_script* state_manager::GetScript(uint32 Index)
 {
 	return &m_Scripts[Index];
@@ -46,7 +41,7 @@ void state_manager::ReadFromDirectory(const char* Path)
 		}
 	}
 
-	Filepath = Path + (std::string)"/moves.json";
+	Filepath = Path + (std::string)"/Moves.json";
 	{
 		fopen_s(&filePointer, Filepath.c_str(), "rb");
 		rapidjson::FileReadStream fileReadStream(filePointer, fileBuffer, sizeof(fileBuffer));
@@ -54,12 +49,13 @@ void state_manager::ReadFromDirectory(const char* Path)
 		fclose(filePointer);
 
 		m_MoveCount = Document.Size();
-		m_Moves = new move_list[m_MoveCount];
+		m_Moves = new move_description[m_MoveCount];
 
 		for (unsigned int i = 0; i < m_MoveCount; i++)
 		{
-			m_Moves[i].ScriptIndex = ScriptHandleToIndexMap[Document[i]["Name"].GetString()];
-			m_Moves[i].InputMask = Document[i]["InputMask"].GetUint();
+			m_Moves[i].m_ScriptIndex = ScriptHandleToIndexMap[Document[i]["Name"].GetString()];
+			m_Moves[i].m_Input.m_InputMask = Document[i]["Input"]["InputMask"].GetUint();
+			m_Moves[i].m_Input.m_PropertyFlags = Document[i]["Input"]["PropertyFlags"].GetUint();
 			MoveHandleToIndexMap[Document[i]["Name"].GetString()] = i;
 		}
 	}

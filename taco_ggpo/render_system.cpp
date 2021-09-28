@@ -64,9 +64,19 @@ void render_system::DrawConsole(char* ConsoleInput, char* ConsoleHistory)
 	m_MainFramebuffer.draw(m_DebugString);
 }
 
+void render_system::SetDebugString(const char* DebugString)
+{
+	m_DebugString.setString(DebugString);
+}
+
 void render_system::DrawDebugString(const char* DebugString)
 {
 	m_DebugString.setString(DebugString);
+	m_MainFramebuffer.draw(m_DebugString);
+}
+
+void render_system::DrawDebugString()
+{
 	m_MainFramebuffer.draw(m_DebugString);
 }
 

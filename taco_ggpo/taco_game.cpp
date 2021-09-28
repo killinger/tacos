@@ -2,6 +2,7 @@
 #include "render_system.h"
 #include "console_system.h"
 #include "input_handler.h"
+#include "gamestate_buffer.h"
 #include "subsystems.h"
 #include "gamestate.h"
 #include "permanent_state.h"
@@ -18,6 +19,7 @@ render_system*		RenderSystem;
 logging_system*		LoggingSystem;
 input_handler*		InputHandler;
 event_queue*		EventQueue;
+gamestate_buffer*	GameStateBuffer;
 
 // State
 gamestate			GameState = { 0 };
@@ -82,6 +84,7 @@ namespace taco
 		LoggingSystem = new logging_system();
 		InputHandler = new input_handler();
 		EventQueue = new event_queue(SystemEventQueue);
+		GameStateBuffer = new gamestate_buffer(&GameState);
 
 		GameState.m_Player[0].PositionX = -PLAYER_STARTING_POSITIONS;
 		GameState.m_Player[0].Facing = 1.0f;
@@ -131,6 +134,8 @@ namespace taco
 		DrawCollisionBoxes();
 		if (ConsoleSystem->m_IsActive)
 			ConsoleSystem->DrawConsole();
+		else
+			RenderSystem->DrawDebugString();
 		RenderSystem->Display();
 
 		GameState.m_FrameCount++;
@@ -140,8 +145,8 @@ namespace taco
 	{
 		state_script* Script[2] =
 		{
-			StateManager.GetScript(&GameState.m_Player[0].PlaybackState),
-			StateManager.GetScript(&GameState.m_Player[1].PlaybackState)
+			StateManager.GetScript(GameState.m_Player[0].PlaybackState.State),
+			StateManager.GetScript(GameState.m_Player[1].PlaybackState.State)
 		};
 
 

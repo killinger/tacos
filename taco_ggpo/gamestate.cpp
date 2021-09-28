@@ -17,7 +17,9 @@ void gamestate::Update(uint32* Inputs, state_manager* StateManager)
 	UpdateMovement(&m_Player[0]);
 	UpdateMovement(&m_Player[1]);
 
-	PerformPositionCorrection(Script);
+	CorrectAndFinalizePositions(Script);
+
+	// Hit detection
 }
 
 
@@ -30,6 +32,7 @@ state_script* gamestate::AdvancePlayerState(state_manager* StateManager, players
 	if (!PlayerState->PlaybackState.New)
 		if (++PlayerState->PlaybackState.PlaybackCursor >= Script->TotalFrames)
 			ScriptFinished = true;
+	PlayerState->PlaybackState.New = false;
 
 	// TODO: Needs some testing to figure when to actually apply this
 	if (PlayerState->PositionX > OtherPlayer->PositionX)
@@ -45,8 +48,6 @@ state_script* gamestate::AdvancePlayerState(state_manager* StateManager, players
 															Script, 
 															ScriptFinished, 
 															CurrentFacing);
-	PlayerState->PlaybackState.New = false;
-
 	return StateManager->GetScript(PlayerState->PlaybackState.State);
 }
 
@@ -59,7 +60,7 @@ void gamestate::UpdateMovement(playerstate* PlayerState)
 	PlayerState->VelocityY += PlayerState->AccelerationY;
 }
 
-void gamestate::PerformPositionCorrection(state_script* Script[2])
+void gamestate::CorrectAndFinalizePositions(state_script* Script[2])
 {
 	collision_box Pushbox[2], Result;
 	for (uint32 i = 0; i < 2; i++)

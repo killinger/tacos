@@ -12,7 +12,9 @@ public:
 	~render_system();
 
 	void			DrawConsole(char* ConsoleInput, char* ConsoleHistory);
+	void			SetDebugString(const char* DebugString);
 	void			DrawDebugString(const char* DebugString);
+	void			DrawDebugString();
 	void			Clear();
 	void			Draw(sf::Sprite Sprite);
 	void			Draw(sf::RectangleShape Rectangle);

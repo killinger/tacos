@@ -1,15 +1,24 @@
-// down 1
-// left 2
-// right 4
-// up 8
-// a 16
-// b 32
-// c 64
-// d 128
-// run  256
+// Down 1
+// Back 2
+// Right 4
+// Up 8
+// A 16
+// B 32
+// C 64
+// D 128
+// Run  256
+
+// DIRECTION_RESTRICTION_SIMILAR 1
+// DIRECTION_RESTRICTION_EXACT 2
+// BUTTON_RESTRICTION_ANY 16
+// BUTTON_RESTRICTION_ALL 32
 [
     {
         "Name": "5A",
-        "InputMask": 16
+        "Input":
+        {
+            "InputMask": 16,
+            "PropertyFlags": 16
+        }
     }
 ]
