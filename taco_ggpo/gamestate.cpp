@@ -1,14 +1,20 @@
 #include "gamestate.h"
 #include "character_cmn_states.h"
 #include "logging_system.h"
+#include "gamestate_buffer.h"
 #include "subsystems.h"
 
 void gamestate::Update(uint32* Inputs, state_manager* StateManager)
 {
-	bool FlipDirections[] =	{	m_Player[0].PositionX > m_Player[1].PositionX, 
-								m_Player[1].PositionX > m_Player[0].PositionX };
-	m_Player[0].InputBuffer.Update(Inputs[0], m_FrameCount, FlipDirections[0]);
-	m_Player[1].InputBuffer.Update(Inputs[1], m_FrameCount, FlipDirections[1]);
+	if (!GameStateBuffer->IsReplaying())
+	{
+		bool FlipDirections[] = {	m_Player[0].PositionX > m_Player[1].PositionX,
+									m_Player[1].PositionX > m_Player[0].PositionX };
+		m_Player[0].InputBuffer.Update(Inputs[0], m_FrameCount, FlipDirections[0]);
+		m_Player[1].InputBuffer.Update(Inputs[1], m_FrameCount, FlipDirections[1]);
+	}
+
+	GameStateBuffer->Update();
 
 	// Transition stage
 	state_script* Script[2] = {	AdvancePlayerState(StateManager, &m_Player[0], &m_Player[1]),

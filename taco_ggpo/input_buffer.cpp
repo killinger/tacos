@@ -4,9 +4,9 @@
 input_buffer::input_buffer()
 {
 	memset(m_Buffer, 0, sizeof(m_Buffer));
-	for (uint32 i = 0; i < INPUT_BUFFER_SIZE; i++)
+	for (int32 i = 0; i < INPUT_BUFFER_SIZE; i++)
 	{
-		m_Buffer[(i + 1) % INPUT_BUFFER_SIZE].m_pPrevEntry = &m_Buffer[i];
+		m_Buffer[(i + 1) % INPUT_BUFFER_SIZE].m_PrevEntry = i;
 	}
 	m_Cursor = 0;
 }
@@ -34,21 +34,21 @@ void input_buffer::Update(uint32 InputMask, uint32 TimeStamp, bool FlipDirection
 bool input_buffer::MatchInputs(move_description* MoveDescription, uint32 TimeStamp, int32 Buffer)
 {
 	Buffer -= (int32)(TimeStamp - m_Buffer[m_Cursor].m_TimeStamp);
-	buffer_entry* CurrentEntry = MatchInput(&m_Buffer[m_Cursor], &MoveDescription->m_Input, Buffer);
+	int32 CurrentIndex = MatchInput(m_Cursor, &MoveDescription->m_Input, Buffer);
 
-	if (CurrentEntry == NULL)
+	if (CurrentIndex < 0)
 		return false;
 
 	for (int32 i = ((int32)MoveDescription->m_MotionCount - 1); i >= 0; i--)
 	{
-		Buffer = (int32)MoveDescription->m_Motion[i].m_BufferFrames - (int32)(TimeStamp - CurrentEntry->m_TimeStamp);
-		CurrentEntry = MatchInput(CurrentEntry, &MoveDescription->m_Motion[i].m_Input, Buffer);
+		Buffer = (int32)MoveDescription->m_Motion[i].m_BufferFrames - (int32)(TimeStamp - m_Buffer[CurrentIndex].m_TimeStamp);
+		CurrentIndex = MatchInput(CurrentIndex, &MoveDescription->m_Motion[i].m_Input, Buffer);
 
-		if (CurrentEntry == NULL)
+		if (CurrentIndex < 0)
 			return false;
 
-		TimeStamp = CurrentEntry->m_TimeStamp;
-		CurrentEntry = CurrentEntry->m_pPrevEntry;
+		TimeStamp = m_Buffer[CurrentIndex].m_TimeStamp;
+		CurrentIndex = m_Buffer[CurrentIndex].m_PrevEntry;
 	}
 
 	return true;
@@ -79,7 +79,7 @@ bool input_buffer::MatchLastEntry(input_description* InputDescription)
 	return false;
 }
 
-input_buffer::buffer_entry* input_buffer::MatchInput(buffer_entry* CurrentEntry, input_description* InputDescription, int32 Buffer)
+int32 input_buffer::MatchInput(int32 CurrentIndex, input_description* InputDescription, int32 Buffer)
 {
 	uint32 BufferRestrictionMask = 0;
 	uint32 MoveRestrictionMask = 0xFFFFFFFF;
@@ -95,18 +95,18 @@ input_buffer::buffer_entry* input_buffer::MatchInput(buffer_entry* CurrentEntry,
 
 	while (Buffer >= 0)
 	{
-		if ((CurrentEntry->m_InputMask & BufferRestrictionMask) == (InputDescription->m_InputMask & MoveRestrictionMask))
+		if ((m_Buffer[CurrentIndex].m_InputMask & BufferRestrictionMask) == (InputDescription->m_InputMask & MoveRestrictionMask))
 			if (!(InputDescription->m_PropertyFlags & BUTTON_RESTRICTION_ANY))
-				return CurrentEntry;
-			else if ((CurrentEntry->m_InputMask & InputDescription->m_InputMask) & INPUT_BUTTONS)
-				return CurrentEntry;
+				return CurrentIndex;
+			else if ((m_Buffer[CurrentIndex].m_InputMask & InputDescription->m_InputMask) & INPUT_BUTTONS)
+				return CurrentIndex;
 
-		if (CurrentEntry->m_TimeStamp <= CurrentEntry->m_pPrevEntry->m_TimeStamp)
-			return NULL;
+		if (m_Buffer[CurrentIndex].m_TimeStamp <= m_Buffer[m_Buffer[CurrentIndex].m_PrevEntry].m_TimeStamp)
+			return -1;
 
-		Buffer -= int32(CurrentEntry->m_TimeStamp - CurrentEntry->m_pPrevEntry->m_TimeStamp);
-		CurrentEntry = CurrentEntry->m_pPrevEntry;
+		Buffer -= int32(m_Buffer[CurrentIndex].m_TimeStamp - m_Buffer[m_Buffer[CurrentIndex].m_PrevEntry].m_TimeStamp);
+		CurrentIndex = m_Buffer[CurrentIndex].m_PrevEntry;
 	}
 
-	return NULL;
+	return -1;
 }

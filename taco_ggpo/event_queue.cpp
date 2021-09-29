@@ -23,7 +23,7 @@ void event_queue::ProcessSystemQueue()
 		{
 			if (Event.Parameters[0] >= 26 && Event.Parameters[0] <= 35)
 			{
-				GameStateBuffer->SetSaveSlot((uint8)(Event.Parameters[0] - 26));
+				GameStateBuffer->SetCaptureSlot((uint8)(Event.Parameters[0] - 26));
 			}
 			else if (Event.Parameters[0] == 85)
 			{
@@ -32,6 +32,14 @@ void event_queue::ProcessSystemQueue()
 			else if (Event.Parameters[0] == 86)
 			{
 				GameStateBuffer->LoadGameState();
+			}
+			else if (Event.Parameters[0] == 87)
+			{
+				GameStateBuffer->ToggleInputRecording();
+			}
+			else if (Event.Parameters[0] == 88)
+			{
+				GameStateBuffer->ToggleInputPlayback();
 			}
 		}
 #endif

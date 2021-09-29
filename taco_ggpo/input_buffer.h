@@ -6,6 +6,7 @@
 
 class input_buffer
 {
+	friend class gamestate_buffer;
 public:
 	input_buffer();
 
@@ -18,10 +19,10 @@ private:
 		uint32			m_InputMask;
 		uint32			m_ConsumedMask;
 		uint32			m_TimeStamp;
-		buffer_entry*	m_pPrevEntry;
+		int32			m_PrevEntry;
 	};
 	buffer_entry	m_Buffer[INPUT_BUFFER_SIZE];
 	uint32			m_Cursor;
 
-	buffer_entry* MatchInput(buffer_entry* CurrentEntry, input_description* InputDescription, int32 Buffer);
+	int32 MatchInput(int32 CurrentIndex, input_description* InputDescription, int32 Buffer);
 };
