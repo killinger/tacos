@@ -1,41 +1,44 @@
 {
-    "Name": "CmnStateBWalk",
-    "TotalFrames": 2,
+    "Name": "NmlAtk5A",
+    "TotalFrames": 12,
     "ScalingXV": 0,
     "ScalingYV": 0,
     "ScalingXA": 0,
     "ScalingYA": 0,
-    "Flags": 2,
-    "LoopTo": 0,
+    "Flags": 0,
+    "LoopTo": -1,
+    "AtkLvl": 1,
+    "HitboxElements":
+    [
+        {
+            "FrameStart": 3,
+            "FrameEnd": 5,
+            "X": 15.0,
+            "Y": 40.0,
+            "Width": 40.0,
+            "Height": 10.0
+        }
+    ],
     "HurtboxElements":
     [
         {
             "FrameStart": 0,
-            "FrameEnd": 2,
+            "FrameEnd": 12,
             "X": -15.0,
             "Y": 0.0,
             "Width": 30.0,
             "Height": 70.0
         }
-
     ],
     "PushboxElements":
     [
         {
             "FrameStart": 0,
-            "FrameEnd": 2,
+            "FrameEnd": 12,
             "X": -10.0,
             "Y": 0.0,
             "Width": 20.0,
             "Height": 60.0
-        }
-    ],
-    "CancelElements":
-    [
-        {
-            "FrameStart": 0,
-            "FrameEnd": 2,
-            "CancelList": "CANCEL_REST_0"
         }
     ]
 }

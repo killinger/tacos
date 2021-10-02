@@ -14,6 +14,16 @@ state_script* state_manager::GetScript(uint32 Index)
 	return &m_Scripts[Index];
 }
 
+cancel_list* state_manager::GetCancelList(uint32 Index)
+{
+	return &m_CancelLists[Index];
+}
+
+move_description* state_manager::GetMoveDescription(uint32 Index)
+{
+	return &m_Moves[Index];
+}
+
 void state_manager::ReadFromDirectory(const char* Path)
 {
 	FILE* filePointer;
@@ -50,7 +60,6 @@ void state_manager::ReadFromDirectory(const char* Path)
 
 		m_MoveCount = Document.Size();
 		m_Moves = new move_description[m_MoveCount];
-
 		for (unsigned int i = 0; i < m_MoveCount; i++)
 		{
 			m_Moves[i].m_ScriptIndex = ScriptHandleToIndexMap[Document[i]["Name"].GetString()];
@@ -69,7 +78,6 @@ void state_manager::ReadFromDirectory(const char* Path)
 
 		m_CancelCount = Document.Size();
 		m_CancelLists = new cancel_list[m_CancelCount];
-
 		for (unsigned int i = 0; i < Document.Size(); i++)
 		{
 			CancelHandleToIndexMap[Document[i]["Handle"].GetString()] = i;
@@ -84,7 +92,6 @@ void state_manager::ReadFromDirectory(const char* Path)
 
 	m_ScriptCount = Scripts.size();
 	m_Scripts = new state_script[m_ScriptCount];
-
 	for (unsigned int i = 0; i < m_ScriptCount; i++)
 	{
 		std::string ScriptName = "/" + Scripts[i] + ".json";
@@ -102,6 +109,8 @@ void state_manager::ReadFromDirectory(const char* Path)
 		m_Scripts[i].ScalingYV = Document["ScalingYV"].GetFloat();
 		m_Scripts[i].ScalingXA = Document["ScalingXA"].GetFloat();
 		m_Scripts[i].ScalingYA = Document["ScalingYA"].GetFloat();
+		if (Document.HasMember("AtkLvl"))
+			m_Scripts[i].AtkLvl = (uint8)Document["AtkLvl"].GetUint();
 
 		m_Scripts[i].Flags = 0;
 		m_Scripts[i].Flags |= Document["Flags"].GetUint();
@@ -125,7 +134,7 @@ void state_manager::ReadFromDirectory(const char* Path)
 			m_Scripts[i].Elements.HitboxElements = new hitbox_element[m_Scripts[i].Elements.HitboxCount];
 			for (unsigned int j = 0; j < m_Scripts[i].Elements.HitboxCount; j++)
 			{
-				//m_Scripts[i].Elements.HitboxElements[j].EfectIndex = HitEffectToHandleToIndexMap[Document["HitboxElements"][j]["Effect"].GetString()];
+				//m_Scripts[i].Elements.HitboxElements[j].EffectIndex = HitEffectToHandleToIndexMap[Document["HitboxElements"][j]["Effect"].GetString()];
 				m_Scripts[i].Elements.HitboxElements[j].FrameStart = (int8)Document["HitboxElements"][j]["FrameStart"].GetUint();
 				m_Scripts[i].Elements.HitboxElements[j].FrameEnd = (int8)Document["HitboxElements"][j]["FrameEnd"].GetUint();
 				m_Scripts[i].Elements.HitboxElements[j].Box.X = Document["HitboxElements"][j]["X"].GetFloat();
@@ -135,7 +144,7 @@ void state_manager::ReadFromDirectory(const char* Path)
 
 				if (j == 0)
 					m_Scripts[i].FirstHitboxFrame = m_Scripts[i].Elements.HitboxElements[j].FrameStart;
-				else if (j == (m_Scripts[i].Elements.HitboxCount - 1))
+				if (j == (m_Scripts[i].Elements.HitboxCount - 1))
 					m_Scripts[i].LastHitboxFrame = m_Scripts[i].Elements.HitboxElements[j].FrameEnd;
 			}
 		}

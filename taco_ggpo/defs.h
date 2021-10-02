@@ -17,6 +17,10 @@
 
 #define BUTTON_COUNT 5
 
+#define Kilobytes(KB) KB << 10
+#define	Megabytes(MB) MB << 20
+#define	Gigabytes(GB) GB << 30
+
 typedef int8_t int8;
 typedef int16_t int16;
 typedef int32_t int32;

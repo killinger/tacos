@@ -20,6 +20,7 @@ struct state_script
 	float			ScalingYA;
 	uint32			Flags;
 	uint8			TotalFrames;
+	uint8			AtkLvl;
 	int8			FirstHitboxFrame;
 	int8			LastHitboxFrame;
 };

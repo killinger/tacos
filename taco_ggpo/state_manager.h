@@ -38,6 +38,8 @@ public:
 
 	void				Initialize();
 	state_script*		GetScript(uint32 Index);
+	cancel_list*		GetCancelList(uint32 Index);
+	move_description*	GetMoveDescription(uint32 Index);
 private:
 	state_script*		m_Scripts;
 	cancel_list*		m_CancelLists;

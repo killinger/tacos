@@ -30,7 +30,7 @@ struct status_element
 struct hitbox_element
 {
 	collision_box	Box;
-	uint16			EffectIndex;
+	uint8			AttackLvl;
 	uint8			FrameStart;
 	uint8			FrameEnd;
 

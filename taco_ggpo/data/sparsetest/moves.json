@@ -14,7 +14,7 @@
 // BUTTON_RESTRICTION_ALL 32
 [
     {
-        "Name": "5A",
+        "Name": "NmlAtk5A",
         "Input":
         {
             "InputMask": 16,

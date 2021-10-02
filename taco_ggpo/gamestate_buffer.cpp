@@ -30,7 +30,6 @@ void gamestate_buffer::SaveGameState()
 		fwrite(m_GameState, sizeof(gamestate), 1, FilePtr);
 		fclose(FilePtr);
 	}
-
 	std::string OutputString("GameState saved in slot #" + std::to_string(m_SaveSlot));
 	RenderSystem->SetDebugString(OutputString.c_str());
 }
@@ -70,11 +69,9 @@ void gamestate_buffer::ToggleInputRecording()
 		}
 		else
 		{
-			m_IsRecordingInput = true;
-
 			input_buffer* InputBuffer = &m_GameState->m_Player[0].InputBuffer;
 			m_LastInputBufferUpdate = InputBuffer->m_Buffer[InputBuffer->m_Cursor].m_TimeStamp;
-
+			m_IsRecordingInput = true;
 			SaveGameState();
 
 			std::string OutputString("Input capture started on slot #" + std::to_string(m_SaveSlot));
@@ -106,7 +103,6 @@ void gamestate_buffer::ToggleInputPlayback()
 			m_ReplayingSlot = (int8)m_SaveSlot;
 			m_ReplayBufferCursor = 0;
 			m_IsReplayingInput = true;
-
 			LoadGameState();
 
 			std::string OutputString("Starting replay playback from slot #" + std::to_string(m_ReplayingSlot));
@@ -150,12 +146,10 @@ void gamestate_buffer::Update()
 			if (m_GameState->m_FrameCount == BufferEntry.m_TimeStamp)
 			{
 				++InputBuffer->m_Cursor %= INPUT_BUFFER_SIZE;
-
 				InputBuffer->m_Buffer[InputBuffer->m_Cursor].m_InputMask = BufferEntry.m_InputMask;
 				InputBuffer->m_Buffer[InputBuffer->m_Cursor].m_TimeStamp = BufferEntry.m_TimeStamp;
 				m_ReplayBufferCursor++;
 			}
-
 			if (m_ReplayBufferCursor >= m_ReplayBufferEntryCount)
 			{
 				m_IsReplayingInput = 0;

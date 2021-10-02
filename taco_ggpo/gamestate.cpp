@@ -2,6 +2,7 @@
 #include "character_cmn_states.h"
 #include "logging_system.h"
 #include "gamestate_buffer.h"
+#include "render_system.h"
 #include "subsystems.h"
 
 void gamestate::Update(uint32* Inputs, state_manager* StateManager)
@@ -51,9 +52,23 @@ state_script* gamestate::AdvancePlayerState(state_manager* StateManager, players
 	else if (PlayerState->PlaybackState.State < CMN_STATE_COUNT)
 		UpdateCmnState[PlayerState->PlaybackState.State](	StateManager, 
 															PlayerState, 
-															Script, 
+															Script,
+															m_FrameCount,
 															ScriptFinished, 
 															CurrentFacing);
+	else
+	{
+		if (ScriptFinished)
+		{
+			PlayerState->PlaybackState.State = CMN_STATE_STAND;
+			CmnStateStand(	StateManager,
+							PlayerState,
+							Script,
+							m_FrameCount,
+							ScriptFinished,
+							CurrentFacing);
+		}
+	}
 	return StateManager->GetScript(PlayerState->PlaybackState.State);
 }
 

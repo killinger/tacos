@@ -36,7 +36,7 @@ input_description CmnInputs[]
 	{ INPUT_UP, DIRECTION_RESTRICTION_SIMILAR }
 };
 
-#define CMN_STATE_SIG state_manager* StateManager, playerstate* PlayerState, state_script* Script, bool ScriptFinished, float CurrentFacing
+#define CMN_STATE_SIG state_manager* StateManager, playerstate* PlayerState, state_script* Script, uint32 TimeStamp, bool ScriptFinished, float CurrentFacing
 #define CMN_STATE_RETURN_TYPE void
 #define CMN_STATE(state) CMN_STATE_RETURN_TYPE state(CMN_STATE_SIG)
 #define CMN_DEF_TRANSITION(state) do { CmnStateDefInit(Script, PlayerState); PlayerState->PlaybackState.State = state; } while(0)
@@ -110,39 +110,55 @@ inline void CmnStateBWalkInit(state_manager* StateManager, state_script* Script,
 
 CMN_STATE(CmnStateStand)
 {
-	// TODO: Check cancel list first
-
-	if (PlayerState->InputBuffer.MatchLastEntry(&CmnInputs[CMN_INPUT_UP]))
+	cancel_list* CancelList = StateManager->GetCancelList(0);
+	bool Cancel = false;
+	uint32 i;
+	for (i = 0; i < CancelList->MoveCount; i++)
 	{
-		if (PlayerState->InputBuffer.MatchLastEntry(&CmnInputs[CMN_INPUT_FORWARD_SIM]))
-			PlayerState->BufferedJump = 9;
-		else if (PlayerState->InputBuffer.MatchLastEntry(&CmnInputs[CMN_INPUT_BACK_SIM]))
-			PlayerState->BufferedJump = 7;
-		else
-			PlayerState->BufferedJump = 8;
-		
-		CMN_DEF_TRANSITION(CMN_STATE_PREJUMP);
-	}
-	else if (PlayerState->InputBuffer.MatchLastEntry(&CmnInputs[CMN_INPUT_FORWARD_EX]))
-	{
-		CMN_FWALK_TRANSITION(CMN_STATE_FWALK);
-	}
-	else if (PlayerState->InputBuffer.MatchLastEntry(&CmnInputs[CMN_INPUT_BACK_EX]))
-	{
-		CMN_BWALK_TRANSITION(CMN_STATE_BWALK);
-	}
-	else if (PlayerState->InputBuffer.MatchLastEntry(&CmnInputs[CMN_INPUT_DOWN]))
-	{
-		CMN_DEF_TRANSITION(CMN_STATE_STAND2CROUCH);
-	}
-	else
-	{
-		if (CurrentFacing != PlayerState->Facing)
-			CMN_DEF_TRANSITION(CMN_STATE_STANDTURN);
-		else if (ScriptFinished)
+		move_description* MoveDescription = StateManager->GetMoveDescription(CancelList->Moves[i]);
+		if (PlayerState->InputBuffer.MatchInputs(MoveDescription, TimeStamp, 3))
 		{
-			// TODO: Get loop point
-			PlayerState->PlaybackState.PlaybackCursor = 0;
+			Cancel = true;
+			CmnStateDefInit(Script, PlayerState);
+			PlayerState->PlaybackState.State = MoveDescription->m_ScriptIndex;
+
+		}
+	}
+
+	if (!Cancel)
+	{
+		if (PlayerState->InputBuffer.MatchLastEntry(&CmnInputs[CMN_INPUT_UP]))
+		{
+			if (PlayerState->InputBuffer.MatchLastEntry(&CmnInputs[CMN_INPUT_FORWARD_SIM]))
+				PlayerState->BufferedJump = 9;
+			else if (PlayerState->InputBuffer.MatchLastEntry(&CmnInputs[CMN_INPUT_BACK_SIM]))
+				PlayerState->BufferedJump = 7;
+			else
+				PlayerState->BufferedJump = 8;
+
+			CMN_DEF_TRANSITION(CMN_STATE_PREJUMP);
+		}
+		else if (PlayerState->InputBuffer.MatchLastEntry(&CmnInputs[CMN_INPUT_FORWARD_EX]))
+		{
+			CMN_FWALK_TRANSITION(CMN_STATE_FWALK);
+		}
+		else if (PlayerState->InputBuffer.MatchLastEntry(&CmnInputs[CMN_INPUT_BACK_EX]))
+		{
+			CMN_BWALK_TRANSITION(CMN_STATE_BWALK);
+		}
+		else if (PlayerState->InputBuffer.MatchLastEntry(&CmnInputs[CMN_INPUT_DOWN]))
+		{
+			CMN_DEF_TRANSITION(CMN_STATE_STAND2CROUCH);
+		}
+		else
+		{
+			if (CurrentFacing != PlayerState->Facing)
+				CMN_DEF_TRANSITION(CMN_STATE_STANDTURN);
+			else if (ScriptFinished)
+			{
+				// TODO: Get loop point
+				PlayerState->PlaybackState.PlaybackCursor = 0;
+			}
 		}
 	}
 }

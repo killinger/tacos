@@ -23,7 +23,6 @@ void input_buffer::Update(uint32 InputMask, uint32 TimeStamp, bool FlipDirection
 	if (m_Buffer[m_Cursor].m_InputMask != InputMask)
 	{
 		++m_Cursor %= INPUT_BUFFER_SIZE;
-
 		m_Buffer[m_Cursor].m_InputMask = InputMask;
 		m_Buffer[m_Cursor].m_TimeStamp = TimeStamp;
 

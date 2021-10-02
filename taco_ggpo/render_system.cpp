@@ -59,7 +59,6 @@ void render_system::DrawConsole(char* ConsoleInput, char* ConsoleHistory)
 {
 	m_ConsoleInputText.setString(">" + std::string(ConsoleInput));
 	m_DebugString.setString(ConsoleHistory);	
-	
 	m_MainFramebuffer.draw(m_ConsoleInputText);
 	m_MainFramebuffer.draw(m_DebugString);
 }
