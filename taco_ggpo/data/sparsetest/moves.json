@@ -44,5 +44,21 @@
             "InputMask": 33,
             "PropertyFlags": 17
         }
+    },
+    {
+        "Name": "NmlAtk5C",
+        "Input":
+        {
+            "InputMask": 64,
+            "PropertyFlags": 16
+        }
+    },
+    {
+        "Name": "NmlAtk2C",
+        "Input":
+        {
+            "InputMask": 65,
+            "PropertyFlags": 17
+        }
     }
 ]

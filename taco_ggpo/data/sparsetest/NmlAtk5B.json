@@ -8,6 +8,21 @@
     "Flags": 0,
     "LoopTo": -1,
     "AtkLvl": 1,
+    "CancelElements":
+    [
+        {
+            "FrameStart": 0,
+            "FrameEnd": 6,
+            "CancelList": 2,
+            "Flags": 2
+        },
+        {
+            "FrameStart": 6,
+            "FrameEnd": 18,
+            "CancelList": 2,
+            "Flags": 3
+        }
+    ],
     "HitboxElements":
     [
         {

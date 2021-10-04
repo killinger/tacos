@@ -1,6 +1,6 @@
 {
-    "Name": "NmlAtk2B",
-    "TotalFrames": 18,
+    "Name": "NmlAtk5C",
+    "TotalFrames": 30,
     "ScalingXV": 0,
     "ScalingYV": 0,
     "ScalingXA": 0,
@@ -12,7 +12,7 @@
     [
         {
             "FrameStart": 0,
-            "FrameEnd": 18,
+            "FrameEnd": 30,
             "Flags": 2
         }
     ],
@@ -20,34 +20,34 @@
     [
         {
             "FrameStart": 0,
-            "FrameEnd": 6,
-            "CancelList": 2,
+            "FrameEnd": 11,
+            "CancelList": 3,
             "Flags": 2
         },
         {
-            "FrameStart": 6,
-            "FrameEnd": 18,
-            "CancelList": 2,
+            "FrameStart": 11,
+            "FrameEnd": 30,
+            "CancelList": 3,
             "Flags": 3
         }
     ],
     "HitboxElements":
     [
         {
-            "FrameStart": 6,
-            "FrameEnd": 11,
+            "FrameStart": 11,
+            "FrameEnd": 15,
             "X": 15.0,
-            "Y": 15.0,
-            "Width": 40.0,
-            "Height": 17.0,
-            "Effects": 1
+            "Y": 13.0,
+            "Width": 46.0,
+            "Height": 12.0,
+            "Effects": 2
         }
     ],
     "HurtboxElements":
     [
         {
             "FrameStart": 0,
-            "FrameEnd": 18,
+            "FrameEnd": 30,
             "X": -20.0,
             "Y": 0.0,
             "Width": 40.0,
@@ -58,7 +58,7 @@
     [
         {
             "FrameStart": 0,
-            "FrameEnd": 18,
+            "FrameEnd": 30,
             "X": -10.0,
             "Y": 0.0,
             "Width": 20.0,
