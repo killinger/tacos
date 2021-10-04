@@ -1,12 +1,18 @@
 [
     { 
-        "Handle": "CANCEL_REST_0",
         "List": 
         [
             "NmlAtk2B",
             "NmlAtk5B",
             "NmlAtk2A",
             "NmlAtk5A"
+        ]
+    },
+    {
+        "List": 
+        [
+            "NmlAtk2B",
+            "NmlAtk5B"
         ]
     }
 ]

@@ -19,10 +19,12 @@ void gamestate::Initialize(memory_allocator* MemoryAllocator)
 	m_Player[0].Facing = 1.0f;
 	m_Player[0].PlaybackState.State = CMN_STATE_STAND;
 	m_Player[0].PlaybackState.New = true;
+	m_Player[0].PlaybackState.BufferedState = -1;
 	m_Player[1].PositionX = PLAYER_STARTING_POSITIONS;
 	m_Player[1].Facing = -1.0f;
 	m_Player[1].PlaybackState.State = CMN_STATE_STAND;
 	m_Player[1].PlaybackState.New = true;
+	m_Player[1].PlaybackState.BufferedState = -1;
 	
 	TransientAllocator = MemoryAllocator;
 }
@@ -87,8 +89,40 @@ state_script* gamestate::AdvancePlayerState(state_manager* StateManager, players
 															CurrentFacing);
 	else
 	{
+		for (uint32 i = 0; i < Script->Elements.CancelCount; i++)
+		{
+			if (Script->Elements.CancelElements[i].InRange(PlayerState->PlaybackState.PlaybackCursor))
+			{
+				if (Script->Elements.CancelElements[i].Flags & CANCEL_BUFFER_HIT)
+				{
+					cancel_list* CancelList = StateManager->GetCancelList(Script->Elements.CancelElements[i].Index);
+					for (uint32 j = 0; j < CancelList->MoveCount; j++)
+					{
+						move_description* MoveDescription = StateManager->GetMoveDescription(CancelList->Moves[j]);
+						if (PlayerState->InputBuffer.MatchInputs(MoveDescription, m_FrameCount, 3))
+						{
+							PlayerState->PlaybackState.BufferedState = MoveDescription->m_ScriptIndex;
+							break;
+						}
+					}
+				}
+				if (!PlayerState->Hitstop)
+				{
+					if ((Script->Elements.CancelElements[i].Flags & CANCEL_EXECUTE) &&
+						PlayerState->CanCancel &&
+						(PlayerState->PlaybackState.BufferedState != -1))
+					{
+						PlayerState->PlaybackState.State = (uint32)PlayerState->PlaybackState.BufferedState;
+						CmnStateDefInit(Script, PlayerState);
+						break;
+					}
+				}
+			}
+		}
+		
 		if (ScriptFinished)
 		{
+			CmnStateDefInit(Script, PlayerState);
 			// TODO: Air recovery
 			if (Script->Flags & SCRIPT_ENDS_CROUCHING)
 			{
@@ -208,6 +242,7 @@ void gamestate::HitDetection(state_manager* StateManager, uint32 PlayerIndex, ui
 						if (BoxIntersection(&Hitbox, &Hurtbox))
 						{
 							ResolveHitAndApplyEffects(StateManager, PlayerIndex, OtherIndex, PlayerScript->Elements.HitboxElements[i].Effects, OtherScript);
+							break;
 						}
 					}
 				}
@@ -236,6 +271,7 @@ void gamestate::ResolveHitAndApplyEffects(state_manager* StateManager, uint32 Pl
 	}
 	m_Player[PlayerIndex].DisableHitbox = true;
 	m_Player[PlayerIndex].Hitstop = HitboxEffects->Hitstop;
+	m_Player[PlayerIndex].CanCancel = true;
 	m_Player[OtherIndex].Hitstop = HitboxEffects->Hitstop;
 	m_Player[OtherIndex].PlaybackState.New = true;
 	m_Player[OtherIndex].PlaybackState.PlaybackCursor = 0;

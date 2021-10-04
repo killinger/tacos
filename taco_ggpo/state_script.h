@@ -11,6 +11,9 @@
 #define STATUS_CROUCHING 0x02
 #define STATUS_AIRBORNE 0x04
 
+#define CANCEL_EXECUTE 0x01
+#define CANCEL_BUFFER_HIT 0x02
+
 struct state_script
 {
 	frame_elements	Elements;

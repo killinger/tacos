@@ -29,13 +29,5 @@
             "Width": 20.0,
             "Height": 60.0
         }
-    ],
-    "CancelElements":
-    [
-        {
-            "FrameStart": 0,
-            "FrameEnd": 2,
-            "CancelList": "CANCEL_REST_0"
-        }
     ]
 }

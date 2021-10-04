@@ -86,7 +86,6 @@ void state_manager::ReadFromDirectory(const char* Path)
 		m_CancelLists = new cancel_list[m_CancelCount];
 		for (unsigned int i = 0; i < Document.Size(); i++)
 		{
-			CancelHandleToIndexMap[Document[i]["Handle"].GetString()] = i;
 			m_CancelLists[i].MoveCount = Document[i]["List"].Size();
 			m_CancelLists[i].Moves = new uint8[m_CancelLists[i].MoveCount];
 			for (unsigned int j = 0; j < m_CancelLists[i].MoveCount; j++)
@@ -228,12 +227,13 @@ void state_manager::ReadFromDirectory(const char* Path)
 		if (Document.HasMember("CancelElements"))
 		{
 			m_Scripts[i].Elements.CancelCount = Document["CancelElements"].Size();
-			m_Scripts[i].Elements.CancelElements = new frame_element[m_Scripts[i].Elements.CancelCount];
+			m_Scripts[i].Elements.CancelElements = new cancel_element[m_Scripts[i].Elements.CancelCount];
 			for (unsigned int j = 0; j < m_Scripts[i].Elements.CancelCount; j++)
 			{
 				m_Scripts[i].Elements.CancelElements[j].FrameStart = (uint8)Document["CancelElements"][j]["FrameStart"].GetUint();
 				m_Scripts[i].Elements.CancelElements[j].FrameEnd = (uint8)Document["CancelElements"][j]["FrameEnd"].GetUint();
-				m_Scripts[i].Elements.CancelElements[j].Index = CancelHandleToIndexMap[Document["CancelElements"][j]["CancelList"].GetString()];
+				m_Scripts[i].Elements.CancelElements[j].Index = Document["CancelElements"][j]["CancelList"].GetUint();
+				m_Scripts[i].Elements.CancelElements[j].Flags = Document["CancelElements"][j]["Flags"].GetUint();
 			}
 		}
 		else

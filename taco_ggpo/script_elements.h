@@ -14,6 +14,20 @@ struct frame_element
 	}
 };
 
+struct cancel_element
+{
+	uint8	Index;
+	uint8	FrameStart;
+	uint8	FrameEnd;
+	uint8	Flags;
+	bool InRange(uint32 Cursor)
+	{
+		if (Cursor >= FrameStart && Cursor < FrameEnd)
+			return true;
+		return false;
+	}
+};
+
 struct status_element
 {
 	uint32	StatusFlags;
@@ -91,7 +105,7 @@ struct frame_elements
 	hitbox_element*		HitboxElements;
 	hurtbox_element*	HurtboxElements;
 	pushbox_element*	PushboxElements;
-	frame_element*		CancelElements;
+	cancel_element*		CancelElements;
 	force_element*		ForceElements;
 	position_element*	PositionElements;
 	frame_element*		AnimationElements;

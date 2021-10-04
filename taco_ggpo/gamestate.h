@@ -10,6 +10,7 @@ struct playbackstate
 {
 	uint32	PlaybackCursor;
 	uint32	State;
+	int32	BufferedState;
 	bool	New;
 };
 
@@ -27,8 +28,9 @@ struct playerstate
 	float				RunAcceleration;
 	float				Facing;
 	bool				DisableHitbox;
+	bool				CanCancel;
 	uint8				BufferedJump;
-	uint32				Hitstop;
+	uint8				Hitstop;
 };
 
 // TODO: Move playerstate to a proper class? possibly the entirety of gamestate?

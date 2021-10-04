@@ -83,6 +83,8 @@ inline void CmnStateDefInit(state_script* Script, playerstate* PlayerState)
 	PlayerState->PlaybackState.PlaybackCursor = 0;
 	PlayerState->BufferedJump = 0;
 	PlayerState->DisableHitbox = false;
+	PlayerState->CanCancel = false;
+	PlayerState->PlaybackState.BufferedState = -1;
 	PlayerState->VelocityX *= Script->ScalingXV;
 	PlayerState->VelocityY *= Script->ScalingYV;
 	PlayerState->AccelerationX *= Script->ScalingXA;
@@ -96,6 +98,8 @@ inline void CmnStateFWalkInit(state_manager* StateManager, state_script* Script,
 	PlayerState->PlaybackState.PlaybackCursor = 0;
 	PlayerState->BufferedJump = 0;
 	PlayerState->DisableHitbox = false;
+	PlayerState->CanCancel = false;
+	PlayerState->PlaybackState.BufferedState = -1;
 	PlayerState->VelocityX = StateManager->m_CharacterData.WalkFSpeed * PlayerState->Facing;
 	PlayerState->VelocityY *= Script->ScalingYV;
 	PlayerState->AccelerationX *= Script->ScalingXA;
@@ -109,6 +113,8 @@ inline void CmnStateBWalkInit(state_manager* StateManager, state_script* Script,
 	PlayerState->PlaybackState.PlaybackCursor = 0;
 	PlayerState->BufferedJump = 0;
 	PlayerState->DisableHitbox = false;
+	PlayerState->CanCancel = false;
+	PlayerState->PlaybackState.BufferedState = -1;
 	PlayerState->VelocityX = -StateManager->m_CharacterData.WalkBSpeed * PlayerState->Facing;
 	PlayerState->VelocityY *= Script->ScalingYV;
 	PlayerState->AccelerationX *= Script->ScalingXA;
