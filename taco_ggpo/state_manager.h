@@ -31,6 +31,13 @@ struct character_data
 	float			JumpVelocityX;
 };
 
+struct hitbox_effects
+{
+	uint8 AtkLvl;
+	uint8 Hitstop;
+	float Knockback;
+};
+
 class state_manager
 {
 public:
@@ -40,13 +47,16 @@ public:
 	state_script*		GetScript(uint32 Index);
 	cancel_list*		GetCancelList(uint32 Index);
 	move_description*	GetMoveDescription(uint32 Index);
+	hitbox_effects*		GetHitboxEffects(uint32 Index);
 private:
 	state_script*		m_Scripts;
 	cancel_list*		m_CancelLists;
 	move_description*	m_Moves;
+	hitbox_effects*		m_HitboxEffects;
 	uint32				m_ScriptCount;
 	uint32				m_CancelCount;
 	uint32				m_MoveCount;
+	uint32				m_HitboxEffectCount;
 
 	void ReadFromDirectory(const char* Path);
 };

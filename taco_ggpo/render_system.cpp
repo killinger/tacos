@@ -28,6 +28,9 @@ render_system::render_system(sf::RenderWindow* Window)
 	m_DebugString.setCharacterSize(14);
 	m_DebugString.setFillColor(sf::Color::White);
 	m_DebugString.setPosition(-320.0f, -260.0f);
+	m_WorldText.setFont(m_ConsoleFont);
+	m_WorldText.setCharacterSize(10);
+	m_WorldText.setFillColor(sf::Color::White);
 
 	//m_Window->setView(m_MainView);
 
@@ -63,9 +66,14 @@ void render_system::DrawConsole(char* ConsoleInput, char* ConsoleHistory)
 	m_MainFramebuffer.draw(m_DebugString);
 }
 
-void render_system::SetDebugString(const char* DebugString)
+void render_system::SetDebugString(const char* DebugString ...)
 {
-	m_DebugString.setString(DebugString);
+	char Buffer[512];
+	va_list Args;
+	va_start(Args, DebugString);
+	vsnprintf(Buffer, 512, DebugString, Args);
+	va_end(Args);
+	m_DebugString.setString(Buffer);
 }
 
 void render_system::DrawDebugString(const char* DebugString)
@@ -77,6 +85,20 @@ void render_system::DrawDebugString(const char* DebugString)
 void render_system::DrawDebugString()
 {
 	m_MainFramebuffer.draw(m_DebugString);
+}
+
+void render_system::DrawWorldText(float X, float Y, const char* WorldText ...)
+{
+	char Buffer[512];
+
+	va_list Args;
+	va_start(Args, WorldText);
+	vsnprintf(Buffer, 512, WorldText, Args);
+	va_end(Args);
+
+	m_WorldText.setPosition(X, Y);
+	m_WorldText.setString(Buffer);
+	m_MainFramebuffer.draw(m_WorldText);
 }
 
 void render_system::Clear()

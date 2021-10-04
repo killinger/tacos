@@ -3,6 +3,7 @@
 #include "rapidjson/filereadstream.h"
 #include <unordered_map>
 #include <vector>
+#include "atk_lvl.h"
 
 void state_manager::Initialize()
 {
@@ -22,6 +23,11 @@ cancel_list* state_manager::GetCancelList(uint32 Index)
 move_description* state_manager::GetMoveDescription(uint32 Index)
 {
 	return &m_Moves[Index];
+}
+
+hitbox_effects* state_manager::GetHitboxEffects(uint32 Index)
+{
+	return &m_HitboxEffects[Index];
 }
 
 void state_manager::ReadFromDirectory(const char* Path)
@@ -90,6 +96,29 @@ void state_manager::ReadFromDirectory(const char* Path)
 		}
 	}
 
+	Filepath = Path + (std::string)"/hitboxeffects.json";
+	{
+		fopen_s(&filePointer, Filepath.c_str(), "rb");
+		rapidjson::FileReadStream fileReadStream(filePointer, fileBuffer, sizeof(fileBuffer));
+		Document.ParseStream<rapidjson::kParseCommentsFlag>(fileReadStream);
+		fclose(filePointer);
+
+		m_HitboxEffectCount = Document.Size();
+		m_HitboxEffects = new hitbox_effects[m_HitboxEffectCount];
+		for (unsigned int i = 0; i < m_HitboxEffectCount; i++)
+		{
+			m_HitboxEffects[i].AtkLvl = Document[i]["AtkLvl"].GetUint();
+			if (Document[i].HasMember("Hitstop"))
+				m_HitboxEffects[i].Hitstop = Document[i]["Hitstop"].GetUint();
+			else
+				m_HitboxEffects[i].Hitstop = atk_lvl::Defaults[m_HitboxEffects[i].AtkLvl].NormalHitstopAttacker;
+			if (Document[i].HasMember("Knockback"))
+				m_HitboxEffects[i].Knockback = Document[i]["Knockback"].GetFloat();
+			else
+				m_HitboxEffects[i].Knockback = atk_lvl::Defaults[m_HitboxEffects[i].AtkLvl].NormalKnockback;
+		}
+	}
+
 	m_ScriptCount = Scripts.size();
 	m_Scripts = new state_script[m_ScriptCount];
 	for (unsigned int i = 0; i < m_ScriptCount; i++)
@@ -114,7 +143,7 @@ void state_manager::ReadFromDirectory(const char* Path)
 
 		m_Scripts[i].Flags = 0;
 		m_Scripts[i].Flags |= Document["Flags"].GetUint();
-
+		m_Scripts[i].Elements.StatusCount = 0;
 		if (Document.HasMember("StatusElements"))
 		{
 			m_Scripts[i].Elements.StatusCount = Document["StatusElements"].Size();
@@ -141,7 +170,7 @@ void state_manager::ReadFromDirectory(const char* Path)
 				m_Scripts[i].Elements.HitboxElements[j].Box.Y = Document["HitboxElements"][j]["Y"].GetFloat();
 				m_Scripts[i].Elements.HitboxElements[j].Box.Width = Document["HitboxElements"][j]["Width"].GetFloat();
 				m_Scripts[i].Elements.HitboxElements[j].Box.Height = Document["HitboxElements"][j]["Height"].GetFloat();
-
+				m_Scripts[i].Elements.HitboxElements[j].Effects = Document["HitboxElements"][j]["Effects"].GetUint();
 				if (j == 0)
 					m_Scripts[i].FirstHitboxFrame = m_Scripts[i].Elements.HitboxElements[j].FrameStart;
 				if (j == (m_Scripts[i].Elements.HitboxCount - 1))

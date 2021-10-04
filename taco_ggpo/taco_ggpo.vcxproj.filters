@@ -69,6 +69,9 @@
     <ClCompile Include="gamestate_buffer.cpp">
       <Filter>Subsystems</Filter>
     </ClCompile>
+    <ClCompile Include="linear_allocator.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="defs.h">
@@ -133,6 +136,15 @@
     </ClInclude>
     <ClInclude Include="gamestate_buffer.h">
       <Filter>Subsystems</Filter>
+    </ClInclude>
+    <ClInclude Include="memory_allocator.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="linear_allocator.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="atk_lvl.h">
+      <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

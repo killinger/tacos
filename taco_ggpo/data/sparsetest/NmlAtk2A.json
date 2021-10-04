@@ -1,24 +1,38 @@
 {
-    "Name": "CmnStateCrouch",
-    "TotalFrames": 2,
+    "Name": "NmlAtk2A",
+    "TotalFrames": 12,
     "ScalingXV": 0,
     "ScalingYV": 0,
     "ScalingXA": 0,
     "ScalingYA": 0,
-    "Flags": 2,
+    "Flags": 4,
+    "LoopTo": -1,
+    "AtkLvl": 1,
     "StatusElements":
     [
         {
             "FrameStart": 0,
-            "FrameEnd": 2,
+            "FrameEnd": 12,
             "Flags": 2
+        }
+    ],
+    "HitboxElements":
+    [
+        {
+            "FrameStart": 3,
+            "FrameEnd": 5,
+            "X": 15.0,
+            "Y": 17.0,
+            "Width": 30.0,
+            "Height": 10.0,
+            "Effects": 0
         }
     ],
     "HurtboxElements":
     [
         {
             "FrameStart": 0,
-            "FrameEnd": 2,
+            "FrameEnd": 12,
             "X": -20.0,
             "Y": 0.0,
             "Width": 40.0,
@@ -29,7 +43,7 @@
     [
         {
             "FrameStart": 0,
-            "FrameEnd": 2,
+            "FrameEnd": 12,
             "X": -10.0,
             "Y": 0.0,
             "Width": 20.0,

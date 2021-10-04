@@ -1,6 +1,12 @@
 #pragma once
 #include <cstdint>
 
+#define Kilobytes(KB) KB << 10
+#define	Megabytes(MB) MB << 20
+#define	Gigabytes(GB) GB << 30
+
+#define GAMESTATE_TRANSIENT_MEMORY_SIZE Kilobytes(512)
+
 #define INPUT_DOWN 0x01
 #define INPUT_LEFT 0x02
 #define INPUT_BACK 0x02
@@ -14,12 +20,7 @@
 #define INPUT_RUN 0x100
 #define INPUT_DIRECTIONS 0xF
 #define INPUT_BUTTONS 0x1F0
-
 #define BUTTON_COUNT 5
-
-#define Kilobytes(KB) KB << 10
-#define	Megabytes(MB) MB << 20
-#define	Gigabytes(GB) GB << 30
 
 typedef int8_t int8;
 typedef int16_t int16;
@@ -31,3 +32,8 @@ typedef uint16_t uint16;
 typedef uint32_t uint32;
 typedef uint64_t uint64;
 
+struct allocated_memory
+{
+	void*	Data;
+	uint32	Size;
+};

@@ -1,6 +1,6 @@
 {
-    "Name": "NmlAtk5A",
-    "TotalFrames": 12,
+    "Name": "NmlAtk5B",
+    "TotalFrames": 18,
     "ScalingXV": 0,
     "ScalingYV": 0,
     "ScalingXA": 0,
@@ -11,20 +11,20 @@
     "HitboxElements":
     [
         {
-            "FrameStart": 3,
-            "FrameEnd": 5,
+            "FrameStart": 6,
+            "FrameEnd": 11,
             "X": 15.0,
-            "Y": 45.0,
-            "Width": 30.0,
-            "Height": 10.0,
-            "Effects": 0
+            "Y": 30.0,
+            "Width": 40.0,
+            "Height": 17.0,
+            "Effects": 1
         }
     ],
     "HurtboxElements":
     [
         {
             "FrameStart": 0,
-            "FrameEnd": 12,
+            "FrameEnd": 18,
             "X": -15.0,
             "Y": 0.0,
             "Width": 30.0,
@@ -35,7 +35,7 @@
     [
         {
             "FrameStart": 0,
-            "FrameEnd": 12,
+            "FrameEnd": 18,
             "X": -10.0,
             "Y": 0.0,
             "Width": 20.0,

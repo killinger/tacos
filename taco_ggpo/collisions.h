@@ -10,4 +10,5 @@ struct collision_box
 	float Height;
 };
 
+bool BoxIntersection(collision_box* Box0, collision_box* Box1);
 bool BoxIntersection(collision_box* Box0, collision_box* Box1, collision_box* Result);

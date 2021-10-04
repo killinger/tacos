@@ -9,9 +9,17 @@
 #include "player_graphics.h"
 #include "logging_system.h"
 #include "state_manager.h"
+#include "linear_allocator.h"
 
-// TODO: This should find a more suitable home
-#define PLAYER_STARTING_POSITIONS 80.0f
+// TODO:
+// - - - - -
+// BUGS
+// - - - - -
+// - Input buffer treats changes to directions while a button is held as though the button was pressed on that frame
+// - - - - -
+// OTHER
+// - - - - - 
+// - AtkLvl should be attached to hitboxes
 
 // Subsystems
 console_system*		ConsoleSystem;
@@ -24,6 +32,7 @@ gamestate_buffer*	GameStateBuffer;
 // State
 gamestate			GameState = { 0 };
 permanent_state		PermanentState;
+bool				FrameStepMode;
 
 // Assets/other
 player_graphics		PlayerGraphics[2];
@@ -73,9 +82,13 @@ input_sequence ReplayData;
 namespace taco
 {
 	void AdvanceFrame(uint32* Inputs);
-
+	void Render();
 	// TEST TINGS REMOVE AFTER IMPLEMENTATION
 	void DrawCollisionBoxes();
+	void DrawWorldText(uint32 Player);
+	void StepFrame();
+	void ToggleFrameStepping();
+	
 
 	void Initialize(sf::RenderWindow* Window, system_event_queue* SystemEventQueue)
 	{
@@ -83,58 +96,62 @@ namespace taco
 		RenderSystem = new render_system(Window);
 		LoggingSystem = new logging_system();
 		InputHandler = new input_handler();
-		EventQueue = new event_queue(SystemEventQueue);
+		EventQueue = new event_queue(SystemEventQueue, &StepFrame, &ToggleFrameStepping);
 		GameStateBuffer = new gamestate_buffer(&GameState);
+		
+		FrameStepMode = false;
 
-		GameState.m_Player[0].PositionX = -PLAYER_STARTING_POSITIONS;
-		GameState.m_Player[0].Facing = 1.0f;
-		GameState.m_Player[1].PositionX = PLAYER_STARTING_POSITIONS;
-		GameState.m_Player[1].Facing = -1.0f;
-
+		void* AllocatorStart = malloc(GAMESTATE_TRANSIENT_MEMORY_SIZE);
+		memory_allocator* GameStateAllocator = new linear_allocator(AllocatorStart, GAMESTATE_TRANSIENT_MEMORY_SIZE);
+		GameState.Initialize(GameStateAllocator);
 		PermanentState.Player[0].Type = PLAYER_TYPE_LOCAL;
 		PermanentState.Player[1].Type = PLAYER_TYPE_DUMMY;
-
 		PlayerGraphics[0].Initialize("data/sphere");
 		PlayerGraphics[1].Initialize("data/sphere");
 		//ScriptManager.initializeTestData();
 
 		// TEST TINGS REMOVE AFTER IMPLEMENTATION
 		StateManager.Initialize();
-		GameState.m_Player[0].PlaybackState.State = 0;
-		GameState.m_Player[0].PlaybackState.New = true;
-		GameState.m_Player[1].PlaybackState.State = 0;
-		GameState.m_Player[1].PlaybackState.New = true;
 	}
 
 	void RunFrame()
 	{
 		EventQueue->ProcessSystemQueue();
-
-		uint32 Inputs[2] = { 0 };
-		for (uint32 i = 0; i < 2; i++)
+		if (!FrameStepMode)
 		{
-			if (PermanentState.Player[i].Type == PLAYER_TYPE_LOCAL)
-				Inputs[i] = InputHandler->GetInputs();
+			uint32 Inputs[2] = { 0 };
+			for (uint32 i = 0; i < 2; i++)
+			{
+				if (PermanentState.Player[i].Type == PLAYER_TYPE_LOCAL)
+					Inputs[i] = InputHandler->GetInputs();
+			}
+
+			// GGPO stuff here
+
+			AdvanceFrame(Inputs);
 		}
-
-		// GGPO stuff here
-
-		AdvanceFrame(Inputs);
+		else
+			Render();
 	}
 
 	void AdvanceFrame(uint32* Inputs)
 	{
 		GameState.Update(Inputs, &StateManager);
+		Render();
+		GameState.m_FrameCount++;
+	}
 
+	void Render()
+	{
 		RenderSystem->Clear();
 		DrawCollisionBoxes();
+		DrawWorldText(0);
+		DrawWorldText(1);
 		if (ConsoleSystem->m_IsActive)
 			ConsoleSystem->DrawConsole();
 		else
 			RenderSystem->DrawDebugString();
 		RenderSystem->Display();
-
-		GameState.m_FrameCount++;
 	}
 
 	void DrawCollisionBoxes()
@@ -254,6 +271,55 @@ namespace taco
 					}
 				}
 			}
+		}
+	}
+
+	void DrawWorldText(uint32 Player)
+	{
+		state_script* Script = StateManager.GetScript(GameState.m_Player[Player].PlaybackState.State);
+
+		float Adjustment = 80.0f;
+		if (GameState.m_Player[Player].Facing == -1.0f)
+			Adjustment = 4.0f;
+
+		RenderSystem->DrawWorldText(
+			(-120.0f * GameState.m_Player[Player].Facing) - Adjustment,
+			RenderSystem->GetViewCenter().y - 140.0f,
+			"%s\n%d / %d\nPos %.2f, %.2f\nVel %.2f, %.2f\nAcc %.2f, %.2f\nHitstop %u",
+			Script->Name.c_str(),
+			GameState.m_Player[Player].PlaybackState.PlaybackCursor + 1, Script->TotalFrames,
+			GameState.m_Player[Player].PositionX, GameState.m_Player[Player].PositionY,
+			GameState.m_Player[Player].VelocityX, GameState.m_Player[Player].VelocityY,
+			GameState.m_Player[Player].AccelerationX, GameState.m_Player[Player].AccelerationY,
+			GameState.m_Player[Player].Hitstop);
+	}
+	
+	void StepFrame()
+	{
+		std::string DebugString = "Stepping frame: #" + std::to_string(GameState.m_FrameCount);
+		RenderSystem->SetDebugString(DebugString.c_str());
+
+		uint32 Inputs[2] = { 0 };
+		for (uint32 i = 0; i < 2; i++)
+		{
+			if (PermanentState.Player[i].Type == PLAYER_TYPE_LOCAL)
+				Inputs[i] = InputHandler->GetInputs();
+		}
+
+		AdvanceFrame(Inputs);
+	}
+
+	void ToggleFrameStepping()
+	{
+		if (FrameStepMode)
+		{
+			FrameStepMode = false;
+			RenderSystem->SetDebugString("Frame step mode: off");
+		}
+		else
+		{
+			FrameStepMode = true;
+			RenderSystem->SetDebugString("Frame step mode: on");
 		}
 	}
 }

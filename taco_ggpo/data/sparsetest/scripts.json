@@ -11,5 +11,10 @@
     "CmnStateRunLoop",
     "CmnStateRunBrake",
     "CmnStatePrejump",
-    "NmlAtk5A"
+    "CmnStateHitLvl0",
+    "CmnStateHitLvl1",
+    "NmlAtk5A",
+    "NmlAtk2A",
+    "NmlAtk5B",
+    "NmlAtk2B"
 ]
