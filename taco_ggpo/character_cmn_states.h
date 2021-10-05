@@ -9,12 +9,20 @@ enum cmn_states
 	CMN_STATE_CROUCH2STAND, 
 	CMN_STATE_FWALK, 
 	CMN_STATE_BWALK,
-	CMN_STATE_RUNSTART, 
-	CMN_STATE_RUNLOOP,
+	CMN_STATE_RUN, 
 	CMN_STATE_RUNBRAKE,
 	CMN_STATE_PREJUMP, 
-	CMN_STATE_HIT_LVL0,
-	CMN_STATE_HIT_LVL1,
+	CMN_STATE_JUMPRISE,
+	CMN_STATE_JUMPAPEX,
+	CMN_STATE_JUMPFALL,
+	CMN_STATE_HIT_STAND_LVL0,
+	CMN_STATE_HIT_STAND_LVL1,
+	CMN_STATE_HIT_CROUCH_LVL0,
+	CMN_STATE_HIT_CROUCH_LVL1,
+	CMN_STATE_GUARD_STAND_LVL0,
+	CMN_STATE_GUARD_STAND_LVL1,
+	CMN_STATE_GUARD_CROUCH_LVL0,
+	CMN_STATE_GUARD_CROUCH_LVL1,
 	CMN_STATE_COUNT
 };
 
@@ -53,12 +61,20 @@ CMN_STATE(CmnStateCrouchTurn);
 CMN_STATE(CmnStateCrouch2Stand);
 CMN_STATE(CmnStateFWalk);
 CMN_STATE(CmnStateBWalk);
-CMN_STATE(CmnStateRunStart);
-CMN_STATE(CmnStateRunLoop);
+CMN_STATE(CmnStateRun);
 CMN_STATE(CmnStateRunBrake);
 CMN_STATE(CmnStatePrejump);
-CMN_STATE(CmnStateHitLvl0);
-CMN_STATE(CmnStateHitLvl1);
+CMN_STATE(CmnStateJumpRise);
+CMN_STATE(CmnStateJumpApex);
+CMN_STATE(CmnStateJumpFall);
+CMN_STATE(CmnStateHitStandLvl0);
+CMN_STATE(CmnStateHitStandLvl1);
+CMN_STATE(CmnStateHitCrouchLvl0);
+CMN_STATE(CmnStateHitCrouchLvl1);
+CMN_STATE(CmnStateGuardStandLvl0);
+CMN_STATE(CmnStateGuardStandLvl1);
+CMN_STATE(CmnStateGuardCrouchLvl0);
+CMN_STATE(CmnStateGuardCrouchLvl1);
 
 CMN_STATE_RETURN_TYPE(*UpdateCmnState[CMN_STATE_COUNT])(CMN_STATE_SIG) =
 {
@@ -70,12 +86,20 @@ CMN_STATE_RETURN_TYPE(*UpdateCmnState[CMN_STATE_COUNT])(CMN_STATE_SIG) =
 	&CmnStateCrouch2Stand,
 	&CmnStateFWalk,
 	&CmnStateBWalk,
-	&CmnStateRunStart,
-	&CmnStateRunLoop,
+	&CmnStateRun,
 	&CmnStateRunBrake,
 	&CmnStatePrejump,
-	&CmnStateHitLvl0,
-	&CmnStateHitLvl1
+	&CmnStateJumpRise,
+	&CmnStateJumpApex,
+	&CmnStateJumpFall,
+	&CmnStateHitStandLvl0,
+	&CmnStateHitStandLvl1,
+	&CmnStateHitCrouchLvl0,
+	&CmnStateHitCrouchLvl1,
+	&CmnStateGuardStandLvl0,
+	&CmnStateGuardStandLvl1,
+	&CmnStateGuardCrouchLvl0,
+	&CmnStateGuardCrouchLvl1
 };
 
 inline void CmnStateDefInit(state_script* Script, playerstate* PlayerState)
@@ -357,14 +381,9 @@ CMN_STATE(CmnStateBWalk)
 		CMN_DEF_TRANSITION(CMN_STATE_STAND);
 }
 
-CMN_STATE(CmnStateRunStart)
+CMN_STATE(CmnStateRun)
 {
 
-}
-
-CMN_STATE(CmnStateRunLoop)
-{
-	
 }
 
 CMN_STATE(CmnStateRunBrake)
@@ -377,14 +396,64 @@ CMN_STATE(CmnStatePrejump)
 	
 }
 
-CMN_STATE(CmnStateHitLvl0)
+CMN_STATE(CmnStateJumpRise)
+{
+	// Loop point
+}
+
+CMN_STATE(CmnStateJumpApex)
+{
+	// Loop point
+}
+
+CMN_STATE(CmnStateJumpFall)
+{
+	// Loop point
+}
+
+CMN_STATE(CmnStateHitStandLvl0)
 {
 	if (ScriptFinished)
 		CMN_DEF_TRANSITION(CMN_STATE_STAND);
 }
 
-CMN_STATE(CmnStateHitLvl1)
+CMN_STATE(CmnStateHitStandLvl1)
 {
 	if (ScriptFinished)
 		CMN_DEF_TRANSITION(CMN_STATE_STAND);
+}
+
+CMN_STATE(CmnStateHitCrouchLvl0)
+{
+	if (ScriptFinished)
+		CMN_DEF_TRANSITION(CMN_STATE_CROUCH);
+}
+
+CMN_STATE(CmnStateHitCrouchLvl1)
+{
+	if (ScriptFinished)
+		CMN_DEF_TRANSITION(CMN_STATE_CROUCH);
+}
+
+CMN_STATE(CmnStateGuardStandLvl0)
+{
+	if (ScriptFinished)
+		CMN_DEF_TRANSITION(CMN_STATE_STAND);
+}
+CMN_STATE(CmnStateGuardStandLvl1)
+{
+	if (ScriptFinished)
+		CMN_DEF_TRANSITION(CMN_STATE_STAND);
+}
+
+CMN_STATE(CmnStateGuardCrouchLvl0)
+{
+	if (ScriptFinished)
+		CMN_DEF_TRANSITION(CMN_STATE_CROUCH);
+}
+
+CMN_STATE(CmnStateGuardCrouchLvl1)
+{
+	if (ScriptFinished)
+		CMN_DEF_TRANSITION(CMN_STATE_CROUCH);
 }

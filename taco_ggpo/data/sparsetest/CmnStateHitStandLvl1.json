@@ -1,6 +1,6 @@
 {
-    "Name": "CmnStateHitLvl0",
-    "TotalFrames": 10,
+    "Name": "CmnStateHitStandLvl1",
+    "TotalFrames": 12,
     "ScalingXV": 0,
     "ScalingYV": 0,
     "ScalingXA": 0,
@@ -10,7 +10,7 @@
     [
         {
             "FrameStart": 0,
-            "FrameEnd": 10,
+            "FrameEnd": 12,
             "X": -15.0,
             "Y": 0.0,
             "Width": 30.0,
@@ -22,7 +22,7 @@
     [
         {
             "FrameStart": 0,
-            "FrameEnd": 10,
+            "FrameEnd": 12,
             "X": -10.0,
             "Y": 0.0,
             "Width": 20.0,

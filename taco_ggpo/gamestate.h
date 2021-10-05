@@ -2,7 +2,6 @@
 #include "defs.h"
 #include "input_buffer.h"
 #include "state_manager.h"
-#include "memory_allocator.h"
 
 class state_manager;
 
@@ -39,7 +38,7 @@ struct gamestate
 	playerstate m_Player[2];
 	int32		m_FrameCount;
 	
-	void			Initialize(memory_allocator* MemoryAllocator);
+	void			Initialize();
 	void			Update(uint32* Inputs, state_manager* StateManager);
 private:
 	state_script*	AdvancePlayerState(state_manager* StateManager, playerstate* PlayerState, playerstate* OtherPlayer);

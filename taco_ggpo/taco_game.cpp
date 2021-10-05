@@ -9,17 +9,12 @@
 #include "player_graphics.h"
 #include "logging_system.h"
 #include "state_manager.h"
-#include "linear_allocator.h"
 
 // TODO:
 // - - - - -
 // BUGS
 // - - - - -
 // - Input buffer treats changes to directions while a button is held as though the button was pressed on that frame
-// - - - - -
-// OTHER
-// - - - - - 
-// - AtkLvl should be attached to hitboxes
 
 // Subsystems
 console_system*		ConsoleSystem;
@@ -101,9 +96,7 @@ namespace taco
 		
 		FrameStepMode = false;
 
-		void* AllocatorStart = malloc(GAMESTATE_TRANSIENT_MEMORY_SIZE);
-		memory_allocator* GameStateAllocator = new linear_allocator(AllocatorStart, GAMESTATE_TRANSIENT_MEMORY_SIZE);
-		GameState.Initialize(GameStateAllocator);
+		GameState.Initialize();
 		PermanentState.Player[0].Type = PLAYER_TYPE_LOCAL;
 		PermanentState.Player[1].Type = PLAYER_TYPE_DUMMY;
 		PlayerGraphics[0].Initialize("data/sphere");

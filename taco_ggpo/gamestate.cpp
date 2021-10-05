@@ -4,17 +4,13 @@
 #include "gamestate_buffer.h"
 #include "render_system.h"
 #include "subsystems.h"
-#include "linear_allocator.h"
 
 #define PLAYER_STARTING_POSITIONS 80.0f
 
-memory_allocator* TransientAllocator;
-
-void gamestate::Initialize(memory_allocator* MemoryAllocator)
+void gamestate::Initialize()
 {
 	memset(&m_Player[0], 0, sizeof(playerstate));
 	memset(&m_Player[1], 0, sizeof(playerstate));
-
 	m_Player[0].PositionX = -PLAYER_STARTING_POSITIONS;
 	m_Player[0].Facing = 1.0f;
 	m_Player[0].PlaybackState.State = CMN_STATE_STAND;
@@ -25,8 +21,6 @@ void gamestate::Initialize(memory_allocator* MemoryAllocator)
 	m_Player[1].PlaybackState.State = CMN_STATE_STAND;
 	m_Player[1].PlaybackState.New = true;
 	m_Player[1].PlaybackState.BufferedState = -1;
-	
-	TransientAllocator = MemoryAllocator;
 }
 
 void gamestate::Update(uint32* Inputs, state_manager* StateManager)
@@ -39,6 +33,11 @@ void gamestate::Update(uint32* Inputs, state_manager* StateManager)
 		m_Player[1].InputBuffer.Update(Inputs[1], m_FrameCount, FlipDirections[1]);
 	}
 	GameStateBuffer->Update();
+
+	if (m_Player[0].Hitstop)
+		m_Player[0].Hitstop--;
+	if (m_Player[1].Hitstop)
+		m_Player[1].Hitstop--;
 
 	// Transition stage
 	state_script* Script[2] = {	AdvancePlayerState(StateManager, &m_Player[0], &m_Player[1]),
@@ -69,9 +68,6 @@ state_script* gamestate::AdvancePlayerState(state_manager* StateManager, players
 				ScriptFinished = true;
 		PlayerState->PlaybackState.New = false;
 	}
-	else
-		PlayerState->Hitstop--;
-	
 
 	// TODO: Needs some testing to figure when to actually apply this
 	if (PlayerState->PositionX > OtherPlayer->PositionX)
@@ -122,29 +118,28 @@ state_script* gamestate::AdvancePlayerState(state_manager* StateManager, players
 		
 		if (ScriptFinished)
 		{
-			CmnStateDefInit(Script, PlayerState);
 			// TODO: Air recovery
 			if (Script->Flags & SCRIPT_ENDS_CROUCHING)
 			{
+				CmnStateDefInit(Script, PlayerState);
 				PlayerState->PlaybackState.State = CMN_STATE_CROUCH;
-				CmnStateCrouch(
-					StateManager,
-					PlayerState,
-					Script,
-					m_FrameCount,
-					ScriptFinished,
-					CurrentFacing);
+				CmnStateCrouch(	StateManager,
+								PlayerState,
+								Script,
+								m_FrameCount,
+								ScriptFinished,
+								CurrentFacing);
 			}
 			else
 			{
+				CmnStateDefInit(Script, PlayerState);
 				PlayerState->PlaybackState.State = CMN_STATE_STAND;
-				CmnStateStand(
-					StateManager,
-					PlayerState,
-					Script,
-					m_FrameCount,
-					ScriptFinished,
-					CurrentFacing);
+				CmnStateStand(	StateManager,
+								PlayerState,
+								Script,
+								m_FrameCount,
+								ScriptFinished,
+								CurrentFacing);
 			}
 		}
 	}
@@ -254,16 +249,17 @@ void gamestate::HitDetection(state_manager* StateManager, uint32 PlayerIndex, ui
 
 void gamestate::ResolveHitAndApplyEffects(state_manager* StateManager, uint32 PlayerIndex, uint32 OtherIndex, uint8 EffectIndex, state_script* OtherScript)
 {
+	// TODO: find a good home for attack level defaults
 	hitbox_effects* HitboxEffects = StateManager->GetHitboxEffects(EffectIndex);
 	switch (HitboxEffects->AtkLvl)
 	{
 	case 0:
-		m_Player[OtherIndex].PlaybackState.State = CMN_STATE_HIT_LVL0; 
+		m_Player[OtherIndex].PlaybackState.State = CMN_STATE_HIT_STAND_LVL0; 
 		m_Player[OtherIndex].VelocityX = -(HitboxEffects->Knockback / 10.0f) * m_Player[OtherIndex].Facing;
 		m_Player[OtherIndex].AccelerationX = (m_Player[OtherIndex].VelocityX / 10.0f);
 		break;
 	case 1:
-		m_Player[OtherIndex].PlaybackState.State = CMN_STATE_HIT_LVL1;
+		m_Player[OtherIndex].PlaybackState.State = CMN_STATE_HIT_STAND_LVL1;
 		m_Player[OtherIndex].VelocityX = -(HitboxEffects->Knockback / 12.0f) * m_Player[OtherIndex].Facing;
 		m_Player[OtherIndex].AccelerationX = (m_Player[OtherIndex].VelocityX / 12.0f);
 	default:
