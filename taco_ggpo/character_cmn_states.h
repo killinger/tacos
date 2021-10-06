@@ -68,6 +68,7 @@ CMN_STATE(CmnStatePrejump);
 CMN_STATE(CmnStateJumpRise);
 CMN_STATE(CmnStateJumpApex);
 CMN_STATE(CmnStateJumpFall);
+CMN_STATE(CmnStateLanding);
 CMN_STATE(CmnStateHitStandLvl0);
 CMN_STATE(CmnStateHitStandLvl1);
 CMN_STATE(CmnStateHitCrouchLvl0);
@@ -93,6 +94,7 @@ CMN_STATE_RETURN_TYPE(*UpdateCmnState[CMN_STATE_COUNT])(CMN_STATE_SIG) =
 	&CmnStateJumpRise,
 	&CmnStateJumpApex,
 	&CmnStateJumpFall,
+	&CmnStateLanding,
 	&CmnStateHitStandLvl0,
 	&CmnStateHitStandLvl1,
 	&CmnStateHitCrouchLvl0,
@@ -431,6 +433,11 @@ CMN_STATE(CmnStateJumpApex)
 CMN_STATE(CmnStateJumpFall)
 {
 	// Loop point
+}
+
+CMN_STATE(CmnStateLanding)
+{
+
 }
 
 CMN_STATE(CmnStateHitStandLvl0)
