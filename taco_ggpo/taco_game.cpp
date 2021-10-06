@@ -15,6 +15,11 @@
 // BUGS
 // - - - - -
 // - Input buffer treats changes to directions while a button is held as though the button was pressed on that frame
+//
+// - - - - -
+// OTHER
+// - - - - -
+// - Input buffer needs some change to the interface to allow for buttons to be consumed
 
 // Subsystems
 console_system*		ConsoleSystem;
@@ -32,47 +37,6 @@ bool				FrameStepMode;
 // Assets/other
 player_graphics		PlayerGraphics[2];
 state_manager		StateManager;
-
-struct input_frame
-{
-	uint32 InputMask;
-	uint32 FrameNumber;
-};
-
-struct input_sequence
-{
-	input_sequence()
-	{
-		memset(Inputs, 0, sizeof(Inputs));
-		Cursor = 0;
-		InputCount = 0;
-	}
-
-	void SetInputAtFrame(uint32 InputMask, uint32 Frame)
-	{
-		Inputs[InputCount].InputMask = InputMask;
-		Inputs[InputCount].FrameNumber = Frame;
-
-		InputCount++;
-	}
-
-	uint32 GetNextInput(uint32 Frame)
-	{
-		uint32 ReturnValue = 0;
-		if (Inputs[Cursor].FrameNumber == Frame)
-		{
-			ReturnValue = Inputs[Cursor].InputMask;
-			Cursor++;
-		}
-		return ReturnValue;
-	}
-
-	input_frame Inputs[30];
-	uint32		Cursor;
-	uint32		InputCount;
-};
-
-input_sequence ReplayData;
 
 namespace taco
 {

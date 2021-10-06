@@ -15,6 +15,7 @@ enum cmn_states
 	CMN_STATE_JUMPRISE,
 	CMN_STATE_JUMPAPEX,
 	CMN_STATE_JUMPFALL,
+	CMN_STATE_LANDING,
 	CMN_STATE_HIT_STAND_LVL0,
 	CMN_STATE_HIT_STAND_LVL1,
 	CMN_STATE_HIT_CROUCH_LVL0,
@@ -105,7 +106,7 @@ CMN_STATE_RETURN_TYPE(*UpdateCmnState[CMN_STATE_COUNT])(CMN_STATE_SIG) =
 inline void CmnStateDefInit(state_script* Script, playerstate* PlayerState)
 {
 	PlayerState->PlaybackState.PlaybackCursor = 0;
-	PlayerState->BufferedJump = 0;
+	//PlayerState->BufferedJump = 0;
 	PlayerState->DisableHitbox = false;
 	PlayerState->CanCancel = false;
 	PlayerState->PlaybackState.BufferedState = -1;
@@ -383,7 +384,7 @@ CMN_STATE(CmnStateBWalk)
 
 CMN_STATE(CmnStateRun)
 {
-
+	// Loop point
 }
 
 CMN_STATE(CmnStateRunBrake)
@@ -393,12 +394,33 @@ CMN_STATE(CmnStateRunBrake)
 
 CMN_STATE(CmnStatePrejump)
 {
-	
+	if (ScriptFinished)
+	{
+		if (PlayerState->BufferedJump == 8)
+		{
+			PlayerState->VelocityX = 0.0f;
+		}
+		else if (PlayerState->BufferedJump == 9)
+		{
+			PlayerState->VelocityX = StateManager->m_CharacterData.JumpVelocityX * PlayerState->Facing;
+		}
+		PlayerState->VelocityY = StateManager->m_CharacterData.JumpVelocityY;
+		PlayerState->AccelerationX = 0.0f;
+		PlayerState->AccelerationY = StateManager->m_CharacterData.JumpGravity;
+		PlayerState->PlaybackState.State = CMN_STATE_JUMPRISE;
+		PlayerState->PlaybackState.PlaybackCursor = 0;
+		PlayerState->PlaybackState.BufferedState = -1;
+		PlayerState->BufferedJump = 0;
+		PlayerState->DisableHitbox = false;
+		PlayerState->CanCancel = false;
+	}
 }
 
 CMN_STATE(CmnStateJumpRise)
 {
 	// Loop point
+	if (ScriptFinished)
+		PlayerState->PlaybackState.PlaybackCursor = 0;
 }
 
 CMN_STATE(CmnStateJumpApex)

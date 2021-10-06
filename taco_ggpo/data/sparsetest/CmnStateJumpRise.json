@@ -1,19 +1,11 @@
 {
-    "Name": "CmnStateRunStart",
+    "Name": "CmnStateJumpRise",
     "TotalFrames": 2,
     "ScalingXV": 0,
     "ScalingYV": 0,
     "ScalingXA": 0,
     "ScalingYA": 0,
-    "Flags": 2,
-    "StatusElements":
-    [
-        {
-            "FrameStart": 0,
-            "FrameEnd": 2,
-            "Flags": 2
-        }
-    ],
+    "Flags": 1,
     "HurtboxElements":
     [
         {
@@ -24,6 +16,7 @@
             "Width": 30.0,
             "Height": 70.0
         }
+
     ],
     "PushboxElements":
     [
