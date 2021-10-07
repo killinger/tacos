@@ -1,28 +1,27 @@
 {
-    "Name": "CmnStateCrouchTurn",
-    "TotalFrames": 2,
+    "Name": "CmnStateHitCrouchLvl2",
+    "TotalFrames": 14,
     "ScalingXV": 0,
     "ScalingYV": 0,
     "ScalingXA": 0,
     "ScalingYA": 0,
-    "Flags": 2,
+    "Flags": 0,
     "HurtboxElements":
     [
         {
             "FrameStart": 0,
-            "FrameEnd": 2,
-            "X": -15.0,
+            "FrameEnd": 14,
+            "X": -20.0,
             "Y": 0.0,
-            "Width": 30.0,
-            "Height": 70.0
+            "Width": 40.0,
+            "Height": 60.0
         }
-
     ],
     "PushboxElements":
     [
         {
             "FrameStart": 0,
-            "FrameEnd": 2,
+            "FrameEnd": 14,
             "X": -10.0,
             "Y": 0.0,
             "Width": 20.0,

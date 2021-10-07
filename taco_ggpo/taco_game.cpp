@@ -239,7 +239,7 @@ namespace taco
 		if (GameState.m_Player[Player].Facing == -1.0f)
 			Adjustment = 4.0f;
 
-		std::string BufferedState = "None";
+		std::string BufferedState = "none";
 		if (GameState.m_Player[Player].PlaybackState.BufferedState != -1)
 		{
 			state_script* BufferedScript = StateManager.GetScript(GameState.m_Player[Player].PlaybackState.BufferedState);
@@ -249,14 +249,15 @@ namespace taco
 		RenderSystem->DrawWorldText(
 			(-120.0f * GameState.m_Player[Player].Facing) - Adjustment,
 			RenderSystem->GetViewCenter().y - 140.0f,
-			"%s\n%d / %d\nPos %.2f, %.2f\nVel %.2f, %.2f\nAcc %.2f, %.2f\nHitstop %u\nBuffer: %s",
+			"%s\n%d / %d\nPos %.2f, %.2f\nVel %.2f, %.2f\nAcc %.2f, %.2f\nHitstop %u\nBuffer %s\nFlags %u %u",
 			Script->Name.c_str(),
 			GameState.m_Player[Player].PlaybackState.PlaybackCursor + 1, Script->TotalFrames,
 			GameState.m_Player[Player].PositionX, GameState.m_Player[Player].PositionY,
 			GameState.m_Player[Player].VelocityX, GameState.m_Player[Player].VelocityY,
 			GameState.m_Player[Player].AccelerationX, GameState.m_Player[Player].AccelerationY,
 			GameState.m_Player[Player].Hitstop,
-			BufferedState.c_str());
+			BufferedState.c_str(),
+			(GameState.m_Player[Player].Flags & PLAYER_ALLOW_CANCEL), (GameState.m_Player[Player].Flags & PLAYER_USED_AIR_ACTION));
 	}
 	
 	void StepFrame()

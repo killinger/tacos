@@ -1,7 +1,7 @@
 {
     "WalkFSpeed": 1.34,
     "WalkBSpeed": 1.34,
-    "JumpGravity": -0.21,
-    "JumpVelocityY": 8.2,
-    "JumpVelocityX": 0.74
+    "JumpGravity": -0.4,
+    "JumpVelocityY": 9.2,
+    "JumpVelocityX": 1.14
 }

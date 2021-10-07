@@ -3,6 +3,9 @@
 #include "input_buffer.h"
 #include "state_manager.h"
 
+#define PLAYER_ALLOW_CANCEL 0x01
+#define PLAYER_USED_AIR_ACTION 0x02
+
 class state_manager;
 
 struct playbackstate
@@ -17,6 +20,7 @@ struct playerstate
 {
 	playbackstate		PlaybackState;
 	input_buffer		InputBuffer;
+	uint32				Flags;
 	float				PositionX;
 	float				PositionY;
 	float				VelocityX;
@@ -27,7 +31,6 @@ struct playerstate
 	float				RunAcceleration;
 	float				Facing;
 	bool				DisableHitbox;
-	bool				CanCancel;
 	uint8				BufferedJump;
 	uint8				Hitstop;
 };

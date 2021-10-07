@@ -74,7 +74,8 @@ state_script* gamestate::AdvancePlayerState(state_manager* StateManager, players
 		CurrentFacing = -1.0f;
 	if (PlayerState->PositionY < 0.0f)
 	{
-		// TODO: Landing
+		PlayerState->PositionY = 0.0f;
+		CMN_DEF_TRANSITION(CMN_STATE_LANDING);
 	}
 	else if (PlayerState->PlaybackState.State < CMN_STATE_COUNT)
 		UpdateCmnState[PlayerState->PlaybackState.State](	StateManager, 
@@ -105,7 +106,7 @@ state_script* gamestate::AdvancePlayerState(state_manager* StateManager, players
 				if (!PlayerState->Hitstop)
 				{
 					if ((Script->Elements.CancelElements[i].Flags & CANCEL_EXECUTE) &&
-						PlayerState->CanCancel &&
+						(PlayerState->Flags & PLAYER_ALLOW_CANCEL) &&
 						(PlayerState->PlaybackState.BufferedState != -1))
 					{
 						PlayerState->PlaybackState.State = (uint32)PlayerState->PlaybackState.BufferedState;
@@ -188,8 +189,22 @@ void gamestate::CorrectAndFinalizePositions(state_script* Script[2])
 	if (BoxIntersection(&Pushbox[0], &Pushbox[1], &Result))
 	{
 		float Repulsion = Result.Width / 2.0f;
-		m_Player[0].PositionX -= m_Player[0].Facing * Repulsion;
-		m_Player[1].PositionX -= m_Player[1].Facing * Repulsion;
+		float P0RepulsionDir = 1.0f;
+		float P1RepulsionDir = 1.0f;
+		if (m_Player[0].PositionX > m_Player[1].PositionX)
+		{
+			P1RepulsionDir = -1.0f;
+		}
+		else if (m_Player[1].PositionX > m_Player[0].PositionX)
+		{
+			P0RepulsionDir = -1.0f;
+		}
+		else
+		{
+			// TODO: I don't know
+		}
+		m_Player[0].PositionX += P0RepulsionDir * Repulsion;
+		m_Player[1].PositionX += P1RepulsionDir * Repulsion;
 	}
 }
 
@@ -267,7 +282,7 @@ void gamestate::ResolveHitAndApplyEffects(state_manager* StateManager, uint32 Pl
 	}
 	m_Player[PlayerIndex].DisableHitbox = true;
 	m_Player[PlayerIndex].Hitstop = HitboxEffects->Hitstop;
-	m_Player[PlayerIndex].CanCancel = true;
+	m_Player[PlayerIndex].Flags |= PLAYER_ALLOW_CANCEL;
 	m_Player[OtherIndex].Hitstop = HitboxEffects->Hitstop;
 	m_Player[OtherIndex].PlaybackState.New = true;
 	m_Player[OtherIndex].PlaybackState.PlaybackCursor = 0;
