@@ -235,9 +235,11 @@ namespace taco
 	{
 		state_script* Script = StateManager.GetScript(GameState.m_Player[Player].PlaybackState.State);
 
-		float Adjustment = 80.0f;
-		if (GameState.m_Player[Player].Facing == -1.0f)
-			Adjustment = 4.0f;
+		float Offset = -200.0f;
+		if (Player == 1)
+		{
+			Offset = 120.0f;
+		}
 
 		std::string BufferedState = "none";
 		if (GameState.m_Player[Player].PlaybackState.BufferedState != -1)
@@ -247,7 +249,7 @@ namespace taco
 		}
 
 		RenderSystem->DrawWorldText(
-			(-120.0f * GameState.m_Player[Player].Facing) - Adjustment,
+			Offset,
 			RenderSystem->GetViewCenter().y - 140.0f,
 			"%s\n%d / %d\nPos %.2f, %.2f\nVel %.2f, %.2f\nAcc %.2f, %.2f\nHitstop %u\nBuffer %s\nFlags %u %u",
 			Script->Name.c_str(),

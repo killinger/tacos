@@ -54,7 +54,6 @@ void gamestate::Update(uint32* Inputs, state_manager* StateManager)
 	HitDetection(StateManager, 1, 0, Script[1], Script[0]);
 }
 
-
 state_script* gamestate::AdvancePlayerState(state_manager* StateManager, playerstate* PlayerState, playerstate* OtherPlayer)
 {
 	state_script* Script = StateManager->GetScript(PlayerState->PlaybackState.State);
@@ -74,9 +73,11 @@ state_script* gamestate::AdvancePlayerState(state_manager* StateManager, players
 		CurrentFacing = -1.0f;
 	if (PlayerState->PositionY < 0.0f)
 	{
+		// TODO: KD states
 		PlayerState->PositionY = 0.0f;
 		CMN_DEF_TRANSITION(CMN_STATE_LANDING);
 	}
+	// TODO: Perform cancel shit here? instead of cmn state?
 	else if (PlayerState->PlaybackState.State < CMN_STATE_COUNT)
 		UpdateCmnState[PlayerState->PlaybackState.State](	StateManager, 
 															PlayerState, 
