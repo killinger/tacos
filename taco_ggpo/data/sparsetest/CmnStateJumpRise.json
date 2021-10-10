@@ -6,6 +6,14 @@
     "ScalingXA": 0,
     "ScalingYA": 0,
     "Flags": 1,
+    "StatusElements":
+    [
+        {
+            "FrameStart": 0,
+            "FrameEnd": 2,
+            "Flags": 4
+        }
+    ],
     "HurtboxElements":
     [
         {

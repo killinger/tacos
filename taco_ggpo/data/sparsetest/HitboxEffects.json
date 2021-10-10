@@ -1,11 +1,30 @@
 [
     {
-        "AtkLvl": 0
+        "AtkLvl": 0,
+        "HitType": 0,
+        "HitstopAttacker": 8,
+        "HitstopDefender": 8,
+        "Knockback": 8.0
     },
     {
-        "AtkLvl": 1
+        "AtkLvl": 1,
+        "HitType": 0,
+        "HitstopAttacker": 10,
+        "HitstopDefender": 10,
+        "Knockback": 15.0
     },
     {
-        "AtkLvl": 2
+        "AtkLvl": 2,
+        "HitType": 0,
+        "HitstopAttacker": 14,
+        "HitstopDefender": 14,
+        "Knockback": 18.0
+    },
+    {
+        "AtkLvl": 1,
+        "HitType": 1,
+        "HitstopAttacker": 10,
+        "HitstopDefender": 10,
+        "Knockback": 7.0
     }
 ]

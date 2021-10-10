@@ -143,8 +143,5 @@
     <ClInclude Include="linear_allocator.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="atk_lvl.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
   </ItemGroup>
 </Project>

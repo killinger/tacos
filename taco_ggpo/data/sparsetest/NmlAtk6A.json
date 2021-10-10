@@ -1,32 +1,24 @@
 {
-    "Name": "NmlAtk2A",
-    "TotalFrames": 12,
+    "Name": "NmlAtk6A",
+    "TotalFrames": 15,
     "ScalingXV": 0,
     "ScalingYV": 0,
     "ScalingXA": 0,
     "ScalingYA": 0,
-    "Flags": 4,
+    "Flags": 0,
     "LoopTo": -1,
     "AtkLvl": 1,
-    "StatusElements":
-    [
-        {
-            "FrameStart": 0,
-            "FrameEnd": 12,
-            "Flags": 2
-        }
-    ],
     "CancelElements":
     [
         {
             "FrameStart": 0,
-            "FrameEnd": 3,
+            "FrameEnd": 6,
             "CancelList": 1,
             "Flags": 2
         },
         {
-            "FrameStart": 3,
-            "FrameEnd": 12,
+            "FrameStart": 6,
+            "FrameEnd": 15,
             "CancelList": 1,
             "Flags": 3
         }
@@ -34,31 +26,31 @@
     "HitboxElements":
     [
         {
-            "FrameStart": 3,
-            "FrameEnd": 5,
+            "FrameStart": 6,
+            "FrameEnd": 8,
             "X": 15.0,
-            "Y": 17.0,
+            "Y": 45.0,
             "Width": 30.0,
             "Height": 10.0,
-            "Effects": 0
+            "Effects": 3
         }
     ],
     "HurtboxElements":
     [
         {
             "FrameStart": 0,
-            "FrameEnd": 12,
-            "X": -20.0,
+            "FrameEnd": 15,
+            "X": -15.0,
             "Y": 0.0,
-            "Width": 40.0,
-            "Height": 60.0
+            "Width": 30.0,
+            "Height": 90.0
         }
     ],
     "PushboxElements":
     [
         {
             "FrameStart": 0,
-            "FrameEnd": 12,
+            "FrameEnd": 15,
             "X": -10.0,
             "Y": 0.0,
             "Width": 20.0,

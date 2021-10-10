@@ -251,7 +251,7 @@ namespace taco
 		RenderSystem->DrawWorldText(
 			Offset,
 			RenderSystem->GetViewCenter().y - 140.0f,
-			"%s\n%d / %d\nPos %.2f, %.2f\nVel %.2f, %.2f\nAcc %.2f, %.2f\nHitstop %u\nBuffer %s\nFlags %u %u",
+			"%s\n%d / %d\nPos %.2f, %.2f\nVel %.2f, %.2f\nAcc %.2f, %.2f\nHitstop %u\nBuffer %s",
 			Script->Name.c_str(),
 			GameState.m_Player[Player].PlaybackState.PlaybackCursor + 1, Script->TotalFrames,
 			GameState.m_Player[Player].PositionX, GameState.m_Player[Player].PositionY,

@@ -22,12 +22,15 @@ enum cmn_states
 	CMN_STATE_HIT_CROUCH_LVL0,
 	CMN_STATE_HIT_CROUCH_LVL1,
 	CMN_STATE_HIT_CROUCH_LVL2,
+	CMN_STATE_HIT_PUNT,
+	CMN_STATE_HIT_FLIP,
 	CMN_STATE_GUARD_STAND_LVL0,
 	CMN_STATE_GUARD_STAND_LVL1,
 	CMN_STATE_GUARD_STAND_LVL2,
 	CMN_STATE_GUARD_CROUCH_LVL0,
 	CMN_STATE_GUARD_CROUCH_LVL1,
 	CMN_STATE_GUARD_CROUCH_LVL2,
+	CMN_STATE_DOWN,
 	CMN_STATE_COUNT
 };
 
@@ -76,8 +79,11 @@ CMN_STATE(CmnStateJumpFall);
 CMN_STATE(CmnStateLanding);
 CMN_STATE(CmnStateHitStand);
 CMN_STATE(CmnStateHitCrouch);
+CMN_STATE(CmnStateHitPunt);
+CMN_STATE(CmnStateHitFlip);
 CMN_STATE(CmnStateGuardStand);
 CMN_STATE(CmnStateGuardCrouch);
+CMN_STATE(CmnStateDown);
 
 CMN_STATE_RETURN_TYPE(*UpdateCmnState[CMN_STATE_COUNT])(CMN_STATE_SIG) =
 {
@@ -102,12 +108,15 @@ CMN_STATE_RETURN_TYPE(*UpdateCmnState[CMN_STATE_COUNT])(CMN_STATE_SIG) =
 	&CmnStateHitCrouch,
 	&CmnStateHitCrouch,
 	&CmnStateHitCrouch,
+	&CmnStateHitPunt,
+	&CmnStateHitFlip,
 	&CmnStateGuardStand,
 	&CmnStateGuardStand,
 	&CmnStateGuardStand,
 	&CmnStateGuardCrouch,
 	&CmnStateGuardCrouch,
-	&CmnStateGuardCrouch
+	&CmnStateGuardCrouch,
+	&CmnStateDown
 };
 
 inline void CmnStateDefInit(state_script* Script, playerstate* PlayerState)
@@ -478,7 +487,7 @@ CMN_STATE(CmnStateJumpRise)
 					PlayerState->VelocityX = -StateManager->m_CharacterData.JumpVelocityX * PlayerState->Facing;
 				else
 					PlayerState->VelocityX = 0.0f;
-				PlayerState->VelocityY = StateManager->m_CharacterData.JumpVelocityY / 2.0f;
+				PlayerState->VelocityY = StateManager->m_CharacterData.JumpVelocityY / 1.5f;
 				PlayerState->PlaybackState.State = CMN_STATE_JUMPRISE;
 			}
 		}
@@ -504,7 +513,7 @@ CMN_STATE(CmnStateJumpApex)
 				PlayerState->VelocityX = -StateManager->m_CharacterData.JumpVelocityX * PlayerState->Facing;
 			else
 				PlayerState->VelocityX = 0.0f;
-			PlayerState->VelocityY = StateManager->m_CharacterData.JumpVelocityY / 2.0f;
+			PlayerState->VelocityY = StateManager->m_CharacterData.JumpVelocityY / 1.5f;
 			PlayerState->PlaybackState.State = CMN_STATE_JUMPRISE;
 		}
 	}
@@ -555,6 +564,20 @@ CMN_STATE(CmnStateHitCrouch)
 		CMN_DEF_TRANSITION(CMN_STATE_CROUCH);
 }
 
+CMN_STATE(CmnStateHitPunt)
+{
+	// TODO: Loop point
+	if (ScriptFinished)
+		PlayerState->PlaybackState.PlaybackCursor = 0;
+}
+
+CMN_STATE(CmnStateHitFlip)
+{
+	// TODO: Loop point
+	if (ScriptFinished)
+		PlayerState->PlaybackState.PlaybackCursor = 0;
+}
+
 CMN_STATE(CmnStateGuardStand)
 {
 	if (ScriptFinished)
@@ -565,4 +588,12 @@ CMN_STATE(CmnStateGuardCrouch)
 {
 	if (ScriptFinished)
 		CMN_DEF_TRANSITION(CMN_STATE_CROUCH);
+}
+
+CMN_STATE(CmnStateDown)
+{
+	if (ScriptFinished)
+	{
+		CMN_DEF_TRANSITION(CMN_STATE_STAND);
+	}
 }

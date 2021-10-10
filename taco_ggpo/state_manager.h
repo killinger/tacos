@@ -12,6 +12,12 @@
 #define POSITION_X_AXIS 0x01
 #define POSITION_Y_AXIS 0x02
 
+enum
+{
+	HIT_TYPE_STUN = 0,
+	HIT_TYPE_PUNT
+};
+
 struct gamestate;
 struct playerstate;
 struct playbackstate;
@@ -34,7 +40,9 @@ struct character_data
 struct hitbox_effects
 {
 	uint8 AtkLvl;
-	uint8 Hitstop;
+	uint8 HitType;
+	uint8 HitstopAttacker;
+	uint8 HitstopDefender;
 	float Knockback;
 };
 

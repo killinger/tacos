@@ -14,6 +14,14 @@
 // BUTTON_RESTRICTION_ALL 32
 [
     {
+        "Name": "NmlAtk6A",
+        "Input":
+        {
+            "InputMask": 20,
+            "PropertyFlags": 34
+        }
+    },
+    {
         "Name": "NmlAtk5A",
         "Input":
         {

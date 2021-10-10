@@ -51,7 +51,7 @@
             "X": -20.0,
             "Y": 0.0,
             "Width": 40.0,
-            "Height": 50.0
+            "Height": 60.0
         }
     ],
     "PushboxElements":
@@ -62,7 +62,7 @@
             "X": -10.0,
             "Y": 0.0,
             "Width": 20.0,
-            "Height": 60.0
+            "Height": 80.0
         }
     ]
 }

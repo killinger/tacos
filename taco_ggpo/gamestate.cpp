@@ -75,7 +75,10 @@ state_script* gamestate::AdvancePlayerState(state_manager* StateManager, players
 	{
 		// TODO: KD states
 		PlayerState->PositionY = 0.0f;
-		CMN_DEF_TRANSITION(CMN_STATE_LANDING);
+		if (PlayerState->PlaybackState.State == CMN_STATE_HIT_PUNT || PlayerState->PlaybackState.State == CMN_STATE_HIT_FLIP)
+			CMN_DEF_TRANSITION(CMN_STATE_DOWN);
+		else
+			CMN_DEF_TRANSITION(CMN_STATE_LANDING);
 	}
 	// TODO: Perform cancel shit here? instead of cmn state?
 	else if (PlayerState->PlaybackState.State < CMN_STATE_COUNT)
@@ -265,26 +268,55 @@ void gamestate::HitDetection(state_manager* StateManager, uint32 PlayerIndex, ui
 
 void gamestate::ResolveHitAndApplyEffects(state_manager* StateManager, uint32 PlayerIndex, uint32 OtherIndex, uint8 EffectIndex, state_script* OtherScript)
 {
-	// TODO: find a good home for attack level defaults
+	// TODO: scripts needs state changes for OH/OB/CH + flags for launch
 	hitbox_effects* HitboxEffects = StateManager->GetHitboxEffects(EffectIndex);
-	switch (HitboxEffects->AtkLvl)
+	uint32 ScriptIndex = CMN_STATE_HIT_STAND_LVL0;
+	uint32 Status = 0;
+	switch (HitboxEffects->HitType)
 	{
-	case 0:
-		m_Player[OtherIndex].PlaybackState.State = CMN_STATE_HIT_STAND_LVL0; 
-		m_Player[OtherIndex].VelocityX = -(HitboxEffects->Knockback / 10.0f) * m_Player[OtherIndex].Facing;
-		m_Player[OtherIndex].AccelerationX = (m_Player[OtherIndex].VelocityX / 10.0f);
+	case HIT_TYPE_STUN:
+	{
+		// TODO: Crouching/air hit etc
+		// TODO: this won't do, hurt states needs to be buffered to the next frame, otherwise p1 auto wins trades
+		for (uint32 i = 0; i < OtherScript->Elements.StatusCount; i++)
+		{
+			if (OtherScript->Elements.StatusElements[i].InRange(m_Player[OtherIndex].PlaybackState.PlaybackCursor))
+			{
+				Status = OtherScript->Elements.StatusElements[i].StatusFlags;
+				break;
+			}
+		}
+		if (Status & STATUS_AIRBORNE)
+		{
+			m_Player[OtherIndex].PlaybackState.State = CMN_STATE_HIT_FLIP;
+			m_Player[OtherIndex].VelocityX = -(HitboxEffects->Knockback / 8.0f) * m_Player[OtherIndex].Facing;
+			m_Player[OtherIndex].AccelerationX = 0.0f;
+			m_Player[OtherIndex].VelocityY = (HitboxEffects->Knockback / 4.0f);
+			m_Player[OtherIndex].AccelerationY = -(m_Player[OtherIndex].VelocityY / 15.0f);
+			break;
+		}
+		ScriptIndex += HitboxEffects->AtkLvl;
+		m_Player[OtherIndex].PlaybackState.State = ScriptIndex;
+		state_script* Script = StateManager->GetScript(ScriptIndex);
+		float Duration = (float)Script->TotalFrames;
+		m_Player[OtherIndex].VelocityX = -(HitboxEffects->Knockback / Duration) * m_Player[OtherIndex].Facing;
+		m_Player[OtherIndex].AccelerationX = (m_Player[OtherIndex].VelocityX / Duration);
 		break;
-	case 1:
-		m_Player[OtherIndex].PlaybackState.State = CMN_STATE_HIT_STAND_LVL1;
-		m_Player[OtherIndex].VelocityX = -(HitboxEffects->Knockback / 12.0f) * m_Player[OtherIndex].Facing;
-		m_Player[OtherIndex].AccelerationX = (m_Player[OtherIndex].VelocityX / 12.0f);
-	default:
+	}
+	case HIT_TYPE_PUNT:
+	{
+		m_Player[OtherIndex].PlaybackState.State = CMN_STATE_HIT_PUNT;
+		m_Player[OtherIndex].VelocityX = -(HitboxEffects->Knockback / 2.2f) * m_Player[OtherIndex].Facing;
+		m_Player[OtherIndex].VelocityY = (HitboxEffects->Knockback / 2.5f);
+		m_Player[OtherIndex].AccelerationY = -(m_Player[OtherIndex].VelocityY / 15.0f);
+	}
+	default: 
 		break;
 	}
 	m_Player[PlayerIndex].DisableHitbox = true;
-	m_Player[PlayerIndex].Hitstop = HitboxEffects->Hitstop;
+	m_Player[PlayerIndex].Hitstop = HitboxEffects->HitstopAttacker;
 	m_Player[PlayerIndex].Flags |= PLAYER_ALLOW_CANCEL;
-	m_Player[OtherIndex].Hitstop = HitboxEffects->Hitstop;
+	m_Player[OtherIndex].Hitstop = HitboxEffects->HitstopDefender;
 	m_Player[OtherIndex].PlaybackState.New = true;
 	m_Player[OtherIndex].PlaybackState.PlaybackCursor = 0;
 }

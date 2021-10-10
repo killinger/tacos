@@ -20,16 +20,20 @@
     "CmnStateHitCrouchLvl0",
     "CmnStateHitCrouchLvl1",
     "CmnStateHitCrouchLvl2",
+    "CmnStateHitPunt",
+    "CmnStateHitFlip",
     "CmnStateGuardStandLvl0",
     "CmnStateGuardStandLvl1",
     "CmnStateGuardStandLvl2",
     "CmnStateGuardCrouchLvl0",
     "CmnStateGuardCrouchLvl1",
     "CmnStateGuardCrouchLvl2",
+    "CmnStateDown",
     "NmlAtk5A",
     "NmlAtk2A",
     "NmlAtk5B",
     "NmlAtk2B",
     "NmlAtk5C",
-    "NmlAtk2C"
+    "NmlAtk2C",
+    "NmlAtk6A"
 ]

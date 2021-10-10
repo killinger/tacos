@@ -137,7 +137,6 @@
     <ClCompile Include="taco_game.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="atk_lvl.h" />
     <ClInclude Include="character_cmn_states.h" />
     <ClInclude Include="collisions.h" />
     <ClInclude Include="console_system.h" />

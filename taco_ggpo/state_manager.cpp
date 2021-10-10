@@ -3,7 +3,6 @@
 #include "rapidjson/filereadstream.h"
 #include <unordered_map>
 #include <vector>
-#include "atk_lvl.h"
 
 void state_manager::Initialize()
 {
@@ -107,14 +106,10 @@ void state_manager::ReadFromDirectory(const char* Path)
 		for (unsigned int i = 0; i < m_HitboxEffectCount; i++)
 		{
 			m_HitboxEffects[i].AtkLvl = Document[i]["AtkLvl"].GetUint();
-			if (Document[i].HasMember("Hitstop"))
-				m_HitboxEffects[i].Hitstop = Document[i]["Hitstop"].GetUint();
-			else
-				m_HitboxEffects[i].Hitstop = atk_lvl::Defaults[m_HitboxEffects[i].AtkLvl].NormalHitstopAttacker;
-			if (Document[i].HasMember("Knockback"))
-				m_HitboxEffects[i].Knockback = Document[i]["Knockback"].GetFloat();
-			else
-				m_HitboxEffects[i].Knockback = atk_lvl::Defaults[m_HitboxEffects[i].AtkLvl].NormalKnockback;
+			m_HitboxEffects[i].HitType = Document[i]["HitType"].GetUint();
+			m_HitboxEffects[i].HitstopAttacker  = Document[i]["HitstopAttacker"].GetUint();
+			m_HitboxEffects[i].HitstopDefender = Document[i]["HitstopDefender"].GetUint();
+			m_HitboxEffects[i].Knockback = Document[i]["Knockback"].GetFloat();
 		}
 	}
 
@@ -137,8 +132,6 @@ void state_manager::ReadFromDirectory(const char* Path)
 		m_Scripts[i].ScalingYV = Document["ScalingYV"].GetFloat();
 		m_Scripts[i].ScalingXA = Document["ScalingXA"].GetFloat();
 		m_Scripts[i].ScalingYA = Document["ScalingYA"].GetFloat();
-		if (Document.HasMember("AtkLvl"))
-			m_Scripts[i].AtkLvl = (uint8)Document["AtkLvl"].GetUint();
 
 		m_Scripts[i].Flags = 0;
 		m_Scripts[i].Flags |= Document["Flags"].GetUint();
