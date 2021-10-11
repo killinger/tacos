@@ -5,6 +5,10 @@
 
 #define PLAYER_ALLOW_CANCEL 0x01
 #define PLAYER_USED_AIR_ACTION 0x02
+#define BUFFERED_STATE_FROM_OPPONENT 0x01
+#define BUFFERED_STATE_HIT_CANCEL 0x02
+#define BUFFERED_STATE_WHIFF_CANCEL 0x04
+#define BUFFERED_STATE_ANY_CANCEL 0x06
 
 class state_manager;
 
@@ -12,13 +16,21 @@ struct playbackstate
 {
 	uint32	PlaybackCursor;
 	uint32	State;
-	int32	BufferedState;
 	bool	New;
+};
+
+struct buffered_state
+{
+	uint32 StateIndex;
+	uint32 Flags;
+	uint32 InputMask;
+	uint32 InputBufferIndex;
 };
 
 struct playerstate
 {
 	playbackstate		PlaybackState;
+	buffered_state		BufferedState;
 	input_buffer		InputBuffer;
 	uint32				Flags;
 	float				PositionX;

@@ -11,23 +11,21 @@ void gamestate::Initialize()
 {
 	memset(&m_Player[0], 0, sizeof(playerstate));
 	memset(&m_Player[1], 0, sizeof(playerstate));
+	m_Player[0].InputBuffer.Initialize();
 	m_Player[0].PositionX = -PLAYER_STARTING_POSITIONS;
 	m_Player[0].Facing = 1.0f;
-	m_Player[0].PlaybackState.State = CMN_STATE_STAND;
 	m_Player[0].PlaybackState.New = true;
-	m_Player[0].PlaybackState.BufferedState = -1;
+	m_Player[1].InputBuffer.Initialize();
 	m_Player[1].PositionX = PLAYER_STARTING_POSITIONS;
 	m_Player[1].Facing = -1.0f;
-	m_Player[1].PlaybackState.State = CMN_STATE_STAND;
 	m_Player[1].PlaybackState.New = true;
-	m_Player[1].PlaybackState.BufferedState = -1;
 }
 
 void gamestate::Update(uint32* Inputs, state_manager* StateManager)
 {
 	if (!GameStateBuffer->IsReplaying())
 	{
-		bool FlipDirections[] = {	m_Player[0].PositionX > m_Player[1].PositionX,
+		bool FlipDirections[] = { m_Player[0].PositionX > m_Player[1].PositionX,
 									m_Player[1].PositionX > m_Player[0].PositionX };
 		m_Player[0].InputBuffer.Update(Inputs[0], m_FrameCount, FlipDirections[0]);
 		m_Player[1].InputBuffer.Update(Inputs[1], m_FrameCount, FlipDirections[1]);
@@ -40,7 +38,7 @@ void gamestate::Update(uint32* Inputs, state_manager* StateManager)
 		m_Player[1].Hitstop--;
 
 	// Transition stage
-	state_script* Script[2] = {	AdvancePlayerState(StateManager, &m_Player[0], &m_Player[1]),
+	state_script* Script[2] = { AdvancePlayerState(StateManager, &m_Player[0], &m_Player[1]),
 								AdvancePlayerState(StateManager, &m_Player[1], &m_Player[0]) };
 	// Movement and correction stage
 	if (!m_Player[0].Hitstop)
@@ -68,7 +66,6 @@ state_script* gamestate::AdvancePlayerState(state_manager* StateManager, players
 		PlayerState->PlaybackState.New = false;
 	}
 
-	// TODO: Needs some testing to figure when to actually apply this
 	if (PlayerState->PositionX > OtherPlayer->PositionX)
 		CurrentFacing = -1.0f;
 	if (PlayerState->PositionY < 0.0f)
@@ -82,11 +79,11 @@ state_script* gamestate::AdvancePlayerState(state_manager* StateManager, players
 	}
 	// TODO: Perform cancel shit here? instead of cmn state?
 	else if (PlayerState->PlaybackState.State < CMN_STATE_COUNT)
-		UpdateCmnState[PlayerState->PlaybackState.State](	StateManager, 
-															PlayerState, 
+		UpdateCmnState[PlayerState->PlaybackState.State](	StateManager,
+															PlayerState,
 															Script,
 															m_FrameCount,
-															ScriptFinished, 
+															ScriptFinished,
 															CurrentFacing);
 	else
 	{
@@ -94,33 +91,62 @@ state_script* gamestate::AdvancePlayerState(state_manager* StateManager, players
 		{
 			if (Script->Elements.CancelElements[i].InRange(PlayerState->PlaybackState.PlaybackCursor))
 			{
-				if (Script->Elements.CancelElements[i].Flags & CANCEL_BUFFER_HIT)
+				// TODO: Maybe some kind of priority instead of just ignoring any cancel if one is already buffered
+				if ((PlayerState->BufferedState.Flags & BUFFERED_STATE_ANY_CANCEL) == 0)
 				{
-					cancel_list* CancelList = StateManager->GetCancelList(Script->Elements.CancelElements[i].Index);
-					for (uint32 j = 0; j < CancelList->MoveCount; j++)
+					if (Script->Elements.CancelElements[i].Flags & CANCEL_BUFFER_HIT)
 					{
-						move_description* MoveDescription = StateManager->GetMoveDescription(CancelList->Moves[j]);
-						if (PlayerState->InputBuffer.MatchInputs(MoveDescription, m_FrameCount, 3))
+						cancel_list* CancelList = StateManager->GetCancelList(Script->Elements.CancelElements[i].Index);
+						for (uint32 j = 0; j < CancelList->MoveCount; j++)
 						{
-							PlayerState->PlaybackState.BufferedState = MoveDescription->m_ScriptIndex;
-							break;
+							move_description* MoveDescription = StateManager->GetMoveDescription(CancelList->Moves[j]);
+							int32 Result = PlayerState->InputBuffer.MatchInputs(MoveDescription, m_FrameCount, 3, false);
+							if (Result != INPUT_BUFFER_NO_MATCH)
+							{
+								PlayerState->BufferedState.StateIndex = MoveDescription->m_ScriptIndex;
+								PlayerState->BufferedState.Flags = BUFFERED_STATE_HIT_CANCEL;
+								PlayerState->BufferedState.InputBufferIndex = (uint32)Result;
+								PlayerState->BufferedState.InputMask = MoveDescription->m_Input.m_InputMask;
+								break;
+							}
+						}
+					}
+					else if (Script->Elements.CancelElements[i].Flags & CANCEL_BUFFER_WHIFF)
+					{
+						cancel_list* CancelList = StateManager->GetCancelList(Script->Elements.CancelElements[i].Index);
+						for (uint32 j = 0; j < CancelList->MoveCount; j++)
+						{
+							move_description* MoveDescription = StateManager->GetMoveDescription(CancelList->Moves[j]);
+							int32 Result = PlayerState->InputBuffer.MatchInputs(MoveDescription, m_FrameCount, 3, false);
+							if (Result != INPUT_BUFFER_NO_MATCH)
+							{
+								PlayerState->BufferedState.StateIndex = MoveDescription->m_ScriptIndex;
+								PlayerState->BufferedState.Flags = BUFFERED_STATE_WHIFF_CANCEL;
+								PlayerState->BufferedState.InputBufferIndex = (uint32)Result;
+								PlayerState->BufferedState.InputMask = MoveDescription->m_Input.m_InputMask;
+								break;
+							}
 						}
 					}
 				}
 				if (!PlayerState->Hitstop)
 				{
-					if ((Script->Elements.CancelElements[i].Flags & CANCEL_EXECUTE) &&
-						(PlayerState->Flags & PLAYER_ALLOW_CANCEL) &&
-						(PlayerState->PlaybackState.BufferedState != -1))
+					if (Script->Elements.CancelElements[i].Flags & CANCEL_EXECUTE)
 					{
-						PlayerState->PlaybackState.State = (uint32)PlayerState->PlaybackState.BufferedState;
-						CmnStateDefInit(Script, PlayerState);
-						break;
+						if ((PlayerState->Flags & PLAYER_ALLOW_CANCEL &&
+							PlayerState->BufferedState.Flags & BUFFERED_STATE_HIT_CANCEL) ||
+							(PlayerState->BufferedState.Flags & BUFFERED_STATE_WHIFF_CANCEL))
+						{
+							PlayerState->PlaybackState.State = PlayerState->BufferedState.StateIndex;
+							PlayerState->InputBuffer.ConsumeInput(	PlayerState->BufferedState.InputBufferIndex,
+																	PlayerState->BufferedState.InputMask);
+							CmnStateDefInit(Script, PlayerState);
+							break;
+						}
 					}
 				}
 			}
 		}
-		
 		if (ScriptFinished)
 		{
 			// TODO: Air recovery
@@ -154,10 +180,32 @@ state_script* gamestate::AdvancePlayerState(state_manager* StateManager, players
 void gamestate::UpdateMovement(playerstate* PlayerState)
 {
 	// TODO: Run shit
-	PlayerState->PositionX += PlayerState->VelocityX;
+	float RunVelocitySign = 0.0f;
+	if (PlayerState->RunVelocity > 0.0f)
+		RunVelocitySign = 1.0f;
+	else if (PlayerState->RunVelocity < 0.0f)
+		RunVelocitySign = -1.0f;
+
+	PlayerState->RunVelocity += PlayerState->RunAcceleration;
+
+	float NewRunVelocitySign = 0.0f;
+	if (PlayerState->RunVelocity > 0.0f)
+		NewRunVelocitySign = 1.0f;
+	else if (PlayerState->RunVelocity < 0.0f)
+		NewRunVelocitySign = -1.0f;
+
+	if (RunVelocitySign != NewRunVelocitySign)
+	{
+		PlayerState->RunVelocity = 0.0f;
+		PlayerState->RunAcceleration = 0.0f;
+	}
+
+	PlayerState->PositionX += PlayerState->VelocityX + PlayerState->RunVelocity;
 	PlayerState->PositionY += PlayerState->VelocityY;
 	PlayerState->VelocityX += PlayerState->AccelerationX;
 	PlayerState->VelocityY += PlayerState->AccelerationY;
+
+
 }
 
 void gamestate::CorrectAndFinalizePositions(state_script* Script[2])
@@ -263,7 +311,7 @@ void gamestate::HitDetection(state_manager* StateManager, uint32 PlayerIndex, ui
 			}
 		}
 	}
-	
+
 }
 
 void gamestate::ResolveHitAndApplyEffects(state_manager* StateManager, uint32 PlayerIndex, uint32 OtherIndex, uint8 EffectIndex, state_script* OtherScript)
@@ -310,7 +358,7 @@ void gamestate::ResolveHitAndApplyEffects(state_manager* StateManager, uint32 Pl
 		m_Player[OtherIndex].VelocityY = (HitboxEffects->Knockback / 2.5f);
 		m_Player[OtherIndex].AccelerationY = -(m_Player[OtherIndex].VelocityY / 15.0f);
 	}
-	default: 
+	default:
 		break;
 	}
 	m_Player[PlayerIndex].DisableHitbox = true;

@@ -11,12 +11,6 @@
     "CancelElements":
     [
         {
-            "FrameStart": 0,
-            "FrameEnd": 11,
-            "CancelList": 3,
-            "Flags": 2
-        },
-        {
             "FrameStart": 11,
             "FrameEnd": 30,
             "CancelList": 3,
@@ -43,7 +37,7 @@
             "X": -15.0,
             "Y": 0.0,
             "Width": 30.0,
-            "Height": 90.0
+            "Height": 100.0
         }
     ],
     "PushboxElements":

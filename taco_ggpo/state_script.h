@@ -13,6 +13,7 @@
 
 #define CANCEL_EXECUTE 0x01
 #define CANCEL_BUFFER_HIT 0x02
+#define CANCEL_BUFFER_WHIFF 0x04
 
 struct state_script
 {

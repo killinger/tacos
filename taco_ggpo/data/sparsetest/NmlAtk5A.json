@@ -11,16 +11,16 @@
     "CancelElements":
     [
         {
-            "FrameStart": 0,
-            "FrameEnd": 6,
-            "CancelList": 1,
-            "Flags": 2
-        },
-        {
             "FrameStart": 6,
             "FrameEnd": 15,
             "CancelList": 1,
             "Flags": 3
+        },
+        {
+            "FrameStart": 6,
+            "FrameEnd": 15,
+            "CancelList": 4,
+            "Flags": 5
         }
     ],
     "HitboxElements":
@@ -43,7 +43,7 @@
             "X": -15.0,
             "Y": 0.0,
             "Width": 30.0,
-            "Height": 90.0
+            "Height": 100.0
         }
     ],
     "PushboxElements":

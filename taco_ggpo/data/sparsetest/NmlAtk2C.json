@@ -1,5 +1,5 @@
 {
-    "Name": "NmlAtk5C",
+    "Name": "NmlAtk2C",
     "TotalFrames": 30,
     "ScalingXV": 0,
     "ScalingYV": 0,
@@ -18,12 +18,6 @@
     ],
     "CancelElements":
     [
-        {
-            "FrameStart": 0,
-            "FrameEnd": 11,
-            "CancelList": 3,
-            "Flags": 2
-        },
         {
             "FrameStart": 11,
             "FrameEnd": 30,

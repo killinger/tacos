@@ -2,6 +2,7 @@
 #include "defs.h"
 #include <SFML\Graphics.hpp>
 #include <cstdarg>
+#include "camera.h"
 
 #define VIEW_WIDTH 640.0f
 #define VIEW_HEIGHT 360.0f
@@ -18,6 +19,8 @@ public:
 	void			DrawDebugString();
 	void			DrawWorldText(float X, float Y, const char* WorldText...);
 	void			Clear();
+	void			Draw(sf::RectangleShape Rectangle, camera* Camera);
+	void			Draw(sf::Sprite Sprite, camera* Camera);
 	void			Draw(sf::Sprite Sprite);
 	void			Draw(sf::RectangleShape Rectangle);
 	void			DrawLine(float P0X, float P0Y, float P1X, float P1Y);

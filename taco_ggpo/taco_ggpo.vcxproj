@@ -120,6 +120,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="camera.cpp" />
     <ClCompile Include="collisions.cpp" />
     <ClCompile Include="console_system.cpp" />
     <ClCompile Include="event_queue.cpp" />
@@ -137,6 +138,7 @@
     <ClCompile Include="taco_game.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="camera.h" />
     <ClInclude Include="character_cmn_states.h" />
     <ClInclude Include="collisions.h" />
     <ClInclude Include="console_system.h" />

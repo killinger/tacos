@@ -14,11 +14,11 @@ render_system::render_system(sf::RenderWindow* Window)
 
 	m_DebugView = m_Window->getDefaultView();
 	m_MainView = m_Window->getDefaultView();
-	m_MainView.setCenter(sf::Vector2f(0.0f, -80.0f));
-	m_MainView.setSize(sf::Vector2f(640, 360));
+	m_MainView.setCenter(sf::Vector2f(0.0f, 0.0f));
+	m_MainView.setSize(sf::Vector2f(480, 270));
 
-	m_MainFramebuffer.create(640, 360);
-	m_MainFramebuffer.setView(m_MainView);
+	m_MainFramebuffer.create(480, 270);
+	//m_MainFramebuffer.setView(m_MainView);
 
 	m_ConsoleInputText.setFont(m_ConsoleFont);
 	m_ConsoleInputText.setCharacterSize(11);
@@ -27,7 +27,7 @@ render_system::render_system(sf::RenderWindow* Window)
 	m_DebugString.setFont(m_ConsoleFont);
 	m_DebugString.setCharacterSize(14);
 	m_DebugString.setFillColor(sf::Color::White);
-	m_DebugString.setPosition(-320.0f, -260.0f);
+	m_DebugString.setPosition(-240.0f, -135.0f);
 	m_WorldText.setFont(m_ConsoleFont);
 	m_WorldText.setCharacterSize(10);
 	m_WorldText.setFillColor(sf::Color::White);
@@ -84,6 +84,7 @@ void render_system::DrawDebugString(const char* DebugString)
 
 void render_system::DrawDebugString()
 {
+	m_MainFramebuffer.setView(m_MainView);
 	m_MainFramebuffer.draw(m_DebugString);
 }
 
@@ -105,6 +106,18 @@ void render_system::Clear()
 {
 	m_Window->clear();
 	m_MainFramebuffer.clear(sf::Color(25, 25, 25));
+}
+
+void render_system::Draw(sf::RectangleShape Rectangle, camera* Camera)
+{
+	m_MainFramebuffer.setView(Camera->m_View);
+	m_MainFramebuffer.draw(Rectangle);
+}
+
+void render_system::Draw(sf::Sprite Sprite, camera* Camera)
+{
+	m_MainFramebuffer.setView(Camera->m_View);
+	m_MainFramebuffer.draw(Sprite);
 }
 
 void render_system::Draw(sf::Sprite Sprite)
@@ -133,7 +146,7 @@ void render_system::Display()
 {
 	m_MainFramebuffer.display();
 	sf::Sprite Framebuffer(m_MainFramebuffer.getTexture());
-	Framebuffer.setScale({ 2.0f, 2.0f });
+	Framebuffer.setScale(2.666666667f, 2.666666667f);
 	Framebuffer.setOrigin(sf::Vector2f(m_MainFramebuffer.getTexture().getSize() / 2u));
 	Framebuffer.setPosition(m_Window->getView().getCenter());
 

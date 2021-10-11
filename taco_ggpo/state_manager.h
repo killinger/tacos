@@ -32,6 +32,10 @@ struct character_data
 {
 	float			WalkFSpeed;
 	float			WalkBSpeed;
+	float			RunStartVelocity;
+	float			RunMaxVelocity;
+	float			RunAcceleration;
+	float			RunFriction;
 	float			JumpGravity;
 	float			JumpVelocityY;
 	float			JumpVelocityX;

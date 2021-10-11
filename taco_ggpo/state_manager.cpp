@@ -266,6 +266,10 @@ void state_manager::ReadFromDirectory(const char* Path)
 
 		m_CharacterData.WalkFSpeed = Document["WalkFSpeed"].GetFloat();
 		m_CharacterData.WalkBSpeed = Document["WalkBSpeed"].GetFloat();
+		m_CharacterData.RunStartVelocity = Document["RunStartVelocity"].GetFloat();
+		m_CharacterData.RunMaxVelocity = Document["RunMaxVelocity"].GetFloat();
+		m_CharacterData.RunAcceleration = Document["RunAcceleration"].GetFloat();
+		m_CharacterData.RunFriction = Document["RunFriction"].GetFloat();
 		m_CharacterData.JumpGravity = Document["JumpGravity"].GetFloat();
 		m_CharacterData.JumpVelocityY = Document["JumpVelocityY"].GetFloat();
 		m_CharacterData.JumpVelocityX = Document["JumpVelocityX"].GetFloat();

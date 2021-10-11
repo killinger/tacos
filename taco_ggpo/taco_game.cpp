@@ -9,17 +9,15 @@
 #include "player_graphics.h"
 #include "logging_system.h"
 #include "state_manager.h"
+#include "camera.h"
 
 // TODO:
 // - - - - -
 // BUGS
 // - - - - -
 // - Input buffer treats changes to directions while a button is held as though the button was pressed on that frame
-//
-// - - - - -
-// OTHER
-// - - - - -
-// - Input buffer needs some change to the interface to allow for buttons to be consumed
+// - - Fixed it but the any restriction aint working too hot
+// - Buffering moves consumes the input even if the move isn't performed, which means input leniency doesn't apply 
 
 // Subsystems
 console_system*		ConsoleSystem;
@@ -37,6 +35,11 @@ bool				FrameStepMode;
 // Assets/other
 player_graphics		PlayerGraphics[2];
 state_manager		StateManager;
+camera*				Camera;
+
+// TEST SHIT REMOVE
+sf::Texture BgTexture;
+sf::Sprite	BgSprite;
 
 namespace taco
 {
@@ -57,7 +60,12 @@ namespace taco
 		InputHandler = new input_handler();
 		EventQueue = new event_queue(SystemEventQueue, &StepFrame, &ToggleFrameStepping);
 		GameStateBuffer = new gamestate_buffer(&GameState);
-		
+		Camera = new camera();
+
+		BgTexture.loadFromFile("data/bg.png");
+		BgSprite.setTexture(BgTexture, true);
+		BgSprite.setPosition(-480.0f, -380.0f);
+
 		FrameStepMode = false;
 
 		GameState.Initialize();
@@ -94,6 +102,7 @@ namespace taco
 	void AdvanceFrame(uint32* Inputs)
 	{
 		GameState.Update(Inputs, &StateManager);
+		Camera->Update(&GameState);
 		Render();
 		GameState.m_FrameCount++;
 	}
@@ -154,7 +163,7 @@ namespace taco
 						}
 
 						HurtboxRect.setSize(sf::Vector2f(Script[i]->Elements.HurtboxElements[j].Box.Width, Script[i]->Elements.HurtboxElements[j].Box.Height));
-						RenderSystem->Draw(HurtboxRect);
+						RenderSystem->Draw(HurtboxRect, Camera);
 					}
 				}
 			}
@@ -189,7 +198,7 @@ namespace taco
 									Script[i]->Elements.HitboxElements[j].Box.Height)));
 						}
 						HitboxRect.setSize(sf::Vector2f(Script[i]->Elements.HitboxElements[j].Box.Width, Script[i]->Elements.HitboxElements[j].Box.Height));
-						RenderSystem->Draw(HitboxRect);
+						RenderSystem->Draw(HitboxRect, Camera);
 					}
 				}
 			}
@@ -224,7 +233,7 @@ namespace taco
 									Script[i]->Elements.PushboxElements[j].Box.Height)));
 						}
 						PushboxRect.setSize(sf::Vector2f(Script[i]->Elements.PushboxElements[j].Box.Width, Script[i]->Elements.PushboxElements[j].Box.Height));
-						RenderSystem->Draw(PushboxRect);
+						RenderSystem->Draw(PushboxRect, Camera);
 					}
 				}
 			}
@@ -242,9 +251,9 @@ namespace taco
 		}
 
 		std::string BufferedState = "none";
-		if (GameState.m_Player[Player].PlaybackState.BufferedState != -1)
+		if (GameState.m_Player[Player].BufferedState.Flags & BUFFERED_STATE_ANY_CANCEL)
 		{
-			state_script* BufferedScript = StateManager.GetScript(GameState.m_Player[Player].PlaybackState.BufferedState);
+			state_script* BufferedScript = StateManager.GetScript(GameState.m_Player[Player].BufferedState.StateIndex);
 			BufferedState = BufferedScript->Name;
 		}
 

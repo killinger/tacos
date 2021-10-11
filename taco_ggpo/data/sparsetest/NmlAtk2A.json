@@ -19,16 +19,16 @@
     "CancelElements":
     [
         {
-            "FrameStart": 0,
-            "FrameEnd": 3,
-            "CancelList": 1,
-            "Flags": 2
-        },
-        {
             "FrameStart": 3,
             "FrameEnd": 12,
             "CancelList": 1,
             "Flags": 3
+        },
+        {
+            "FrameStart": 3,
+            "FrameEnd": 12,
+            "CancelList": 4,
+            "Flags": 5
         }
     ],
     "HitboxElements":
