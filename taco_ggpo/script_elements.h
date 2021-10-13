@@ -14,6 +14,21 @@ struct frame_element
 	}
 };
 
+struct animation_element
+{
+	float	OffsetX;
+	float	OffsetY;
+	uint16	Index;
+	uint8	FrameStart;
+	uint8	FrameEnd;
+	bool InRange(uint32 Cursor)
+	{
+		if (Cursor >= FrameStart && Cursor < FrameEnd)
+			return true;
+		return false;
+	}
+};
+
 struct cancel_element
 {
 	uint8	Index;
@@ -108,7 +123,7 @@ struct frame_elements
 	cancel_element*		CancelElements;
 	force_element*		ForceElements;
 	position_element*	PositionElements;
-	frame_element*		AnimationElements;
+	animation_element*	AnimationElements;
 	frame_element*		EngineElements;
 	uint8				StatusCount;
 	uint8				HitboxCount;

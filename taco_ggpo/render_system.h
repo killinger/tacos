@@ -23,6 +23,8 @@ public:
 	void			Draw(sf::Sprite Sprite, camera* Camera);
 	void			Draw(sf::Sprite Sprite);
 	void			Draw(sf::RectangleShape Rectangle);
+	void			DrawGUIElement(sf::Sprite& Sprite);
+	void			DrawInputText(float X, float Y, const char* InputText...);
 	void			DrawLine(float P0X, float P0Y, float P1X, float P1Y);
 	void			Display();
 	sf::Vector2f	GetViewCenter();
@@ -37,4 +39,5 @@ private:
 	sf::Text			m_ConsoleInputText;
 	sf::Text			m_DebugString;
 	sf::Text			m_WorldText;
+	sf::Text			m_InputText;
 };

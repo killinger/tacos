@@ -23,7 +23,7 @@ render_system::render_system(sf::RenderWindow* Window)
 	m_ConsoleInputText.setFont(m_ConsoleFont);
 	m_ConsoleInputText.setCharacterSize(11);
 	m_ConsoleInputText.setFillColor(sf::Color::White);
-	m_ConsoleInputText.setPosition(sf::Vector2f(-320.0f, 75.0f));
+	m_ConsoleInputText.setPosition(sf::Vector2f(-240.0f, 115.0f));
 	m_DebugString.setFont(m_ConsoleFont);
 	m_DebugString.setCharacterSize(14);
 	m_DebugString.setFillColor(sf::Color::White);
@@ -31,6 +31,9 @@ render_system::render_system(sf::RenderWindow* Window)
 	m_WorldText.setFont(m_ConsoleFont);
 	m_WorldText.setCharacterSize(10);
 	m_WorldText.setFillColor(sf::Color::White);
+	m_InputText.setFont(m_ConsoleFont);
+	m_InputText.setCharacterSize(10);
+	m_InputText.setFillColor(sf::Color::White);
 
 	//m_Window->setView(m_MainView);
 
@@ -60,6 +63,7 @@ render_system::~render_system()
 
 void render_system::DrawConsole(char* ConsoleInput, char* ConsoleHistory)
 {
+	m_MainFramebuffer.setView(m_MainView);
 	m_ConsoleInputText.setString(">" + std::string(ConsoleInput));
 	m_DebugString.setString(ConsoleHistory);	
 	m_MainFramebuffer.draw(m_ConsoleInputText);
@@ -99,6 +103,7 @@ void render_system::DrawWorldText(float X, float Y, const char* WorldText ...)
 
 	m_WorldText.setPosition(X, Y);
 	m_WorldText.setString(Buffer);
+	m_MainFramebuffer.setView(m_MainView);
 	m_MainFramebuffer.draw(m_WorldText);
 }
 
@@ -130,6 +135,28 @@ void render_system::Draw(sf::RectangleShape Rectangle)
 {
 	//m_Window->setView(m_MainView);
 	m_MainFramebuffer.draw(Rectangle);
+}
+
+void render_system::DrawGUIElement(sf::Sprite& Sprite)
+{
+	m_MainFramebuffer.setView(m_MainView);
+	m_MainFramebuffer.draw(Sprite);
+}
+
+void render_system::DrawInputText(float X, float Y, const char* InputText ...)
+{
+	m_MainFramebuffer.setView(m_MainView);
+
+	char Buffer[512];
+
+	va_list Args;
+	va_start(Args, InputText);
+	vsnprintf(Buffer, 512, InputText, Args);
+	va_end(Args);
+
+	m_InputText.setPosition(sf::Vector2f(X, Y));
+	m_InputText.setString(Buffer);
+	m_MainFramebuffer.draw(m_InputText);
 }
 
 void render_system::DrawLine(float P0X, float P0Y, float P1X, float P1Y)

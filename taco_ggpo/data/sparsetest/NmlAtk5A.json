@@ -8,6 +8,30 @@
     "Flags": 0,
     "LoopTo": -1,
     "AtkLvl": 1,
+    "AnimationElements":
+    [
+        {
+            "FrameStart": 0,
+            "FrameEnd": 6,
+            "Index": 0,
+            "X": -34.0,
+            "Y": 0.0
+        },
+        {
+            "FrameStart": 6,
+            "FrameEnd": 9,
+            "Index": 1,
+            "X": -34.0,
+            "Y": 0.0
+        },
+        {
+            "FrameStart": 9,
+            "FrameEnd": 15,
+            "Index": 0,
+            "X": -34.0,
+            "Y": 0.0
+        }
+    ],
     "CancelElements":
     [
         {
@@ -28,9 +52,9 @@
         {
             "FrameStart": 6,
             "FrameEnd": 8,
-            "X": 15.0,
-            "Y": 45.0,
-            "Width": 30.0,
+            "X": 22.0,
+            "Y": 75.0,
+            "Width": 39.0,
             "Height": 10.0,
             "Effects": 0
         }

@@ -8,6 +8,16 @@
     "Friction": 0,
     "Flags": 2,
     "LoopTo": 0,
+    "AnimationElements":
+    [
+        {
+            "FrameStart": 0,
+            "FrameEnd": 2,
+            "Index": 0,
+            "X": -34.0,
+            "Y": 0.0
+        }
+    ],
     "HurtboxElements":
     [
         {

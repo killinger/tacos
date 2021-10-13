@@ -17,7 +17,7 @@ player_graphics::~player_graphics()
 uint32 player_graphics::Initialize(const char* Filename)
 {
 	FILE* FilePointer;
-	char FileBuffer[65536];
+	char FileBuffer[16000];
 	rapidjson::Document Document;
 	
 	std::string JSONFileName = Filename + (std::string)".json";
@@ -57,9 +57,8 @@ void player_graphics::SetAnimation(uint32 Index, float Facing)
 
 void player_graphics::SetPosition(float PositionX, float PositionY, int Facing)
 {
-	sf::Vector2f ViewCenter = RenderSystem->GetViewCenter();
 	m_CharacterSprite.setScale(sf::Vector2f(Facing, 1.0f));
-	m_CharacterSprite.setPosition(sf::Vector2f(PositionX, -PositionY - ViewCenter.y - m_CharacterSprite.getTextureRect().height));
+	m_CharacterSprite.setPosition(sf::Vector2f(PositionX, -PositionY -m_CharacterSprite.getTextureRect().height));
 }
 
 void player_graphics::NextFrame()

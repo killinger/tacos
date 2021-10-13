@@ -15,7 +15,8 @@ enum
 	CVAR_INT = 1 << 0,
 	CVAR_FLOAT = 1 << 1,
 	CVAR_STRING = 1 << 2,
-	CVAR_UINT = 1 << 3
+	CVAR_UINT = 1 << 3,
+	CVAR_BOOL = 1 << 4
 };
 
 // TODO: Proper repeat protection, use messages from OS message pump

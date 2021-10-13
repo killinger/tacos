@@ -131,6 +131,7 @@ inline void CmnStateDefInit(state_script* Script, playerstate* PlayerState)
 	PlayerState->BufferedState.Flags = 0;
 	PlayerState->BufferedState.InputBufferIndex = 0;
 	PlayerState->BufferedState.InputMask = 0;
+	PlayerState->BufferedState.CancelList = 0;
 	PlayerState->VelocityX *= Script->ScalingXV;
 	PlayerState->VelocityY *= Script->ScalingYV;
 	PlayerState->AccelerationX *= Script->ScalingXA;
@@ -149,6 +150,7 @@ inline void CmnStateFWalkInit(state_manager* StateManager, state_script* Script,
 	PlayerState->BufferedState.Flags = 0;
 	PlayerState->BufferedState.InputBufferIndex = 0;
 	PlayerState->BufferedState.InputMask = 0;
+	PlayerState->BufferedState.CancelList = 0;
 	PlayerState->VelocityX = StateManager->m_CharacterData.WalkFSpeed * PlayerState->Facing;
 	PlayerState->VelocityY *= Script->ScalingYV;
 	PlayerState->AccelerationX *= Script->ScalingXA;
@@ -167,6 +169,7 @@ inline void CmnStateBWalkInit(state_manager* StateManager, state_script* Script,
 	PlayerState->BufferedState.Flags = 0;
 	PlayerState->BufferedState.InputBufferIndex = 0;
 	PlayerState->BufferedState.InputMask = 0;
+	PlayerState->BufferedState.CancelList = 0;
 	PlayerState->VelocityX = -StateManager->m_CharacterData.WalkBSpeed * PlayerState->Facing;
 	PlayerState->VelocityY *= Script->ScalingYV;
 	PlayerState->AccelerationX *= Script->ScalingXA;
@@ -182,7 +185,7 @@ inline bool CmnStateCancel(playerstate* PlayerState, state_manager* StateManager
 	{
 		move_description* MoveDescription = StateManager->GetMoveDescription(CancelList->Moves[i]);
 		int32 Result = PlayerState->InputBuffer.MatchInputs(MoveDescription, TimeStamp, 3);
-		if (Result != -1)
+		if (Result != INPUT_BUFFER_NO_MATCH)
 		{
 			state_script* Script = StateManager->GetScript(MoveDescription->m_ScriptIndex);
 			PlayerState->PlaybackState.State = MoveDescription->m_ScriptIndex;
@@ -193,6 +196,7 @@ inline bool CmnStateCancel(playerstate* PlayerState, state_manager* StateManager
 			PlayerState->BufferedState.Flags = 0;
 			PlayerState->BufferedState.InputBufferIndex = 0;
 			PlayerState->BufferedState.InputMask = 0;
+			PlayerState->BufferedState.CancelList = 0;
 			PlayerState->VelocityX *= Script->ScalingXV;
 			PlayerState->VelocityY *= Script->ScalingYV;
 			PlayerState->AccelerationX *= Script->ScalingXA;
@@ -498,6 +502,7 @@ CMN_STATE(CmnStatePrejump)
 		PlayerState->BufferedState.Flags = 0;
 		PlayerState->BufferedState.InputBufferIndex = 0;
 		PlayerState->BufferedState.InputMask = 0;
+		PlayerState->BufferedState.CancelList = 0;
 		PlayerState->BufferedJump = 0;
 		PlayerState->DisableHitbox = false;
 		PlayerState->Flags = 0;

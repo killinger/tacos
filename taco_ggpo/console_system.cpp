@@ -66,6 +66,11 @@ bool console_system::ProcessEvent(system_event Event)
 		}
 		return true;
 	}
+	else if (Event.Type == EVENT_KEY)
+	{
+		if (m_IsActive)
+			return true;
+	}
 	return false;
 }
 
@@ -106,7 +111,15 @@ void console_system::ProcessInput()
 	for (Index = 0; Index <= m_Cursor; Index++)
 	{
 		if (m_InputBuffer[Index] == ' ')
-			break;
+		{
+			if (m_InputBuffer[Index + 1] >= 48 && m_InputBuffer[Index + 1] <= 57)
+				break;
+			else
+			{
+				DescriptionOnly = true;
+				break;
+			}
+		}
 		else if (m_InputBuffer[Index] == '\0')
 		{
 			DescriptionOnly = true;
@@ -159,9 +172,21 @@ void console_system::ProcessInput()
 						IntValue = MinValue;
 					*(int32*)m_CVars[i].Variable = IntValue;
 				}
+				else if (m_CVars[i].Type & CVAR_BOOL)
+				{
+					int32 IntValue = (int32)atoi(Value);
+					int32 MinValue = (int32)atoi(m_CVars[i].MinValue);
+					int32 MaxValue = (int32)atoi(m_CVars[i].MaxValue);
+					if (IntValue > MaxValue)
+						IntValue = MaxValue;
+					else if (IntValue < MinValue)
+						IntValue = MinValue;
+					*(bool*)m_CVars[i].Variable = IntValue;
+				}
 			}
 
 			m_HistorySize = 0;
+			memset(m_ConsoleHistory, 0, CONSOLE_HISTORY_LENGTH);
 			for (uint8 j = 0; m_HistorySize < CONSOLE_HISTORY_LENGTH; m_HistorySize++, j++)
 			{
 				if (m_CVars[i].Name[j] == '\0')
@@ -176,6 +201,10 @@ void console_system::ProcessInput()
 				sprintf_s(ValueBuffer, 32, " is %f", *(float*)(m_CVars[i].Variable));
 			else if (m_CVars[i].Type & CVAR_INT)
 				sprintf_s(ValueBuffer, 32, " is %i", *(int32*)(m_CVars[i].Variable));
+			else if (m_CVars[i].Type & CVAR_UINT)
+				sprintf_s(ValueBuffer, 32, " is %u", *(uint32*)(m_CVars[i].Variable));
+			else if (m_CVars[i].Type & CVAR_BOOL)
+				sprintf_s(ValueBuffer, 32, " is %d", *(bool*)(m_CVars[i].Variable));
 
 
 			for (uint8 j = 0; m_HistorySize < CONSOLE_HISTORY_LENGTH; m_HistorySize++, j++)

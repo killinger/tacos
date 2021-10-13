@@ -10,6 +10,7 @@
 #include "logging_system.h"
 #include "state_manager.h"
 #include "camera.h"
+#include "input_buffer_graphics.h"
 
 // TODO:
 // - - - - -
@@ -31,6 +32,9 @@ gamestate_buffer*	GameStateBuffer;
 gamestate			GameState = { 0 };
 permanent_state		PermanentState;
 bool				FrameStepMode;
+bool				DrawBoxes;
+bool				DrawInputHistory;
+bool				DrawStateInfo;
 
 // Assets/other
 player_graphics		PlayerGraphics[2];
@@ -40,6 +44,7 @@ camera*				Camera;
 // TEST SHIT REMOVE
 sf::Texture BgTexture;
 sf::Sprite	BgSprite;
+input_buffer_graphics InputBufferGraphics;
 
 namespace taco
 {
@@ -62,21 +67,29 @@ namespace taco
 		GameStateBuffer = new gamestate_buffer(&GameState);
 		Camera = new camera();
 
+		InputBufferGraphics.Initialize();
 		BgTexture.loadFromFile("data/bg.png");
 		BgSprite.setTexture(BgTexture, true);
 		BgSprite.setPosition(-480.0f, -380.0f);
 
 		FrameStepMode = false;
+		DrawBoxes = false;
+		DrawInputHistory = false;
+		DrawStateInfo = false;
 
 		GameState.Initialize();
 		PermanentState.Player[0].Type = PLAYER_TYPE_LOCAL;
 		PermanentState.Player[1].Type = PLAYER_TYPE_DUMMY;
-		PlayerGraphics[0].Initialize("data/sphere");
+		PlayerGraphics[0].Initialize("data/mad 3");
 		PlayerGraphics[1].Initialize("data/sphere");
 		//ScriptManager.initializeTestData();
 
 		// TEST TINGS REMOVE AFTER IMPLEMENTATION
 		StateManager.Initialize();
+
+		ConsoleSystem->RegisterCVar("r_drawboxes", &DrawBoxes, "0", "1", "Draw collision boxes.", CVAR_BOOL);
+		ConsoleSystem->RegisterCVar("r_drawinputs", &DrawInputHistory, "0", "1", "Draw input history.", CVAR_BOOL);
+		ConsoleSystem->RegisterCVar("dbg_stateinfo", &DrawStateInfo, "0", "1", "Show player state info.", CVAR_BOOL);
 	}
 
 	void RunFrame()
@@ -110,13 +123,34 @@ namespace taco
 	void Render()
 	{
 		RenderSystem->Clear();
-		DrawCollisionBoxes();
-		DrawWorldText(0);
-		DrawWorldText(1);
+
+		state_script* Script = StateManager.GetScript(GameState.m_Player[0].PlaybackState.State);
+		float OffsetX = 0.0f;
+		float OffsetY = 0.0f;
+		for (uint32 i = 0; i < Script->Elements.AnimationCount; i++)
+		{
+			if (Script->Elements.AnimationElements[i].InRange(GameState.m_Player[0].PlaybackState.PlaybackCursor))
+			{
+				PlayerGraphics->SetAnimation(Script->Elements.AnimationElements[i].Index);
+				OffsetX = Script->Elements.AnimationElements[i].OffsetX;
+				OffsetY = Script->Elements.AnimationElements[i].OffsetY;
+			}
+		}
+		PlayerGraphics->SetPosition(GameState.m_Player[0].PositionX + OffsetX, GameState.m_Player[0].PositionY + OffsetY, GameState.m_Player[0].Facing);
+		
+		RenderSystem->Draw(PlayerGraphics->m_CharacterSprite, Camera);
+		if (DrawBoxes)
+			DrawCollisionBoxes();
+		if (DrawInputHistory)
+			InputBufferGraphics.Update(&GameState.m_Player[0].InputBuffer);
+		if (DrawStateInfo)
+		{
+			DrawWorldText(0);
+			DrawWorldText(1);
+		}
 		if (ConsoleSystem->m_IsActive)
 			ConsoleSystem->DrawConsole();
-		else
-			RenderSystem->DrawDebugString();
+	
 		RenderSystem->Display();
 	}
 
@@ -247,7 +281,7 @@ namespace taco
 		float Offset = -200.0f;
 		if (Player == 1)
 		{
-			Offset = 120.0f;
+			Offset = 100.0f;
 		}
 
 		std::string BufferedState = "none";
@@ -259,7 +293,7 @@ namespace taco
 
 		RenderSystem->DrawWorldText(
 			Offset,
-			RenderSystem->GetViewCenter().y - 140.0f,
+			-20.0f,
 			"%s\n%d / %d\nPos %.2f, %.2f\nVel %.2f, %.2f\nAcc %.2f, %.2f\nHitstop %u\nBuffer %s",
 			Script->Name.c_str(),
 			GameState.m_Player[Player].PlaybackState.PlaybackCursor + 1, Script->TotalFrames,

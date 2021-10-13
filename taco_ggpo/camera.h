@@ -14,8 +14,7 @@ public:
 	sf::View	m_View;
 	float		m_LeftBound;
 	float		m_RightBound;
-
-	void Update(gamestate* Gamestate);
+	void		Update(gamestate* Gamestate);
 private:
 
 };

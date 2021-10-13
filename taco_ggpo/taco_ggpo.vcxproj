@@ -127,6 +127,7 @@
     <ClCompile Include="gamestate.cpp" />
     <ClCompile Include="gamestate_buffer.cpp" />
     <ClCompile Include="input_buffer.cpp" />
+    <ClCompile Include="input_buffer_graphics.cpp" />
     <ClCompile Include="input_handler.cpp" />
     <ClCompile Include="linear_allocator.cpp" />
     <ClCompile Include="logging_system.cpp" />
@@ -147,6 +148,7 @@
     <ClInclude Include="gamestate.h" />
     <ClInclude Include="gamestate_buffer.h" />
     <ClInclude Include="input_buffer.h" />
+    <ClInclude Include="input_buffer_graphics.h" />
     <ClInclude Include="input_handler.h" />
     <ClInclude Include="linear_allocator.h" />
     <ClInclude Include="logging_system.h" />

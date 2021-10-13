@@ -6,6 +6,16 @@
     "ScalingXA": 0,
     "ScalingYA": 0,
     "Flags": 2,
+    "AnimationElements":
+    [
+        {
+            "FrameStart": 0,
+            "FrameEnd": 2,
+            "Index": 0,
+            "X": -34.0,
+            "Y": 0.0
+        }
+    ],
     "HurtboxElements":
     [
         {

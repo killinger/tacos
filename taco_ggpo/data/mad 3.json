@@ -1,0 +1,55 @@
+{ "frames": [
+   {
+    "filename": "mad 3 0.aseprite",
+    "frame": { "x": 0, "y": 0, "w": 80, "h": 96 },
+    "rotated": false,
+    "trimmed": true,
+    "spriteSourceSize": { "x": 16, "y": 32, "w": 80, "h": 96 },
+    "sourceSize": { "w": 160, "h": 128 },
+    "duration": 100
+   },
+   {
+    "filename": "mad 3 1.aseprite",
+    "frame": { "x": 80, "y": 0, "w": 96, "h": 96 },
+    "rotated": false,
+    "trimmed": true,
+    "spriteSourceSize": { "x": 16, "y": 32, "w": 96, "h": 96 },
+    "sourceSize": { "w": 160, "h": 128 },
+    "duration": 100
+   },
+   {
+    "filename": "mad 3 2.aseprite",
+    "frame": { "x": 176, "y": 0, "w": 128, "h": 96 },
+    "rotated": false,
+    "trimmed": true,
+    "spriteSourceSize": { "x": 16, "y": 32, "w": 128, "h": 96 },
+    "sourceSize": { "w": 160, "h": 128 },
+    "duration": 100
+   },
+   {
+    "filename": "mad 3 3.aseprite",
+    "frame": { "x": 304, "y": 0, "w": 144, "h": 112 },
+    "rotated": false,
+    "trimmed": true,
+    "spriteSourceSize": { "x": 16, "y": 16, "w": 144, "h": 112 },
+    "sourceSize": { "w": 160, "h": 128 },
+    "duration": 100
+   }
+ ],
+ "meta": {
+  "app": "http://www.aseprite.org/",
+  "version": "1.2.29-x64",
+  "image": "mad 3.png",
+  "format": "RGBA8888",
+  "size": { "w": 448, "h": 112 },
+  "scale": "1",
+  "frameTags": [
+  ],
+  "layers": [
+   { "name": "Flattened", "opacity": 255, "blendMode": "normal" },
+   { "name": "Layer 3", "opacity": 255, "blendMode": "normal" }
+  ],
+  "slices": [
+  ]
+ }
+}

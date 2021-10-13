@@ -94,7 +94,7 @@ state_script* gamestate::AdvancePlayerState(state_manager* StateManager, players
 				// TODO: Maybe some kind of priority instead of just ignoring any cancel if one is already buffered
 				if ((PlayerState->BufferedState.Flags & BUFFERED_STATE_ANY_CANCEL) == 0)
 				{
-					if (Script->Elements.CancelElements[i].Flags & CANCEL_BUFFER_HIT)
+					if (Script->Elements.CancelElements[i].Flags & CANCEL_BUFFER_ON_HIT)
 					{
 						cancel_list* CancelList = StateManager->GetCancelList(Script->Elements.CancelElements[i].Index);
 						for (uint32 j = 0; j < CancelList->MoveCount; j++)
@@ -104,14 +104,15 @@ state_script* gamestate::AdvancePlayerState(state_manager* StateManager, players
 							if (Result != INPUT_BUFFER_NO_MATCH)
 							{
 								PlayerState->BufferedState.StateIndex = MoveDescription->m_ScriptIndex;
-								PlayerState->BufferedState.Flags = BUFFERED_STATE_HIT_CANCEL;
-								PlayerState->BufferedState.InputBufferIndex = (uint32)Result;
 								PlayerState->BufferedState.InputMask = MoveDescription->m_Input.m_InputMask;
+								PlayerState->BufferedState.CancelList = Script->Elements.CancelElements[i].Index;
+								PlayerState->BufferedState.InputBufferIndex = (uint32)Result;
+								PlayerState->BufferedState.Flags = BUFFERED_STATE_HIT_CANCEL;
 								break;
 							}
 						}
 					}
-					else if (Script->Elements.CancelElements[i].Flags & CANCEL_BUFFER_WHIFF)
+					else if (Script->Elements.CancelElements[i].Flags & CANCEL_BUFFER_ON_WHIFF)
 					{
 						cancel_list* CancelList = StateManager->GetCancelList(Script->Elements.CancelElements[i].Index);
 						for (uint32 j = 0; j < CancelList->MoveCount; j++)
@@ -121,9 +122,10 @@ state_script* gamestate::AdvancePlayerState(state_manager* StateManager, players
 							if (Result != INPUT_BUFFER_NO_MATCH)
 							{
 								PlayerState->BufferedState.StateIndex = MoveDescription->m_ScriptIndex;
-								PlayerState->BufferedState.Flags = BUFFERED_STATE_WHIFF_CANCEL;
-								PlayerState->BufferedState.InputBufferIndex = (uint32)Result;
 								PlayerState->BufferedState.InputMask = MoveDescription->m_Input.m_InputMask;
+								PlayerState->BufferedState.CancelList = Script->Elements.CancelElements[i].Index;
+								PlayerState->BufferedState.InputBufferIndex = (uint32)Result;
+								PlayerState->BufferedState.Flags = BUFFERED_STATE_WHIFF_CANCEL;
 								break;
 							}
 						}
@@ -131,10 +133,10 @@ state_script* gamestate::AdvancePlayerState(state_manager* StateManager, players
 				}
 				if (!PlayerState->Hitstop)
 				{
-					if (Script->Elements.CancelElements[i].Flags & CANCEL_EXECUTE)
+					if ((Script->Elements.CancelElements[i].Flags & CANCEL_EXECUTE) &&
+						(PlayerState->BufferedState.CancelList == Script->Elements.CancelElements[i].Index))
 					{
-						if ((PlayerState->Flags & PLAYER_ALLOW_CANCEL &&
-							PlayerState->BufferedState.Flags & BUFFERED_STATE_HIT_CANCEL) ||
+						if ((PlayerState->Flags & PLAYER_ALLOW_CANCEL && PlayerState->BufferedState.Flags & BUFFERED_STATE_HIT_CANCEL) || 
 							(PlayerState->BufferedState.Flags & BUFFERED_STATE_WHIFF_CANCEL))
 						{
 							PlayerState->PlaybackState.State = PlayerState->BufferedState.StateIndex;

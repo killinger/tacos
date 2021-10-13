@@ -142,10 +142,24 @@ void state_manager::ReadFromDirectory(const char* Path)
 			m_Scripts[i].Elements.StatusElements = new status_element[m_Scripts[i].Elements.StatusCount];
 			for (unsigned int j = 0; j < m_Scripts[i].Elements.StatusCount; j++)
 			{
-				m_Scripts[i].Elements.StatusElements[j].FrameStart = (int8)Document["StatusElements"][j]["FrameStart"].GetUint();
-				m_Scripts[i].Elements.StatusElements[j].FrameEnd = (int8)Document["StatusElements"][j]["FrameEnd"].GetUint();
+				m_Scripts[i].Elements.StatusElements[j].FrameStart = (uint8)Document["StatusElements"][j]["FrameStart"].GetUint();
+				m_Scripts[i].Elements.StatusElements[j].FrameEnd = (uint8)Document["StatusElements"][j]["FrameEnd"].GetUint();
 				m_Scripts[i].Elements.StatusElements[j].StatusFlags = 0;
 				m_Scripts[i].Elements.StatusElements[j].StatusFlags |= Document["StatusElements"][j]["Flags"].GetUint();
+			}
+		}
+		m_Scripts[i].Elements.AnimationCount = 0;
+		if (Document.HasMember("AnimationElements"))
+		{
+			m_Scripts[i].Elements.AnimationCount = Document["AnimationElements"].Size();
+			m_Scripts[i].Elements.AnimationElements = new animation_element[m_Scripts[i].Elements.AnimationCount];
+			for (unsigned int j = 0; j < m_Scripts[i].Elements.AnimationCount; j++)
+			{
+				m_Scripts[i].Elements.AnimationElements[j].FrameStart = (uint8)Document["AnimationElements"][j]["FrameStart"].GetUint();
+				m_Scripts[i].Elements.AnimationElements[j].FrameEnd = (uint8)Document["AnimationElements"][j]["FrameEnd"].GetUint();
+				m_Scripts[i].Elements.AnimationElements[j].Index = (uint16)Document["AnimationElements"][j]["Index"].GetUint();
+				m_Scripts[i].Elements.AnimationElements[j].OffsetX = Document["AnimationElements"][j]["X"].GetFloat();
+				m_Scripts[i].Elements.AnimationElements[j].OffsetY = Document["AnimationElements"][j]["Y"].GetFloat();
 			}
 		}
 

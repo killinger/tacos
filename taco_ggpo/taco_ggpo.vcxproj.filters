@@ -75,6 +75,9 @@
     <ClCompile Include="camera.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="input_buffer_graphics.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="defs.h">
@@ -147,6 +150,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="camera.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="input_buffer_graphics.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

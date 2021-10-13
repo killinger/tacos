@@ -25,6 +25,7 @@ struct buffered_state
 	uint32 Flags;
 	uint32 InputMask;
 	uint32 InputBufferIndex;
+	uint32 CancelList;
 };
 
 struct playerstate
