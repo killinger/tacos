@@ -9,16 +9,16 @@
 
 camera::camera()
 {
-	m_View.setSize(sf::Vector2f(480.0f, 270.0f));
-	m_View.setCenter(sf::Vector2f(0.0f, -110.0f));
-	m_LeftBound = m_View.getCenter().x - (m_View.getSize().x / 2.0f);
-	m_RightBound = m_View.getCenter().x + (m_View.getSize().x / 2.0f);
+	//m_View.setSize(sf::Vector2f(480.0f, 270.0f));
+	//m_View.setCenter(sf::Vector2f(0.0f, -110.0f));
+	//m_LeftBound = m_View.getCenter().x - (m_View.getSize().x / 2.0f);
+	//m_RightBound = m_View.getCenter().x + (m_View.getSize().x / 2.0f);
 }
 
 void camera::Update(gamestate* Gamestate)
 {
 	// TODO: this needs research lol
-	float PlayerMidpointX = (Gamestate->m_Player[0].PositionX + Gamestate->m_Player[1].PositionX) / 2.0f;
+	/*float PlayerMidpointX = (Gamestate->m_Player[0].PositionX + Gamestate->m_Player[1].PositionX) / 2.0f;
 	float DistanceX = (Gamestate->m_Player[0].PositionX - Gamestate->m_Player[1].PositionX);
 	DistanceX = abs(DistanceX);
 	float CurrentSizeX = m_View.getSize().x;
@@ -98,5 +98,5 @@ void camera::Update(gamestate* Gamestate)
 	}
 	
 	m_LeftBound = m_View.getCenter().x - (m_View.getSize().x / 2.0f);
-	m_RightBound = m_View.getCenter().x + (m_View.getSize().x / 2.0f);
+	m_RightBound = m_View.getCenter().x + (m_View.getSize().x / 2.0f);*/
 }

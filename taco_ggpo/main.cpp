@@ -1,52 +1,112 @@
-#include <SFML\Graphics.hpp>
+#pragma comment(lib, "d3d11.lib")
+
 #include <Windows.h>
+#include <d3d11.h>
 #include "taco_game.h"
 #include "system_event_queue.h"
 
-system_event_queue SystemEventQueue;
+system_event_queue	SystemEventQueue;
 
-void ProcessSystemEvents(sf::RenderWindow& window)
+HWND				CreateAndRegisterWindow(HINSTANCE Instance);
+LRESULT CALLBACK	ProcessSystemEvents(HWND Window, UINT Message, WPARAM WParam, LPARAM LParam);
+
+int WINAPI WinMain(HINSTANCE Instance, HINSTANCE PrevInstance, LPTSTR CmdLine, int CmdShow)
 {
-	sf::Event event;
-	while (window.pollEvent(event))
+	HWND Window = CreateAndRegisterWindow(Instance);
+	if (Window)
 	{
-		if (event.type == sf::Event::Closed)
-			window.close();
-		if (event.type == sf::Event::TextEntered)
+		MSG Message = { 0 };
+		LARGE_INTEGER StartCounter, EndCounter;
+		LARGE_INTEGER Frequency;
+		QueryPerformanceFrequency(&Frequency);
+		QueryPerformanceCounter(&StartCounter);
+		double TargetFrameTime = 1.0 / 60.0;
+		double Next = 0.0;
+		double Now = 0.0;
+
+		taco::Initialize(Instance, Window, &SystemEventQueue);
+
+		while (true)
 		{
-			SystemEventQueue.Enqueue(EVENT_CHAR, (int32)event.text.unicode, 0);
-		}
-		if (event.type == sf::Event::KeyPressed)
-		{
-			SystemEventQueue.Enqueue(EVENT_KEY, (int32)event.key.code, 0);
-		}
-	}
-}
-
-int main()
-{
-	sf::RenderWindow window(sf::VideoMode(1280, 720), "Tacos");
-
-	taco::Initialize(&window, &SystemEventQueue);
-
-	LARGE_INTEGER startCounter, endCounter;
-	LARGE_INTEGER frequency;
-	QueryPerformanceFrequency(&frequency);
-	QueryPerformanceCounter(&startCounter);
-	float targetFrameTime = 1.0f / 60.0f;
-	float Next = 0.0f;
-	float Now = 0.0f;
-
-	while (window.isOpen())
-	{
-		ProcessSystemEvents(window);
-		QueryPerformanceCounter(&endCounter);
-		Now = (float)(endCounter.QuadPart - startCounter.QuadPart) / (float)frequency.QuadPart;
-		if (Now >= Next)
-		{
-			taco::RunFrame();
-			Next = Now + targetFrameTime;
+			if (PeekMessage(&Message, NULL, 0, 0, PM_REMOVE)) // TODO: Maybe look these up lol
+			{
+				if (Message.message == WM_QUIT)
+					break;
+				TranslateMessage(&Message);
+				DispatchMessage(&Message);
+			}
+			
+			QueryPerformanceCounter(&EndCounter);
+			Now = (double)(EndCounter.QuadPart - StartCounter.QuadPart) / (double)Frequency.QuadPart;
+			if (Now >= Next)
+			{
+				taco::RunFrame();
+				Next = Now + TargetFrameTime;
+			}
 		}
 	}
 	return 0;
+}
+
+HWND CreateAndRegisterWindow(HINSTANCE Instance)
+{
+	WNDCLASSEX WindowClass = { 0 };
+	HWND Window = NULL;
+	WindowClass.cbSize = sizeof(WNDCLASSEX);
+	WindowClass.style = CS_HREDRAW | CS_VREDRAW;
+	WindowClass.lpfnWndProc = ProcessSystemEvents;
+	WindowClass.cbClsExtra = NULL;
+	WindowClass.cbWndExtra = NULL;
+	WindowClass.hInstance = Instance;
+	WindowClass.hIcon = LoadIcon(NULL, IDI_WINLOGO);
+	WindowClass.hCursor = LoadCursor(NULL, IDC_ARROW);
+	WindowClass.hbrBackground = (HBRUSH)COLOR_WINDOW;
+	WindowClass.lpszMenuName = NULL;
+	WindowClass.lpszClassName = "Window";
+	WindowClass.hIconSm = LoadIcon(NULL, IDI_WINLOGO);
+
+	if (!RegisterClassEx(&WindowClass))
+		return NULL;
+
+	Window = CreateWindowEx(NULL,
+							"Window",	// window class
+							"tacos",	// window name
+							WS_OVERLAPPEDWINDOW,
+							CW_USEDEFAULT,
+							CW_USEDEFAULT,
+							1280, // width
+							720, // height
+							NULL,
+							NULL,
+							Instance,
+							NULL);
+	ShowWindow(Window, true);
+	UpdateWindow(Window);
+	return Window;
+}
+
+LRESULT CALLBACK ProcessSystemEvents(HWND Window, UINT Message, WPARAM WParam, LPARAM LParam)
+{
+	switch (Message)
+	{
+	case WM_KEYDOWN:
+		if (WParam == VK_ESCAPE)
+		{
+			DestroyWindow(Window);
+			return 0;
+		}
+		else
+		{
+			SystemEventQueue.Enqueue(EVENT_KEY, ((LParam >> 16) & 255), true);
+			break;
+		}
+		break;
+	case WM_CHAR:
+		SystemEventQueue.Enqueue(EVENT_CHAR, WParam, 0);
+		break;
+	case WM_DESTROY:
+		PostQuitMessage(0);
+		return 0;
+	}
+	return DefWindowProc(Window, Message, WParam, LParam);
 }

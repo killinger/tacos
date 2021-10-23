@@ -8,7 +8,6 @@
 class input_buffer
 {
 	friend class gamestate_buffer;
-	friend class input_buffer_graphics;
 public:
 	void	Initialize();
 	void	Update(uint32 InputMask, uint32 TimeStamp, bool FlipDirections);

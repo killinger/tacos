@@ -76,7 +76,7 @@ bool console_system::ProcessEvent(system_event Event)
 
 void console_system::DrawConsole()
 {
-	RenderSystem->DrawConsole(m_InputBuffer, m_ConsoleHistory);
+	
 }
 
 void console_system::ProcessChar(uint32 Key)

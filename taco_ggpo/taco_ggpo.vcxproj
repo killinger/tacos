@@ -80,7 +80,7 @@
     </ClCompile>
     <Link>
       <AdditionalLibraryDirectories>C:\Users\hnrkp\Source\Repos\taco_ggpo\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>sfml-graphics-d.lib;sfml-window-d.lib;sfml-audio-d.lib;sfml-system-d.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>sfml-audio-d.lib;sfml-window-d.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
@@ -127,13 +127,11 @@
     <ClCompile Include="gamestate.cpp" />
     <ClCompile Include="gamestate_buffer.cpp" />
     <ClCompile Include="input_buffer.cpp" />
-    <ClCompile Include="input_buffer_graphics.cpp" />
     <ClCompile Include="input_handler.cpp" />
     <ClCompile Include="linear_allocator.cpp" />
     <ClCompile Include="logging_system.cpp" />
     <ClCompile Include="state_manager.cpp" />
     <ClCompile Include="main.cpp" />
-    <ClCompile Include="player_graphics.cpp" />
     <ClCompile Include="render_system.cpp" />
     <ClCompile Include="system_event_queue.cpp" />
     <ClCompile Include="taco_game.cpp" />
@@ -148,22 +146,22 @@
     <ClInclude Include="gamestate.h" />
     <ClInclude Include="gamestate_buffer.h" />
     <ClInclude Include="input_buffer.h" />
-    <ClInclude Include="input_buffer_graphics.h" />
     <ClInclude Include="input_handler.h" />
     <ClInclude Include="linear_allocator.h" />
     <ClInclude Include="logging_system.h" />
     <ClInclude Include="memory_allocator.h" />
     <ClInclude Include="move_description.h" />
     <ClInclude Include="script_elements.h" />
+    <ClInclude Include="shaders.h" />
     <ClInclude Include="state_manager.h" />
     <ClInclude Include="permanent_state.h" />
-    <ClInclude Include="player_graphics.h" />
     <ClInclude Include="render_system.h" />
     <ClInclude Include="state_script.h" />
     <ClInclude Include="subsystems.h" />
     <ClInclude Include="system_event.h" />
     <ClInclude Include="system_event_queue.h" />
     <ClInclude Include="taco_game.h" />
+    <ClInclude Include="vertex.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

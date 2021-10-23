@@ -1,43 +1,30 @@
 #pragma once
 #include "defs.h"
-#include <SFML\Graphics.hpp>
+#include <Windows.h>
+#include <d3d11.h>
 #include <cstdarg>
 #include "camera.h"
+#include "shaders.h"
 
-#define VIEW_WIDTH 640.0f
-#define VIEW_HEIGHT 360.0f
+struct test_object;
 
 class render_system
 {
 public:
-	render_system(sf::RenderWindow* Window);
+	render_system(HWND Window, HINSTANCE Instance);
 	~render_system();
 
-	void			DrawConsole(char* ConsoleInput, char* ConsoleHistory);
-	void			SetDebugString(const char* DebugString...);
-	void			DrawDebugString(const char* DebugString);
-	void			DrawDebugString();
-	void			DrawWorldText(float X, float Y, const char* WorldText...);
-	void			Clear();
-	void			Draw(sf::RectangleShape Rectangle, camera* Camera);
-	void			Draw(sf::Sprite Sprite, camera* Camera);
-	void			Draw(sf::Sprite Sprite);
-	void			Draw(sf::RectangleShape Rectangle);
-	void			DrawGUIElement(sf::Sprite& Sprite);
-	void			DrawInputText(float X, float Y, const char* InputText...);
-	void			DrawLine(float P0X, float P0Y, float P1X, float P1Y);
-	void			Display();
-	sf::Vector2f	GetViewCenter();
-
+	void Render();
 private:
-	sf::RenderWindow*	m_Window;
-	sf::RenderTexture	m_MainFramebuffer;
-	sf::Shader			m_Shader;
-	sf::View			m_MainView;
-	sf::View			m_DebugView;
-	sf::Font			m_ConsoleFont;
-	sf::Text			m_ConsoleInputText;
-	sf::Text			m_DebugString;
-	sf::Text			m_WorldText;
-	sf::Text			m_InputText;
+	IDXGISwapChain*			m_SwapChain;
+	ID3D11Device*			m_Device;
+	ID3D11DeviceContext*	m_DeviceContext;
+	ID3D11RenderTargetView*	m_MainRenderTargetView;
+	ID3D11DepthStencilView* m_DepthStencilView;
+	vertex_shader			m_VertexShader;
+	pixel_shader			m_PixelShader;
+
+	// TEST GARBAGE REMOVE
+	void InitScene();
+	void RenderTest(test_object* TestObject, DirectX::XMMATRIX VPMatrix);
 };

@@ -1,9 +1,9 @@
 #pragma once
-#include <SFML\Graphics.hpp>
 #include "event_queue.h"
+#include <Windows.h>
 
 namespace taco
 {
-	void Initialize(sf::RenderWindow* Window, system_event_queue* SystemEventQueue);
+	void Initialize(HINSTANCE Instance, HWND Window, system_event_queue* SystemEventQueue);
 	void RunFrame();
 }

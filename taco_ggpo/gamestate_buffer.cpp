@@ -18,7 +18,7 @@ void gamestate_buffer::SetCaptureSlot(uint8 Slot)
 {
 	m_SaveSlot = Slot;
 	std::string OutputString("GameStateBuffer slot #" + std::to_string(m_SaveSlot) + " selected");
-	RenderSystem->SetDebugString(OutputString.c_str());
+
 }
 
 void gamestate_buffer::SaveGameState()
@@ -31,7 +31,7 @@ void gamestate_buffer::SaveGameState()
 		fclose(FilePtr);
 	}
 	std::string OutputString("GameState saved in slot #" + std::to_string(m_SaveSlot));
-	RenderSystem->SetDebugString(OutputString.c_str());
+
 }
 
 void gamestate_buffer::LoadGameState()
@@ -44,12 +44,12 @@ void gamestate_buffer::LoadGameState()
 		fclose(FilePtr);
 
 		std::string OutputString("GameState loaded from slot #" + std::to_string(m_SaveSlot));
-		RenderSystem->SetDebugString(OutputString.c_str());
+
 	}
 	else
 	{
 		std::string OutputString("GameStateBuffer slot #" + std::to_string(m_SaveSlot) + " has no saved GameState!");
-		RenderSystem->SetDebugString(OutputString.c_str());
+
 	}
 }
 
@@ -65,7 +65,7 @@ void gamestate_buffer::ToggleInputRecording()
 			fclose(FilePtr);
 
 			std::string OutputString("Replay data already exists on slot #" + std::to_string(m_SaveSlot) + "!");
-			RenderSystem->SetDebugString(OutputString.c_str());
+
 		}
 		else
 		{
@@ -75,7 +75,7 @@ void gamestate_buffer::ToggleInputRecording()
 			SaveGameState();
 
 			std::string OutputString("Input capture started on slot #" + std::to_string(m_SaveSlot));
-			RenderSystem->SetDebugString(OutputString.c_str());
+	
 		}
 	}
 	else
@@ -83,7 +83,7 @@ void gamestate_buffer::ToggleInputRecording()
 		m_IsRecordingInput = false;
 
 		std::string OutputString("Input capture ended on slot #" + std::to_string(m_SaveSlot));
-		RenderSystem->SetDebugString(OutputString.c_str());
+		
 	}
 }
 
@@ -106,7 +106,7 @@ void gamestate_buffer::ToggleInputPlayback()
 			LoadGameState();
 
 			std::string OutputString("Starting replay playback from slot #" + std::to_string(m_ReplayingSlot));
-			RenderSystem->SetDebugString(OutputString.c_str());
+		
 		}
 	}
 }
@@ -128,7 +128,7 @@ void gamestate_buffer::Update()
 				fclose(FilePtr);
 
 				std::string OutputString("Input captured on slot #" + std::to_string(m_SaveSlot));
-				RenderSystem->SetDebugString(OutputString.c_str());
+		
 			}
 		}
 	}
@@ -154,7 +154,7 @@ void gamestate_buffer::Update()
 			{
 				m_IsReplayingInput = 0;
 				std::string OutputString("Replay finished");
-				RenderSystem->SetDebugString(OutputString.c_str());
+		
 			}
 
 			fclose(FilePtr);

@@ -1,9 +1,14 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 15
-VisualStudioVersion = 15.0.27130.2036
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.31727.386
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "taco_ggpo", "taco_ggpo\taco_ggpo.vcxproj", "{A982D331-FA8D-440C-87CB-0E7C8567BFA0}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{7599B081-399B-4FDA-BCC5-5CF648542907}"
+	ProjectSection(SolutionItems) = preProject
+		taco_ggpo\Effects.fx = taco_ggpo\Effects.fx
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

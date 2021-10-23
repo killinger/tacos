@@ -59,5 +59,5 @@ void logging_system::DrawLog()
 	char Buffer[512];
 	memset(Buffer, 0, 512);
 	memcpy_s(Buffer, 511, m_OutputBuffer + StartCursor, m_WriteCursor - StartCursor);
-	RenderSystem->DrawDebugString(Buffer);
+
 }

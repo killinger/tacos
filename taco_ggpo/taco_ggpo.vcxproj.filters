@@ -36,9 +36,6 @@
     <ClCompile Include="console_system.cpp">
       <Filter>Subsystems</Filter>
     </ClCompile>
-    <ClCompile Include="player_graphics.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="collisions.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -75,9 +72,6 @@
     <ClCompile Include="camera.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="input_buffer_graphics.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="defs.h">
@@ -94,9 +88,6 @@
     </ClInclude>
     <ClInclude Include="console_system.h">
       <Filter>Subsystems</Filter>
-    </ClInclude>
-    <ClInclude Include="player_graphics.h">
-      <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="permanent_state.h">
       <Filter>Header Files</Filter>
@@ -152,7 +143,10 @@
     <ClInclude Include="camera.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="input_buffer_graphics.h">
+    <ClInclude Include="vertex.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="shaders.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
