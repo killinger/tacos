@@ -7,13 +7,15 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "taco_ggpo", "taco_ggpo\taco
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{7599B081-399B-4FDA-BCC5-5CF648542907}"
 	ProjectSection(SolutionItems) = preProject
-		taco_ggpo\Effects.fx = taco_ggpo\Effects.fx
+		Runtime\Effects.fx = Runtime\Effects.fx
 	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|x64 = Debug|x64
 		Debug|x86 = Debug|x86
+		Profiling|x64 = Profiling|x64
+		Profiling|x86 = Profiling|x86
 		Release|x64 = Release|x64
 		Release|x86 = Release|x86
 	EndGlobalSection
@@ -22,6 +24,10 @@ Global
 		{A982D331-FA8D-440C-87CB-0E7C8567BFA0}.Debug|x64.Build.0 = Debug|x64
 		{A982D331-FA8D-440C-87CB-0E7C8567BFA0}.Debug|x86.ActiveCfg = Debug|Win32
 		{A982D331-FA8D-440C-87CB-0E7C8567BFA0}.Debug|x86.Build.0 = Debug|Win32
+		{A982D331-FA8D-440C-87CB-0E7C8567BFA0}.Profiling|x64.ActiveCfg = Profiling|x64
+		{A982D331-FA8D-440C-87CB-0E7C8567BFA0}.Profiling|x64.Build.0 = Profiling|x64
+		{A982D331-FA8D-440C-87CB-0E7C8567BFA0}.Profiling|x86.ActiveCfg = Profiling|Win32
+		{A982D331-FA8D-440C-87CB-0E7C8567BFA0}.Profiling|x86.Build.0 = Profiling|Win32
 		{A982D331-FA8D-440C-87CB-0E7C8567BFA0}.Release|x64.ActiveCfg = Release|x64
 		{A982D331-FA8D-440C-87CB-0E7C8567BFA0}.Release|x64.Build.0 = Release|x64
 		{A982D331-FA8D-440C-87CB-0E7C8567BFA0}.Release|x86.ActiveCfg = Release|Win32

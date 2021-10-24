@@ -1,5 +1,4 @@
 #include "input_handler.h"
-#include <SFML/Window.hpp>
 
 input_handler::input_handler()
 {
@@ -10,25 +9,26 @@ input_handler::input_handler()
 input_handler::~input_handler()
 {
 }
-
+//
 uint32 input_handler::GetInputs()
 {
-	int32 InputState = 0;
-	if (sf::Joystick::getAxisPosition(m_InputMap.Device, sf::Joystick::PovY) < -1.0)
-		InputState |= INPUT_DOWN;
-	if (sf::Joystick::getAxisPosition(m_InputMap.Device, sf::Joystick::PovY) > 1.0)
-		InputState |= INPUT_UP;
-	if (sf::Joystick::getAxisPosition(m_InputMap.Device, sf::Joystick::PovX) < -1.0)
-		InputState |= INPUT_LEFT;
-	if (sf::Joystick::getAxisPosition(m_InputMap.Device, sf::Joystick::PovX) > 1.0)
-		InputState |= INPUT_RIGHT;
-	for (uint32 i = 0; i < BUTTON_COUNT; i++)
-	{
-		if (sf::Joystick::isButtonPressed(m_InputMap.Device, m_InputMap.Bindings[i].ButtonIndex))
-			InputState |= m_InputMap.Bindings[i].InputBinding;
-	}
-
-	return InputState;
+//	int32 InputState = 0;
+//	if (sf::Joystick::getAxisPosition(m_InputMap.Device, sf::Joystick::PovY) < -1.0)
+//		InputState |= INPUT_DOWN;
+//	if (sf::Joystick::getAxisPosition(m_InputMap.Device, sf::Joystick::PovY) > 1.0)
+//		InputState |= INPUT_UP;
+//	if (sf::Joystick::getAxisPosition(m_InputMap.Device, sf::Joystick::PovX) < -1.0)
+//		InputState |= INPUT_LEFT;
+//	if (sf::Joystick::getAxisPosition(m_InputMap.Device, sf::Joystick::PovX) > 1.0)
+//		InputState |= INPUT_RIGHT;
+//	for (uint32 i = 0; i < BUTTON_COUNT; i++)
+//	{
+//		if (sf::Joystick::isButtonPressed(m_InputMap.Device, m_InputMap.Bindings[i].ButtonIndex))
+//			InputState |= m_InputMap.Bindings[i].InputBinding;
+//	}
+//
+//	return InputState;
+	return 0;
 }
 
 void input_handler::CreateDefaultInputMap()
