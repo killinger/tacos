@@ -21,8 +21,6 @@ private:
 	ID3D11DeviceContext*	m_DeviceContext;
 	ID3D11RenderTargetView*	m_MainRenderTargetView;
 	ID3D11DepthStencilView* m_DepthStencilView;
-	vertex_shader			m_VertexShader;
-	pixel_shader			m_PixelShader;
 
 	// TEST GARBAGE REMOVE
 	void InitScene();
