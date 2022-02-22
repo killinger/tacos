@@ -12,11 +12,22 @@
 
 class state_manager;
 
+
+// TODO: Better name for playbackposition
 struct playbackstate
 {
 	uint32	PlaybackCursor;
 	uint32	State;
+	float	PlaybackRate;
+	float	PlaybackScaled;
 	bool	New;
+
+	void Reset()
+	{
+		PlaybackRate = 1.0f;
+		PlaybackScaled = 0.0f;
+		PlaybackCursor = 0;
+	}
 };
 
 struct buffered_state
@@ -43,9 +54,9 @@ struct playerstate
 	float				RunVelocity;
 	float				RunAcceleration;
 	float				Facing;
-	bool				DisableHitbox;
 	uint8				BufferedJump;
 	uint8				Hitstop;
+	bool				DisableHitbox;
 };
 
 // TODO: Move playerstate to a proper class? possibly the entirety of gamestate?

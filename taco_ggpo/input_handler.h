@@ -1,5 +1,6 @@
 #pragma once
 #include "defs.h"
+#include <SDL2/SDL.h>
 
 class input_handler
 {
@@ -13,13 +14,12 @@ private:
 	{
 		struct button_binding
 		{
-			int32 ButtonIndex;
-			int32 InputBinding;
+			SDL_GameControllerButton	ButtonIndex;
+			int32						InputBinding;
 		};
-		int32			Device;
-		button_binding	Bindings[BUTTON_COUNT];
+		SDL_GameController* GameController;
+		button_binding		Bindings[BUTTON_COUNT];
 	};
-
 	input_map m_InputMap;
 
 	void CreateDefaultInputMap();

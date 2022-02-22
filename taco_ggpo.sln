@@ -7,7 +7,13 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "taco_ggpo", "taco_ggpo\taco
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{7599B081-399B-4FDA-BCC5-5CF648542907}"
 	ProjectSection(SolutionItems) = preProject
-		Runtime\Effects.fx = Runtime\Effects.fx
+		Runtime\Shaders\Character.fx = Runtime\Shaders\Character.fx
+		Runtime\Shaders\CharacterOffscreen.fx = Runtime\Shaders\CharacterOffscreen.fx
+		Runtime\Shaders\CharacterOutline.fx = Runtime\Shaders\CharacterOutline.fx
+		Runtime\Shaders\Effects.fx = Runtime\Shaders\Effects.fx
+		Runtime\Shaders\OverlayRect.fx = Runtime\Shaders\OverlayRect.fx
+		Runtime\Shaders\Text.fx = Runtime\Shaders\Text.fx
+		Runtime\Shaders\TexturedQuad.fx = Runtime\Shaders\TexturedQuad.fx
 	EndProjectSection
 EndProject
 Global

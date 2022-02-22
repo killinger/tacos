@@ -1,175 +1,14 @@
 #include "render_system.h"
 #include "vertex.h"
+#define STB_IMAGE_IMPLEMENTATION
+#include "stb_image.h"
+#include "mesh_loader.h"
+#include "auto_profiler.h"
+#include "test_scene.h"
+#include "scene_graph.h"
 
 #define RESOLUTION_WIDTH 1280
 #define RESOLUTION_HEIGHT 720
-
-struct test_mesh
-{
-	ID3D11Buffer*	m_IndexBuffer;
-	ID3D11Buffer*	m_VertexBuffer;
-	uint32			m_IndexEntryCount;
-	uint32			m_VertexCount;
-	void Initialize(ID3D11Device* Device, uint32* Indices, uint32 IndexEntryCount, vertex* Vertices, uint32 VertexCount)
-	{
-		m_IndexEntryCount = IndexEntryCount;
-		m_VertexCount = VertexCount;
-		CreateIndexBuffer(Device, Indices);
-		CreateVertexBuffer(Device, Vertices);
-	}
-
-	void Free()
-	{
-		m_IndexBuffer->Release();
-		m_VertexBuffer->Release();
-	}
-
-private:
-	void CreateIndexBuffer(ID3D11Device* Device, uint32* Indices)
-	{
-		D3D11_BUFFER_DESC IndexBufferDescription = { 0 };
-		IndexBufferDescription.Usage = D3D11_USAGE_DEFAULT;
-		IndexBufferDescription.ByteWidth = sizeof(uint32) * m_IndexEntryCount;
-		IndexBufferDescription.BindFlags = D3D11_BIND_INDEX_BUFFER;
-		IndexBufferDescription.CPUAccessFlags = 0;
-		IndexBufferDescription.MiscFlags = 0;
-
-		D3D11_SUBRESOURCE_DATA IndexBufferData = { 0 };
-		IndexBufferData.pSysMem = Indices;
-		HRESULT Result = Device->CreateBuffer(&IndexBufferDescription, &IndexBufferData, &m_IndexBuffer);
-	}
-
-	void CreateVertexBuffer(ID3D11Device* Device, vertex* Vertices)
-	{
-		D3D11_BUFFER_DESC VertexBufferDescription = { 0 };
-		VertexBufferDescription.Usage = D3D11_USAGE_DEFAULT;
-		VertexBufferDescription.ByteWidth = sizeof(vertex) * m_VertexCount;
-		VertexBufferDescription.BindFlags = D3D11_BIND_VERTEX_BUFFER;
-		VertexBufferDescription.CPUAccessFlags = 0;
-		VertexBufferDescription.MiscFlags = 0;
-
-		D3D11_SUBRESOURCE_DATA VertexBufferData = { 0 };
-		VertexBufferData.pSysMem = Vertices;
-		HRESULT Result = Device->CreateBuffer(&VertexBufferDescription, &VertexBufferData, &m_VertexBuffer);
-	}
-};
-
-struct test_texture
-{
-	ID3D11ShaderResourceView*	m_ShaderResourceView;
-	ID3D11SamplerState*			m_SamplerState; // TODO: not sure where to slap this bad boy down the line
-	
-	void Initialize(ID3D11Device* Device, uint32 ColorMask)
-	{
-		HRESULT Result = S_OK;
-		uint32 Width = 256;
-		uint32 Height = 256;
-		uint32* ColorBuffer = new uint32[Width * Height];
-
-		for (uint32 i = 0; i < Width * Height; i++)
-		{
-			ColorBuffer[i] = ColorMask;
-		}
-
-		D3D11_SUBRESOURCE_DATA TextureData;
-		TextureData.pSysMem = ColorBuffer;
-		TextureData.SysMemPitch = Width * 4;
-		TextureData.SysMemSlicePitch = 0;
-
-		D3D11_TEXTURE2D_DESC TextureDescription = { 0 };
-		TextureDescription.Width = Width;
-		TextureDescription.Height = Height;
-		TextureDescription.MipLevels = 1;
-		TextureDescription.ArraySize = 1;
-		TextureDescription.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
-		TextureDescription.SampleDesc.Count = 1;
-		TextureDescription.SampleDesc.Quality = 0;
-		TextureDescription.Usage = D3D11_USAGE_DEFAULT;
-		TextureDescription.BindFlags = D3D11_BIND_SHADER_RESOURCE;
-		TextureDescription.CPUAccessFlags = 0;
-		TextureDescription.MiscFlags = 0;
-		
-		ID3D11Texture2D* Texture = NULL;
-		Result = Device->CreateTexture2D(&TextureDescription, &TextureData, &Texture);
-
-		D3D11_SHADER_RESOURCE_VIEW_DESC SRVDescription = { };
-		SRVDescription.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
-		SRVDescription.ViewDimension = D3D11_SRV_DIMENSION_TEXTURE2D;
-		SRVDescription.Texture2D.MostDetailedMip = 0;
-		SRVDescription.Texture2D.MipLevels = -1;
-		Result = Device->CreateShaderResourceView(Texture, &SRVDescription, &m_ShaderResourceView);
-		
-		D3D11_SAMPLER_DESC SamplerDescription = { };
-		SamplerDescription.Filter = D3D11_FILTER_MIN_MAG_MIP_LINEAR;
-		SamplerDescription.AddressU = D3D11_TEXTURE_ADDRESS_WRAP;
-		SamplerDescription.AddressV = D3D11_TEXTURE_ADDRESS_WRAP;
-		SamplerDescription.AddressW = D3D11_TEXTURE_ADDRESS_WRAP;
-		SamplerDescription.ComparisonFunc = D3D11_COMPARISON_NEVER;
-		SamplerDescription.MinLOD = 0;
-		SamplerDescription.MaxLOD = D3D11_FLOAT32_MAX;
-		Result = Device->CreateSamplerState(&SamplerDescription, &m_SamplerState);
-
-		delete ColorBuffer;
-		Texture->Release();
-	}
-
-	void Free()
-	{
-		m_ShaderResourceView->Release();
-		m_SamplerState->Release();
-	}
-};
-
-struct test_object
-{
-	vertex_shader			m_VertexShader;
-	pixel_shader			m_PixelShader;
-	test_mesh*				m_Mesh;
-	test_texture*			m_Texture;
-	ID3D11RasterizerState*	m_RasterizerState; // TODO: maybe this should be part of renderpasses?
-	DirectX::XMFLOAT3		m_Position;
-
-	void Initialize(ID3D11Device* Device, test_mesh* Mesh, test_texture* Texture)
-	{
-		m_Mesh = Mesh;
-		m_Texture = Texture;
-		m_VertexShader.Initialize(Device);
-		m_PixelShader.Initialize(Device);
-		D3D11_RASTERIZER_DESC RasterizerStateDescription = { };
-		RasterizerStateDescription.FillMode = D3D11_FILL_WIREFRAME;
-		RasterizerStateDescription.CullMode = D3D11_CULL_NONE;
-		HRESULT Result = Device->CreateRasterizerState(&RasterizerStateDescription, &m_RasterizerState);
-	}
-
-	void SetState(ID3D11DeviceContext* DeviceContext)
-	{
-		uint32 Stride = sizeof(vertex);
-		uint32 Offset = 0;
-		DeviceContext->IASetIndexBuffer(m_Mesh->m_IndexBuffer, DXGI_FORMAT_R32_UINT, 0);
-		DeviceContext->IASetVertexBuffers(0, 1, &m_Mesh->m_VertexBuffer, &Stride, &Offset);
-		DeviceContext->IASetInputLayout(m_VertexShader.InputLayout);
-		DeviceContext->VSSetShader(m_VertexShader.Shader, 0, 0);
-		DeviceContext->VSSetConstantBuffers(0, 1, &m_VertexShader.ConstantBuffer);
-		DeviceContext->PSSetShader(m_PixelShader.Shader, 0, 0);
-		DeviceContext->PSSetShaderResources(0, 1, &m_Texture->m_ShaderResourceView);
-		DeviceContext->PSSetSamplers(0, 1, &m_Texture->m_SamplerState);
-		//DeviceContext->RSSetState(NULL);
-	}
-
-	void Free()
-	{
-		m_RasterizerState->Release();
-		m_VertexShader.Free();
-		m_PixelShader.Free();
-		m_Mesh->Free();
-		m_Texture->Free();
-		delete m_Mesh;
-		delete m_Texture;
-	}
-};
-
-test_object TestObject;
-test_object TestObject2;
 
 render_system::render_system(HWND Window, HINSTANCE Instance)
 {
@@ -246,8 +85,12 @@ render_system::render_system(HWND Window, HINSTANCE Instance)
 	// ??
 	m_DeviceContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 
-	// TEST 
+	// TEST
 	InitScene();
+	m_FontMedium.InitializeFromFile("data/font/iosevka-ss10-regular.ttf", 0, 22, m_Device);
+	m_FontSmall.InitializeFromFile("data/font/iosevka-ss10-regular.ttf", 0, SMALL_TEXT_SIZE, m_Device);
+	m_OverlayTransform = DirectX::XMMatrixOrthographicLH(RESOLUTION_WIDTH, RESOLUTION_HEIGHT, 1.0f, 1000.0f);
+	m_Rectangle.Initialize(m_Device, 0.0f, 0.0f, 1.0f, 1.0f);
 }
 
 render_system::~render_system()
@@ -259,130 +102,516 @@ render_system::~render_system()
 	m_DepthStencilView->Release();
 }
 
-void render_system::Render()
+void render_system::Clear()
 {
-	const float ClearColor[4] = { 0.15f, 0.15f, 0.15f, 1.0f };
+	const float ClearColor[4] = { 0.45f, 0.45f, 0.45f, 1.0f };
 	m_DeviceContext->ClearDepthStencilView(m_DepthStencilView, D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1.0f, 0);
 	m_DeviceContext->ClearRenderTargetView(m_MainRenderTargetView, ClearColor);
+}
 
+void render_system::Render(camera* Camera)
+{
+	PROFILE();
 	// Camera transform
-	DirectX::XMVECTOR CameraPosition = DirectX::XMVectorSet(-2.0f, 1.75f, -3.0f, 0.0f);
-	DirectX::XMVECTOR CameraTarget = DirectX::XMVectorSet(0.0f, 0.0f, 4.0f, 0.0f);
-	DirectX::XMVECTOR CameraUp = DirectX::XMVectorSet(0.0f, 1.0f, 0.0f, 0.0f);
-
-	float FOV = 59.0f * (3.14f / 180.0f);
-	DirectX::XMMATRIX ViewMatrix = DirectX::XMMatrixLookAtLH(CameraPosition, CameraTarget, CameraUp);
+	float FOV = Camera->m_FOV * (3.14f / 180.0f);
+	DirectX::XMVECTOR CameraPosition = DirectX::XMVectorSet(Camera->m_Position.x, Camera->m_Position.y, Camera->m_Position.z, 0.0f);
+	DirectX::XMMATRIX ViewMatrix = DirectX::XMMatrixLookToLH(CameraPosition, Camera->m_Target, Camera->m_UpDirection);
 	DirectX::XMMATRIX ProjectionMatrix = DirectX::XMMatrixPerspectiveFovLH(FOV, (float)RESOLUTION_WIDTH / (float)RESOLUTION_HEIGHT, 1.0f, 1000.0f);
 	DirectX::XMMATRIX VPMatrix = ViewMatrix * ProjectionMatrix;
+}
 
-	RenderTest(&TestObject, VPMatrix);
-	RenderTest(&TestObject2, VPMatrix);
+void render_system::Render(scene_graph* Scene)
+{
+	camera* Camera = Scene->m_Camera;
+	float FOV = Camera->m_FOV * (3.14f / 180.0f);
+	DirectX::XMVECTOR CameraPosition = DirectX::XMVectorSet(Camera->m_Position.x, Camera->m_Position.y, Camera->m_Position.z, 0.0f);
+	DirectX::XMMATRIX ViewMatrix = DirectX::XMMatrixLookToLH(CameraPosition, Camera->m_Target, Camera->m_UpDirection);
+	DirectX::XMMATRIX ProjectionMatrix = DirectX::XMMatrixPerspectiveFovLH(FOV, (float)RESOLUTION_WIDTH / (float)RESOLUTION_HEIGHT, 1.0f, 1000.0f);
+	DirectX::XMMATRIX VPMatrix = ViewMatrix * ProjectionMatrix;
+	
+	m_DeviceContext->IASetInputLayout(m_RenderStateCharacter.m_OffscreenPass.m_InputLayout);
+	m_DeviceContext->VSSetShader(m_RenderStateCharacter.m_OffscreenPass.m_VertexShader, 0, 0);
+	m_DeviceContext->VSSetConstantBuffers(0, 1, &m_RenderStateCharacter.m_OffscreenPass.m_CbPerObject);
+	m_DeviceContext->PSSetShader(m_RenderStateCharacter.m_OffscreenPass.m_PixelShader, 0, 0);
+	m_DeviceContext->PSSetConstantBuffers(0, 1, &m_RenderStateCharacter.m_OffscreenPass.m_CbPerFrame);
 
+	const float ClearColor[4] = { 0.45f, 0.45f, 0.45f, 1.0f };
+	m_DeviceContext->ClearRenderTargetView(m_RenderStateCharacter.m_OffScreenTarget[0], ClearColor);
+	m_DeviceContext->ClearDepthStencilView(m_RenderStateCharacter.m_OffscreenDepthView, D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1.0f, 0);
+	m_DeviceContext->OMSetRenderTargets(1, &m_RenderStateCharacter.m_OffScreenTarget[0], m_RenderStateCharacter.m_OffscreenDepthView);
+
+	// P1
+	float OffFOV = 59.0f * (3.14f / 180.0f);
+	DirectX::XMVECTOR OffCameraPosition = DirectX::XMVectorSet(0.0f, 0.0f, -9.3f, 0.0f);
+	DirectX::XMVECTOR OffCameraTarget = DirectX::XMVectorSet(0.0f, 0.0f, 1.0f, 0.0f);
+	DirectX::XMVECTOR OffCameraUp = DirectX::XMVectorSet(0.0f, 1.0f, 0.0f, 0.0f);
+	DirectX::XMMATRIX OffViewMatrix = DirectX::XMMatrixLookToLH(OffCameraPosition, OffCameraTarget, OffCameraUp);
+	DirectX::XMMATRIX OffProjectionMatrix = DirectX::XMMatrixPerspectiveFovLH(OffFOV, (float)RESOLUTION_WIDTH / (float)RESOLUTION_HEIGHT, 1.0f, 1000.0f);
+	DirectX::XMMATRIX OffVPMatrix = OffViewMatrix * OffProjectionMatrix;
+	SceneGraph->m_CharacterNodes[0].m_OffscreenTransforms.m_MVPTransform = OffVPMatrix;
+	Scene->m_CharacterNodes[0].m_OffscreenTransforms.m_MVPTransform = DirectX::XMMatrixTranspose(OffVPMatrix) * Scene->m_CharacterNodes[0].m_OffscreenTransforms.m_WorldTransform;
+	CharacterOffscreenPass(&Scene->m_CharacterNodes[0], m_RenderStateCharacter.m_OffScreenTarget[0]);
+
+	m_DeviceContext->UpdateSubresource(
+		m_RenderStateCharacter.m_OutlinePass.m_CbPerFrame, 0, NULL,
+		&Scene->m_CharacterNodes[0].m_OutlineProperties, 0, 0);
+
+	uint32 Stride = sizeof(vertex_3D);
+	uint32 Offset = 0;
+	m_DeviceContext->RSSetState(m_RenderStateCharacter.m_OutlineRasterizer);
+	m_DeviceContext->VSSetShader(m_RenderStateCharacter.m_OutlinePass.m_VertexShader, NULL, 0);
+	m_DeviceContext->PSSetShader(m_RenderStateCharacter.m_OutlinePass.m_PixelShader, NULL, 0);
+	m_DeviceContext->PSSetConstantBuffers(0, 1, &m_RenderStateCharacter.m_OutlinePass.m_CbPerFrame);
+	m_DeviceContext->DrawIndexed(Scene->m_CharacterNodes[0].m_Mesh.m_IndexEntryCount, 0, 0);
+	m_DeviceContext->RSSetState(NULL);
+
+	// TODO: Offscreen target
+
+	m_DeviceContext->OMSetRenderTargets(1, &m_MainRenderTargetView, m_DepthStencilView);
+
+	// Sprite
+	m_DeviceContext->IASetVertexBuffers(0, 1, &m_TexturedQuad.m_VertexBuffer, &Stride, &Offset);
+	m_DeviceContext->VSSetShader(m_TexturedQuad.m_VertexShader, NULL, 0);
+	m_DeviceContext->PSSetShader(m_TexturedQuad.m_PixelShader, NULL, 0);
+	XMMATRIX Matrices[2] = { XMMatrixScaling(4.0f, 4.0f, 1.0f) };
+	Matrices[1] = XMMatrixTranspose(Matrices[0] * VPMatrix);
+	m_DeviceContext->UpdateSubresource(
+		m_RenderStateCharacter.m_OffscreenPass.m_CbPerObject, 0, NULL,
+		&Matrices, 0, 0);
+	m_DeviceContext->PSSetSamplers(0, 1, &m_RenderStateCharacter.m_SpriteSampler);
+	m_DeviceContext->PSSetShaderResources(0, 1, &m_RenderStateCharacter.m_SpriteTexture[0]);
+	m_DeviceContext->Draw(6, 0);
+}
+
+void render_system::Present()
+{
 	m_SwapChain->Present(0, 0);
+}
+
+void render_system::DrawString(float XOffset, float YOffset, float Scale, const char* String ...)
+{
+	char Buffer[512];
+	va_list args;
+	va_start(args, String);
+	vsnprintf(Buffer, 512, String, args);
+	va_end(args);
+
+	RenderText(&m_FontMedium, XOffset, YOffset, Scale, Buffer);
+}
+
+void render_system::DrawStringSmall(float XOffset, float YOffset, float Scale, const char* String ...)
+{
+	char Buffer[512];
+	va_list args;
+	va_start(args, String);
+	vsnprintf(Buffer, 512, String, args);
+	va_end(args);
+
+	RenderText(&m_FontSmall, XOffset, YOffset, Scale, Buffer);
+}
+
+void render_system::DrawStringSmallRightAligned(float XOffset, float YOffset, float Scale, const char* String ...)
+{
+	char Buffer[512];
+	va_list args;
+	va_start(args, String);
+	vsnprintf(Buffer, 512, String, args);
+	va_end(args);
+
+	RenderTextRightAligned(&m_FontSmall, XOffset, YOffset, Scale, Buffer);
+}
+
+void render_system::DrawRectangle(XMMATRIX* Transform, XMFLOAT4 Color)
+{
+	m_DeviceContext->OMSetRenderTargets(1, &m_MainRenderTargetView, NULL);
+	m_Rectangle.SetTransform(Transform);
+	m_Rectangle.Render(m_DeviceContext, Color, &m_OverlayTransform);
+	m_DeviceContext->OMSetRenderTargets(1, &m_MainRenderTargetView, m_DepthStencilView);
 }
 
 void render_system::InitScene()
 {
-	uint32 Indices[] =
+	vertex_3D Vertices[] =
 	{
-		// Front Face
-		0,  1,  2,
-		0,  2,  3,
-
-		// Back Face
-		4,  5,  6,
-		4,  6,  7,
-
-		// Top Face
-		8,  9, 10,
-		8, 10, 11,
-
-		// Bottom Face
-		12, 13, 14,
-		12, 14, 15,
-
-		// Left Face
-		16, 17, 18,
-		16, 18, 19,
-
-		// Right Face
-		20, 21, 22,
-		20, 22, 23
+		vertex_3D(-1.0f, -1.0f, -1.0f, 0.0f, 1.0f, -1.0f, -1.0f, -1.0f),
+		vertex_3D(-1.0f, 1.0f, -1.0f, 0.0f, 0.0f, -1.0f, 1.0f, -1.0f),
+		vertex_3D(1.0f, 1.0f, -1.0f, 1.0f, 0.0f, 1.0f, 1.0f, -1.0f),
+		vertex_3D(-1.0f, -1.0f, -1.0f, 0.0f, 1.0f, -1.0f, -1.0f, -1.0f),
+		vertex_3D(1.0f, 1.0f, -1.0f, 1.0f, 0.0f, 1.0f, 1.0f, -1.0f),
+		vertex_3D(1.0f, -1.0f, -1.0f, 1.0f, 1.0f, 1.0f, -1.0f, -1.0f)
 	};
-	vertex Vertices[] =
-	{
-		// Front Face
-		vertex(-1.0f, -1.0f, -1.0f, 0.0f, 1.0f),
-		vertex(-1.0f,  1.0f, -1.0f, 0.0f, 0.0f),
-		vertex(1.0f,  1.0f, -1.0f, 1.0f, 0.0f),
-		vertex(1.0f, -1.0f, -1.0f, 1.0f, 1.0f),
 
-		// Back Face
-		vertex(-1.0f, -1.0f, 1.0f, 1.0f, 1.0f),
-		vertex(1.0f, -1.0f, 1.0f, 0.0f, 1.0f),
-		vertex(1.0f,  1.0f, 1.0f, 0.0f, 0.0f),
-		vertex(-1.0f,  1.0f, 1.0f, 1.0f, 0.0f),
+	D3D11_BUFFER_DESC VertexBufferDescription = { 0 };
+	VertexBufferDescription.Usage = D3D11_USAGE_DEFAULT;
+	VertexBufferDescription.ByteWidth = sizeof(vertex_3D) * ARRAYSIZE(Vertices);
+	VertexBufferDescription.BindFlags = D3D11_BIND_VERTEX_BUFFER;
+	VertexBufferDescription.CPUAccessFlags = 0;
+	VertexBufferDescription.MiscFlags = 0;
 
-		// Top Face
-		vertex(-1.0f, 1.0f, -1.0f, 0.0f, 1.0f),
-		vertex(-1.0f, 1.0f,  1.0f, 0.0f, 0.0f),
-		vertex(1.0f, 1.0f,  1.0f, 1.0f, 0.0f),
-		vertex(1.0f, 1.0f, -1.0f, 1.0f, 1.0f),
+	D3D11_SUBRESOURCE_DATA VertexBufferData = { 0 };
+	VertexBufferData.pSysMem = Vertices;
+	HRESULT Result = m_Device->CreateBuffer(&VertexBufferDescription, &VertexBufferData, &m_TexturedQuad.m_VertexBuffer);
 
-		// Bottom Face
-		vertex(-1.0f, -1.0f, -1.0f, 1.0f, 1.0f),
-		vertex(1.0f, -1.0f, -1.0f, 0.0f, 1.0f),
-		vertex(1.0f, -1.0f,  1.0f, 0.0f, 0.0f),
-		vertex(-1.0f, -1.0f,  1.0f, 1.0f, 0.0f),
+	ID3D10Blob* VSBuffer = NULL;
+	Result = D3DCompileFromFile(L"Shaders/TexturedQuad.fx", 0, 0, "VS", "vs_4_0", 0, 0, &VSBuffer, 0);
+	Result = m_Device->CreateVertexShader(VSBuffer->GetBufferPointer(), VSBuffer->GetBufferSize(), NULL, &m_TexturedQuad.m_VertexShader);
+	VSBuffer->Release();
 
-		// Left Face
-		vertex(-1.0f, -1.0f,  1.0f, 0.0f, 1.0f),
-		vertex(-1.0f,  1.0f,  1.0f, 0.0f, 0.0f),
-		vertex(-1.0f,  1.0f, -1.0f, 1.0f, 0.0f),
-		vertex(-1.0f, -1.0f, -1.0f, 1.0f, 1.0f),
+	ID3D10Blob* PSBuffer = NULL;
+	Result = D3DCompileFromFile(L"Shaders/TexturedQuad.fx", 0, 0, "PS", "ps_4_0", 0, 0, &PSBuffer, 0);
+	Result = m_Device->CreatePixelShader(PSBuffer->GetBufferPointer(), PSBuffer->GetBufferSize(), NULL, &m_TexturedQuad.m_PixelShader);
+	PSBuffer->Release();
 
-		// Right Face
-		vertex(1.0f, -1.0f, -1.0f, 0.0f, 1.0f),
-		vertex(1.0f,  1.0f, -1.0f, 0.0f, 0.0f),
-		vertex(1.0f,  1.0f,  1.0f, 1.0f, 0.0f),
-		vertex(1.0f, -1.0f,  1.0f, 1.0f, 1.0f)
-	};
-	uint32 VertexCount = ARRAYSIZE(Vertices);
-	uint32 IndexEntryCount = ARRAYSIZE(Indices);
-	test_mesh* Mesh = new test_mesh();
-	Mesh->Initialize(m_Device, Indices, IndexEntryCount, Vertices, VertexCount);
-	test_texture* Texture = new test_texture();
-	Texture->Initialize(m_Device, 0xFF00FFFF);
-	TestObject.Initialize(m_Device, Mesh, Texture);
-	TestObject.m_Position.x = 0.0f;
-	TestObject.m_Position.y = 0.0f;
-	TestObject.m_Position.z = 4.0f;
+	mesh Mesh = assets::LoadMeshFromFile("data/shitman.dae");
+	uint32 IndexEntryCount = Mesh.FaceCount * 3;
+	uint32 VertexCount = Mesh.VertexCount;
 
-	test_texture* Texture2 = new test_texture();
-	Texture2->Initialize(m_Device, 0xFFFF00FF);
-	TestObject2.Initialize(m_Device, Mesh, Texture2);
-	TestObject2.m_Position.x = -3.0f;
-	TestObject2.m_Position.y = 0.0f;
-	TestObject2.m_Position.z = 8.0f;
+	D3D11_BUFFER_DESC IndexBufferDescription = { 0 };
+	IndexBufferDescription.Usage = D3D11_USAGE_DEFAULT;
+	IndexBufferDescription.ByteWidth = sizeof(uint32) * IndexEntryCount;
+	IndexBufferDescription.BindFlags = D3D11_BIND_INDEX_BUFFER;
+	IndexBufferDescription.CPUAccessFlags = 0;
+	IndexBufferDescription.MiscFlags = 0;
+
+	D3D11_SUBRESOURCE_DATA IndexBufferData = { 0 };
+	IndexBufferData.pSysMem = Mesh.Faces;
+	Result = m_Device->CreateBuffer(&IndexBufferDescription, &IndexBufferData, &SceneGraph->m_CharacterNodes[0].m_Mesh.m_IndexBuffer);
+	SceneGraph->m_CharacterNodes[0].m_Mesh.m_IndexEntryCount = IndexEntryCount;
+	SceneGraph->m_CharacterNodes[0].m_Mesh.m_VertexCount = Mesh.VertexCount;
+	SceneGraph->m_CharacterNodes[0].m_Mesh.CreateVertexBuffer(m_Device, Mesh.Vertices);
+	delete Mesh.Faces;
+	delete Mesh.Vertices;
+
+	SceneGraph->m_CharacterNodes[0].m_OffscreenLights.m_DirectionalLight.Ambient = DirectX::XMFLOAT4(0.35f, 0.35f, 0.35f, 1.0f);
+	SceneGraph->m_CharacterNodes[0].m_OffscreenLights.m_DirectionalLight.Diffuse = DirectX::XMFLOAT4(0.78f, 0.78f, 0.78f, 1.0f);
+	SceneGraph->m_CharacterNodes[0].m_OffscreenLights.m_DirectionalLight.Direction = DirectX::XMFLOAT3(-0.40f, -0.1f, 0.15f);
+	DirectX::XMVECTOR Direction = DirectX::XMLoadFloat3(&SceneGraph->m_CharacterNodes[0].m_OffscreenLights.m_DirectionalLight.Direction);
+	Direction = XMVector3Normalize(-Direction);
+	XMStoreFloat3(&SceneGraph->m_CharacterNodes[0].m_OffscreenLights.m_DirectionalLight.Direction, Direction);
+	XMFLOAT3 Axis = XMFLOAT3(0.0f, 1.0f, 0.0f);
+	XMVECTOR AxisVector = XMLoadFloat3(&Axis);
+	XMMATRIX Rotation = XMMatrixRotationAxis(AxisVector, -45.0f * (3.14f / 180.0f));
+	SceneGraph->m_CharacterNodes[0].m_OffscreenTransforms.m_WorldTransform = XMMatrixTranspose( DirectX::XMMatrixIdentity() );
+
+	float FOV = 59.0f * (3.14f / 180.0f);
+	DirectX::XMVECTOR CameraPosition = DirectX::XMVectorSet(0.0f, 0.0f, -5.0f, 0.0f);
+	DirectX::XMVECTOR CameraTarget = DirectX::XMVectorSet(0.0f, 0.0f, 1.0f, 0.0f);
+	DirectX::XMVECTOR CameraUp = DirectX::XMVectorSet(0.0f, 1.0f, 0.0f, 0.0f);
+	DirectX::XMMATRIX ViewMatrix = DirectX::XMMatrixLookToLH(CameraPosition, CameraTarget, CameraUp);
+	DirectX::XMMATRIX ProjectionMatrix = DirectX::XMMatrixPerspectiveFovLH(FOV, (float)RESOLUTION_WIDTH / (float)RESOLUTION_HEIGHT, 1.0f, 1000.0f);
+	DirectX::XMMATRIX VPMatrix = ViewMatrix * ProjectionMatrix;
+	SceneGraph->m_CharacterNodes[0].m_OffscreenTransforms.m_MVPTransform = VPMatrix;
+
+	SceneGraph->m_CharacterNodes[0].m_OutlineProperties.m_Color = XMFLOAT4(0.0f, 0.0f, 0.0f, 1.0f);
+	SceneGraph->m_CharacterNodes[0].m_OutlineProperties.m_Thickness = 0.3f;
+
+	InitRenderStates();
 }
 
-void render_system::RenderTest(test_object* TestObject, DirectX::XMMATRIX VPMatrix)
+void render_system::InitRenderStates()
 {
-	static float Rotation = 0.0f;
-	Rotation += 0.0055f;
-	if (Rotation > 6.28f)
-		Rotation = 0.0f;
+	// *** OFFSCREEN CHARACTER PASS
+	// Vertex shader
+	// TODO: Error checking
+	HRESULT Result;
+	ID3D10Blob* ErrorBlob = NULL;
+	ID3D10Blob* VSBuffer = NULL;
+	D3D11_INPUT_ELEMENT_DESC LayoutDescription[] =
+	{
+		{ "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0, D3D11_INPUT_PER_VERTEX_DATA, 0 },
+		{ "TEXCOORD", 0, DXGI_FORMAT_R32G32_FLOAT, 0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0 },
+		{ "NORMAL", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0 }
+	};
+	uint32 InputCount = ARRAYSIZE(LayoutDescription);
+	Result = D3DCompileFromFile(L"Shaders/CharacterOffscreen.fx", 0, 0, "VS", "vs_4_0", D3DCOMPILE_DEBUG, 0, &VSBuffer, &ErrorBlob);
+	if (Result)
+	{
+		if (ErrorBlob)
+		{
+			char* Error = (char*)ErrorBlob->GetBufferPointer();
+			int b = 2;
+		}
+	}
+	Result = m_Device->CreateVertexShader(
+		VSBuffer->GetBufferPointer(), 
+		VSBuffer->GetBufferSize(), 
+		NULL, 
+		&m_RenderStateCharacter.m_OffscreenPass.m_VertexShader);
+	Result = m_Device->CreateInputLayout(
+		LayoutDescription, InputCount, 
+		VSBuffer->GetBufferPointer(), 
+		VSBuffer->GetBufferSize(), 
+		&m_RenderStateCharacter.m_OffscreenPass.m_InputLayout);
+	VSBuffer->Release();
 
-	// Object transform
+	D3D11_BUFFER_DESC ConstantBufferDescription = { 0 };
+	ConstantBufferDescription.Usage = D3D11_USAGE_DEFAULT;
+	ConstantBufferDescription.ByteWidth = sizeof(character_node::offscreen_transforms);
+	ConstantBufferDescription.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
+	ConstantBufferDescription.CPUAccessFlags = 0;
+	ConstantBufferDescription.MiscFlags = 0;
+	m_Device->CreateBuffer(&ConstantBufferDescription, NULL, &m_RenderStateCharacter.m_OffscreenPass.m_CbPerObject);
+
+	// Pixel shader
+	ID3D10Blob* PSBuffer;
+	Result = D3DCompileFromFile(L"Shaders/CharacterOffscreen.fx", 0, 0, "PS", "ps_4_0", 0, 0, &PSBuffer, 0);
+	Result = m_Device->CreatePixelShader(
+		PSBuffer->GetBufferPointer(), 
+		PSBuffer->GetBufferSize(), 
+		NULL, 
+		&m_RenderStateCharacter.m_OffscreenPass.m_PixelShader);
+	PSBuffer->Release();
+
+	ZeroMemory(&ConstantBufferDescription, sizeof(ConstantBufferDescription));
+	ConstantBufferDescription.Usage = D3D11_USAGE_DEFAULT;
+	ConstantBufferDescription.ByteWidth = sizeof(character_node::character_lights);
+	ConstantBufferDescription.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
+	ConstantBufferDescription.CPUAccessFlags = 0;
+	ConstantBufferDescription.MiscFlags = 0;
+	m_Device->CreateBuffer(&ConstantBufferDescription, NULL, &m_RenderStateCharacter.m_OffscreenPass.m_CbPerFrame);
+	
+	float OFFSCREEN_TEXTURE_WIDTH = 1024;
+	float OFFSCREEN_TEXTURE_HEIGHT = 1024;
+
+	// Render target
+	ID3D11Texture2D* OffscreenTexture = NULL;
+	D3D11_TEXTURE2D_DESC TextureDescription = { 0 };
+	TextureDescription.Width = OFFSCREEN_TEXTURE_WIDTH;
+	TextureDescription.Height = OFFSCREEN_TEXTURE_HEIGHT;
+	TextureDescription.MipLevels = 1;
+	TextureDescription.ArraySize = 1;
+	TextureDescription.Format = DXGI_FORMAT_R32G32B32A32_FLOAT;
+	TextureDescription.SampleDesc.Count = 1;
+	TextureDescription.Usage = D3D11_USAGE_DEFAULT;
+	TextureDescription.BindFlags = D3D11_BIND_SHADER_RESOURCE | D3D11_BIND_RENDER_TARGET;
+	TextureDescription.CPUAccessFlags = 0;
+	TextureDescription.MiscFlags = 0;
+	Result = m_Device->CreateTexture2D(&TextureDescription, NULL, &OffscreenTexture);
+	if (Result)
+		int b = 2;
+
+	D3D11_RENDER_TARGET_VIEW_DESC RenderTargetDescription;
+	RenderTargetDescription.Format = TextureDescription.Format;
+	RenderTargetDescription.ViewDimension = D3D11_RTV_DIMENSION_TEXTURE2D;
+	RenderTargetDescription.Texture2D.MipSlice = 0;
+	m_Device->CreateRenderTargetView(OffscreenTexture, &RenderTargetDescription, &m_RenderStateCharacter.m_OffScreenTarget[0]);
+
+	// Shader resource
+	D3D11_SHADER_RESOURCE_VIEW_DESC ShaderResourceDescription;
+	ShaderResourceDescription.Format = TextureDescription.Format;
+	ShaderResourceDescription.ViewDimension = D3D11_SRV_DIMENSION_TEXTURE2D;
+	ShaderResourceDescription.Texture2D.MostDetailedMip = 0;
+	ShaderResourceDescription.Texture2D.MipLevels = 1;
+	m_Device->CreateShaderResourceView(OffscreenTexture, &ShaderResourceDescription, &m_RenderStateCharacter.m_SpriteTexture[0]);
+	OffscreenTexture->Release();
+
+	ID3D11Texture2D* DepthStencilBuffer = NULL;
+	D3D11_TEXTURE2D_DESC DepthStencilDescription = { 0 };
+	DepthStencilDescription.Width = OFFSCREEN_TEXTURE_WIDTH;
+	DepthStencilDescription.Height = OFFSCREEN_TEXTURE_HEIGHT;
+	DepthStencilDescription.MipLevels = 1;
+	DepthStencilDescription.ArraySize = 1;
+	DepthStencilDescription.Format = DXGI_FORMAT_D24_UNORM_S8_UINT;
+	DepthStencilDescription.SampleDesc.Count = 1;
+	DepthStencilDescription.SampleDesc.Quality = 0;
+	DepthStencilDescription.Usage = D3D11_USAGE_DEFAULT;
+	DepthStencilDescription.BindFlags = D3D11_BIND_DEPTH_STENCIL;
+	DepthStencilDescription.CPUAccessFlags = 0;
+	DepthStencilDescription.MiscFlags = 0;
+	Result = m_Device->CreateTexture2D(&DepthStencilDescription, NULL, &DepthStencilBuffer);
+	Result = m_Device->CreateDepthStencilView(DepthStencilBuffer, NULL, &m_RenderStateCharacter.m_OffscreenDepthView);
+	DepthStencilBuffer->Release();
+
+	// *** OUTLINE PASS
+	m_RenderStateCharacter.m_OutlinePass.m_InputLayout = m_RenderStateCharacter.m_OffscreenPass.m_InputLayout;
+	Result = D3DCompileFromFile(L"Shaders/CharacterOutline.fx", 0, 0, "VS", "vs_4_0", D3DCOMPILE_DEBUG, 0, &VSBuffer, &ErrorBlob);
+	if (Result)
+	{
+		if (ErrorBlob)
+		{
+			char* Error = (char*)ErrorBlob->GetBufferPointer();
+			int b = 2;
+		}
+	}
+	Result = m_Device->CreateVertexShader(
+		VSBuffer->GetBufferPointer(),
+		VSBuffer->GetBufferSize(),
+		NULL,
+		&m_RenderStateCharacter.m_OutlinePass.m_VertexShader);
+	VSBuffer->Release();
+	
+	ZeroMemory(&ConstantBufferDescription, sizeof(ConstantBufferDescription));
+	ConstantBufferDescription.Usage = D3D11_USAGE_DEFAULT;
+	ConstantBufferDescription.ByteWidth = sizeof(character_node::outline_properties);
+	ConstantBufferDescription.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
+	ConstantBufferDescription.CPUAccessFlags = 0;
+	ConstantBufferDescription.MiscFlags = 0;
+	m_Device->CreateBuffer(&ConstantBufferDescription, NULL, &m_RenderStateCharacter.m_OutlinePass.m_CbPerFrame);
+
+	D3D11_RASTERIZER_DESC RasterizerStateDescription;
+	ZeroMemory(&RasterizerStateDescription, sizeof(RasterizerStateDescription));
+	RasterizerStateDescription.FillMode = D3D11_FILL_SOLID;
+	RasterizerStateDescription.CullMode = D3D11_CULL_FRONT;
+	RasterizerStateDescription.FrontCounterClockwise = false;
+	m_Device->CreateRasterizerState(&RasterizerStateDescription, &m_RenderStateCharacter.m_OutlineRasterizer);
+
+	Result = D3DCompileFromFile(L"Shaders/CharacterOutline.fx", 0, 0, "PS", "ps_4_0", 0, 0, &PSBuffer, 0);
+	Result = m_Device->CreatePixelShader(
+		PSBuffer->GetBufferPointer(),
+		PSBuffer->GetBufferSize(),
+		NULL,
+		&m_RenderStateCharacter.m_OutlinePass.m_PixelShader);
+	PSBuffer->Release();
+
+	// *** SPRITE PASS
+	D3D11_SAMPLER_DESC SamplerDescription = { };
+	SamplerDescription.Filter = D3D11_FILTER_ANISOTROPIC;
+	SamplerDescription.AddressU = D3D11_TEXTURE_ADDRESS_WRAP;
+	SamplerDescription.AddressV = D3D11_TEXTURE_ADDRESS_WRAP;
+	SamplerDescription.AddressW = D3D11_TEXTURE_ADDRESS_WRAP;
+	SamplerDescription.ComparisonFunc = D3D11_COMPARISON_NEVER;
+	SamplerDescription.MinLOD = 0;
+	SamplerDescription.MaxLOD = D3D11_FLOAT32_MAX;
+	Result = m_Device->CreateSamplerState(&SamplerDescription, &m_RenderStateCharacter.m_SpriteSampler);
+}
+
+void render_system::CharacterOffscreenPass(character_node* Node, ID3D11RenderTargetView* RenderTarget)
+{
+	// TODO: Maps
+	uint32 Stride = sizeof(vertex_3D);
+	uint32 Offset = 0;
+	m_DeviceContext->IASetIndexBuffer(Node->m_Mesh.m_IndexBuffer, DXGI_FORMAT_R32_UINT, 0);
+	m_DeviceContext->IASetVertexBuffers(0, 1, &Node->m_Mesh.m_VertexBuffer, &Stride, &Offset);
+	// TODO: Switch to dynamic usage (map/unmap)
+	m_DeviceContext->UpdateSubresource(
+		m_RenderStateCharacter.m_OffscreenPass.m_CbPerObject, 0, NULL, 
+		&Node->m_OffscreenTransforms, 0, 0);
+	m_DeviceContext->UpdateSubresource(
+		m_RenderStateCharacter.m_OffscreenPass.m_CbPerFrame, 0, NULL,
+		&Node->m_OffscreenLights, 0, 0);
+	// TODO: Offscreen target
+	m_DeviceContext->DrawIndexed(Node->m_Mesh.m_IndexEntryCount, 0, 0);
+}
+
+void render_system::RenderTest(test_object2* TestObject, DirectX::XMMATRIX VPMatrix)
+{
+// Object transform
 	DirectX::XMMATRIX TranslationMatrix = DirectX::XMMatrixTranslation(TestObject->m_Position.x, TestObject->m_Position.y, TestObject->m_Position.z);
+	//DirectX::XMMATRIX RotationMatrix = DirectX::XMMatrixRotationY(Rotation);
 	DirectX::XMMATRIX RotationMatrix = DirectX::XMMatrixIdentity();
-	DirectX::XMMATRIX ScalingMatrix = DirectX::XMMatrixIdentity();
-	DirectX::XMMATRIX ModelMatrix = ScalingMatrix * RotationMatrix * TranslationMatrix;
-	DirectX::XMMATRIX MVPMatrix = DirectX::XMMatrixTranspose(ModelMatrix * VPMatrix);
+	DirectX::XMMATRIX ScalingMatrix = DirectX::XMMatrixScaling(1.0f, 1.0f, 1.0f);
+	TestObject->m_CbPerObject.WorldTransform = ScalingMatrix * RotationMatrix * TranslationMatrix;
+	TestObject->m_CbPerObject.MVPTransform = DirectX::XMMatrixTranspose(TestObject->m_CbPerObject.WorldTransform * VPMatrix);
 
 	// Update constant buffer
-	m_DeviceContext->UpdateSubresource(TestObject->m_VertexShader.ConstantBuffer, 0, NULL, &MVPMatrix, 0, 0);
 	TestObject->SetState(m_DeviceContext);
-
+	m_DeviceContext->UpdateSubresource(TestObject->m_VertexShader.ConstantBuffer, 0, NULL, &TestObject->m_CbPerObject, 0, 0);
+	m_DeviceContext->UpdateSubresource(TestObject->m_PixelShader.ConstantBuffer, 0, NULL, &TestObject->m_CbPerFrame, 0, 0);
 	m_DeviceContext->DrawIndexed(TestObject->m_Mesh->m_IndexEntryCount, 0, 0);
+}
+
+void render_system::RenderText(d3d11_font* Font, float XOffset, float YOffset, float Scale, const char* String)
+{
+	PROFILE();
+	// TODO: transform a quad instead of reuploading positions for every character
+	// TODO: move all the d3d state so it's set only once before rendering anything 2d 
+	int32 StringLength = strlen(String);
+	float BlendFactor[] = { 1.0f, 1.0f, 1.0f, 1.0f };
+	DirectX::XMFLOAT4 Color(1.0f, 1.0f, 1.0f, 1.0f);
+	uint32 Stride[1] = { sizeof(float) * 4 };
+	uint32 Offset[1] = { 0 };
+	
+	m_DeviceContext->IASetInputLayout(Font->m_InputLayout);
+	m_DeviceContext->IASetVertexBuffers(0, 1, &Font->m_VertexBuffer, Stride, Offset);
+	m_DeviceContext->VSSetShader(Font->m_VertexShader, 0, 0);
+	m_DeviceContext->VSSetConstantBuffers(0, 1, &Font->m_ProjectionBuffer);
+	m_DeviceContext->PSSetConstantBuffers(0, 1, &Font->m_ColorBuffer);
+	m_DeviceContext->UpdateSubresource(Font->m_ColorBuffer, 0, NULL, &Color, 0, 0);
+	m_DeviceContext->PSSetShader(Font->m_PixelShader, 0, 0);
+	m_DeviceContext->PSSetSamplers(0, 1, &Font->m_SamplerState);
+	m_DeviceContext->OMSetBlendState(Font->m_BlendState, BlendFactor, 0xFFFFFFFF);
+	m_DeviceContext->OMSetRenderTargets(1, &m_MainRenderTargetView, NULL);
+
+	//XOffset = (XOffset * (RESOLUTION_WIDTH / 2.0f));
+	//YOffset = (YOffset * (RESOLUTION_HEIGHT / 2.0f));
+	//XOffset -= (RESOLUTION_WIDTH / 2.0f);
+	//YOffset -= (RESOLUTION_HEIGHT / 2.0f);
+	float LineStartX = XOffset;
+
+	for (int32 i = 0; i < StringLength; i++)
+	{
+		const char C = String[i];
+		if (C == '\n')
+		{
+			XOffset = LineStartX;
+			YOffset -= (float)Font->m_PixelHeight;
+			continue;
+		}
+		d3d11_character* Character = &Font->m_Characters[String[i]];
+		float X = XOffset + (float)Character->m_BearingX * Scale;
+		float Y = YOffset - (float)(Character->m_Height - Character->m_BearingY) * Scale;
+		float Width = (float)Character->m_Width * Scale;
+		float Height = (float)Character->m_Height * Scale;
+
+		DirectX::XMMATRIX Transform = DirectX::XMMatrixTranspose(DirectX::XMMatrixScaling(Width, Height, 1.0f) * DirectX::XMMatrixTranslation(X, Y, 2.0f) * m_OverlayTransform);
+		m_DeviceContext->UpdateSubresource(Font->m_ProjectionBuffer, 0, NULL, &Transform, 0, 0);
+		
+		m_DeviceContext->PSSetShaderResources(0, 1, &Character->m_ShaderResourceView);
+		m_DeviceContext->Draw(6, 0);
+		XOffset += (Character->m_Advance >> 6) * Scale;
+	}
+	m_DeviceContext->OMSetRenderTargets(1, &m_MainRenderTargetView, m_DepthStencilView);
+}
+
+void render_system::RenderTextRightAligned(d3d11_font* Font, float XOffset, float YOffset, float Scale, const char* String)
+{
+	PROFILE();
+	// TODO: transform a quad instead of reuploading positions for every character
+	int32 StringLength = strlen(String);
+	float BlendFactor[] = { 1.0f, 1.0f, 1.0f, 1.0f };
+	DirectX::XMFLOAT4 Color(1.0f, 1.0f, 1.0f, 1.0f);
+	uint32 Stride[1] = { sizeof(float) * 4 };
+	uint32 Offset[1] = { 0 };
+
+	m_DeviceContext->IASetInputLayout(Font->m_InputLayout);
+	m_DeviceContext->IASetVertexBuffers(0, 1, &Font->m_VertexBuffer, Stride, Offset);
+	m_DeviceContext->VSSetShader(Font->m_VertexShader, 0, 0);
+	m_DeviceContext->VSSetConstantBuffers(0, 1, &Font->m_ProjectionBuffer);
+	m_DeviceContext->PSSetConstantBuffers(0, 1, &Font->m_ColorBuffer);
+	m_DeviceContext->UpdateSubresource(Font->m_ColorBuffer, 0, NULL, &Color, 0, 0);
+	m_DeviceContext->PSSetShader(Font->m_PixelShader, 0, 0);
+	m_DeviceContext->PSSetSamplers(0, 1, &Font->m_SamplerState);
+	m_DeviceContext->OMSetBlendState(Font->m_BlendState, BlendFactor, 0xFFFFFFFF);
+	m_DeviceContext->OMSetRenderTargets(1, &m_MainRenderTargetView, NULL);
+
+	//XOffset = (XOffset * (RESOLUTION_WIDTH / 2.0f));
+	//YOffset = (YOffset * (RESOLUTION_HEIGHT / 2.0f));
+	//XOffset -= (RESOLUTION_WIDTH / 2.0f);
+	//YOffset -= (RESOLUTION_HEIGHT / 2.0f);
+	float LineStartX = XOffset;
+
+	for (int32 i = StringLength - 1; i >= 0; i--)
+	{
+		const char C = String[i];
+		if (C == '\n')
+		{
+			XOffset = LineStartX;
+			YOffset -= (float)Font->m_PixelHeight;
+			continue;
+		}
+		d3d11_character* Character = &Font->m_Characters[String[i]];
+		XOffset -= (Character->m_Advance >> 6) * Scale;
+		float X = XOffset + (float)Character->m_BearingX * Scale;
+		float Y = YOffset - (float)(Character->m_Height - Character->m_BearingY) * Scale;
+		float Width = (float)Character->m_Width * Scale;
+		float Height = (float)Character->m_Height * Scale;
+
+		
+		DirectX::XMMATRIX Transform = DirectX::XMMatrixTranspose(DirectX::XMMatrixScaling(Width, Height, 1.0f) * DirectX::XMMatrixTranslation(X, Y, 2.0f) * m_OverlayTransform);
+		m_DeviceContext->UpdateSubresource(Font->m_ProjectionBuffer, 0, NULL, &Transform, 0, 0);
+		m_DeviceContext->PSSetShaderResources(0, 1, &Character->m_ShaderResourceView);
+		m_DeviceContext->Draw(6, 0);
+	}
+
+	m_DeviceContext->OMSetRenderTargets(1, &m_MainRenderTargetView, m_DepthStencilView);
 }

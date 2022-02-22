@@ -123,7 +123,7 @@ CMN_STATE_RETURN_TYPE(*UpdateCmnState[CMN_STATE_COUNT])(CMN_STATE_SIG) =
 
 inline void CmnStateDefInit(state_script* Script, playerstate* PlayerState)
 {
-	PlayerState->PlaybackState.PlaybackCursor = 0;
+	PlayerState->PlaybackState.Reset();
 	//PlayerState->BufferedJump = 0;
 	PlayerState->DisableHitbox = false;
 	PlayerState->Flags = 0;
@@ -142,7 +142,7 @@ inline void CmnStateDefInit(state_script* Script, playerstate* PlayerState)
 
 inline void CmnStateFWalkInit(state_manager* StateManager, state_script* Script, playerstate* PlayerState)
 {
-	PlayerState->PlaybackState.PlaybackCursor = 0;
+	PlayerState->PlaybackState.Reset();
 	PlayerState->BufferedJump = 0;
 	PlayerState->DisableHitbox = false;
 	PlayerState->Flags = 0;
@@ -161,7 +161,7 @@ inline void CmnStateFWalkInit(state_manager* StateManager, state_script* Script,
 
 inline void CmnStateBWalkInit(state_manager* StateManager, state_script* Script, playerstate* PlayerState)
 {
-	PlayerState->PlaybackState.PlaybackCursor = 0;
+	PlayerState->PlaybackState.Reset();
 	PlayerState->BufferedJump = 0;
 	PlayerState->DisableHitbox = false;
 	PlayerState->Flags = 0;
@@ -189,7 +189,7 @@ inline bool CmnStateCancel(playerstate* PlayerState, state_manager* StateManager
 		{
 			state_script* Script = StateManager->GetScript(MoveDescription->m_ScriptIndex);
 			PlayerState->PlaybackState.State = MoveDescription->m_ScriptIndex;
-			PlayerState->PlaybackState.PlaybackCursor = 0;
+			PlayerState->PlaybackState.Reset();
 			PlayerState->DisableHitbox = false;
 			PlayerState->Flags = 0;
 			PlayerState->BufferedState.StateIndex = 0;
@@ -251,7 +251,7 @@ CMN_STATE(CmnStateStand)
 		else if (ScriptFinished)
 		{
 			// TODO: Get loop point
-			PlayerState->PlaybackState.PlaybackCursor = 0;
+			PlayerState->PlaybackState.Reset();
 		}
 	}
 
@@ -331,7 +331,7 @@ CMN_STATE(CmnStateCrouch)
 		else if (ScriptFinished)
 		{
 			// TODO: Get loop point
-			PlayerState->PlaybackState.PlaybackCursor = 0;
+			PlayerState->PlaybackState.Reset();
 		}
 	}
 	else
@@ -405,7 +405,7 @@ CMN_STATE(CmnStateFWalk)
 		if (ScriptFinished)
 		{
 			// TODO: Get loop point
-			PlayerState->PlaybackState.PlaybackCursor = 0;
+			PlayerState->PlaybackState.Reset();
 		}
 	}
 	else if (PlayerState->InputBuffer.MatchLastEntry(&CmnInputs[CMN_INPUT_BACK_EX]))
@@ -439,7 +439,7 @@ CMN_STATE(CmnStateBWalk)
 		if (ScriptFinished)
 		{
 			// TODO: Get loop point
-			PlayerState->PlaybackState.PlaybackCursor = 0;
+			PlayerState->PlaybackState.Reset();
 		}
 	}
 	else if (PlayerState->InputBuffer.MatchLastEntry(&CmnInputs[CMN_INPUT_DOWN]))
@@ -457,7 +457,7 @@ CMN_STATE(CmnStateRun)
 		PlayerState->RunAcceleration = StateManager->m_CharacterData.RunFriction * PlayerState->Facing;
 	}
 	else if (ScriptFinished)
-		PlayerState->PlaybackState.PlaybackCursor = 0;
+		PlayerState->PlaybackState.Reset();
 	else
 	{
 		if (PlayerState->RunVelocity > StateManager->m_CharacterData.RunMaxVelocity * PlayerState->Facing)
@@ -497,7 +497,7 @@ CMN_STATE(CmnStatePrejump)
 		PlayerState->AccelerationX = 0.0f;
 		PlayerState->AccelerationY = StateManager->m_CharacterData.JumpGravity;
 		PlayerState->PlaybackState.State = CMN_STATE_JUMPRISE;
-		PlayerState->PlaybackState.PlaybackCursor = 0;
+		PlayerState->PlaybackState.Reset();
 		PlayerState->BufferedState.StateIndex = 0;
 		PlayerState->BufferedState.Flags = 0;
 		PlayerState->BufferedState.InputBufferIndex = 0;
@@ -513,10 +513,10 @@ CMN_STATE(CmnStateJumpRise)
 {
 	// Loop point
 	if (ScriptFinished)
-		PlayerState->PlaybackState.PlaybackCursor = 0;
+		PlayerState->PlaybackState.Reset();
 	if (PlayerState->VelocityY < 0.5f)
 	{
-		PlayerState->PlaybackState.PlaybackCursor = 0;
+		PlayerState->PlaybackState.Reset();
 		PlayerState->PlaybackState.State = CMN_STATE_JUMPAPEX;
 	}
 	if (PlayerState->PositionY > 80.0f)
@@ -543,7 +543,7 @@ CMN_STATE(CmnStateJumpApex)
 {
 	if (ScriptFinished)
 	{
-		PlayerState->PlaybackState.PlaybackCursor = 0;
+		PlayerState->PlaybackState.Reset();
 		PlayerState->PlaybackState.State = CMN_STATE_JUMPFALL;
 	}
 
@@ -568,7 +568,7 @@ CMN_STATE(CmnStateJumpFall)
 {
 	// TODO: Loop point
 	if (ScriptFinished)
-		PlayerState->PlaybackState.PlaybackCursor = 0;
+		PlayerState->PlaybackState.Reset();
 
 	if (!(PlayerState->Flags & PLAYER_USED_AIR_ACTION))
 	{
@@ -613,14 +613,14 @@ CMN_STATE(CmnStateHitPunt)
 {
 	// TODO: Loop point
 	if (ScriptFinished)
-		PlayerState->PlaybackState.PlaybackCursor = 0;
+		PlayerState->PlaybackState.Reset();
 }
 
 CMN_STATE(CmnStateHitFlip)
 {
 	// TODO: Loop point
 	if (ScriptFinished)
-		PlayerState->PlaybackState.PlaybackCursor = 0;
+		PlayerState->PlaybackState.Reset();
 }
 
 CMN_STATE(CmnStateGuardStand)

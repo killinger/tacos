@@ -5,7 +5,11 @@ typedef enum
 {
 	NO_EVENT,
 	EVENT_KEY,
-	EVENT_CHAR
+	EVENT_CHAR,
+	EVENT_MOUSEDOWN,
+	EVENT_MOUSEUP,
+	EVENT_MOUSEMOVE,
+	EVENT_MOUSE2DOWN
 } event_type;
 
 struct system_event

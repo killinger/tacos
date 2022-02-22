@@ -107,8 +107,8 @@
       <AdditionalIncludeDirectories>$(SolutionDir)\include\</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
-      <AdditionalLibraryDirectories>$(SolutionDir)\lib\;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>$(SolutionDir)\lib\x86;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>SDL2.lib;freetype.lib;assimp.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
@@ -118,10 +118,11 @@
       <SDLCheck>true</SDLCheck>
       <ConformanceMode>true</ConformanceMode>
       <AdditionalIncludeDirectories>$(SolutionDir)\include\</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>_PROFILE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
     <Link>
-      <AdditionalDependencies>%(AdditionalDependencies)</AdditionalDependencies>
-      <AdditionalLibraryDirectories>$(SolutionDir)\lib\;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>SDL2.lib;freetype.lib;assimp.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>$(SolutionDir)\lib\x64;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -137,8 +138,8 @@
     <Link>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
-      <AdditionalDependencies>%(AdditionalDependencies)</AdditionalDependencies>
-      <AdditionalLibraryDirectories>$(SolutionDir)\lib\;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>SDL2.lib;freetype.lib;assimp.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>$(SolutionDir)\lib\x86;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Profiling|Win32'">
@@ -154,8 +155,8 @@
     <Link>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
-      <AdditionalDependencies>%(AdditionalDependencies)</AdditionalDependencies>
-      <AdditionalLibraryDirectories>$(SolutionDir)\lib\;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>SDL2.lib;freetype.lib;assimp.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>$(SolutionDir)\lib\x86;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -171,8 +172,8 @@
     <Link>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
-      <AdditionalDependencies>%(AdditionalDependencies)</AdditionalDependencies>
-      <AdditionalLibraryDirectories>$(SolutionDir)\lib\;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>SDL2.lib;freetype.lib;assimp.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>$(SolutionDir)\lib\x64;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Profiling|x64'">
@@ -184,18 +185,21 @@
       <SDLCheck>true</SDLCheck>
       <ConformanceMode>true</ConformanceMode>
       <AdditionalIncludeDirectories>$(SolutionDir)\include\</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>_PROFILE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
     <Link>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
-      <AdditionalDependencies>%(AdditionalDependencies)</AdditionalDependencies>
-      <AdditionalLibraryDirectories>$(SolutionDir)\lib\;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>SDL2.lib;freetype.lib;assimp.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>$(SolutionDir)\lib\x64;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="camera.cpp" />
     <ClCompile Include="collisions.cpp" />
     <ClCompile Include="console_system.cpp" />
+    <ClCompile Include="debug_draw_manager.cpp" />
+    <ClCompile Include="debug_overlay.cpp" />
     <ClCompile Include="event_queue.cpp" />
     <ClCompile Include="gamestate.cpp" />
     <ClCompile Include="gamestate_buffer.cpp" />
@@ -203,6 +207,9 @@
     <ClCompile Include="input_handler.cpp" />
     <ClCompile Include="linear_allocator.cpp" />
     <ClCompile Include="logging_system.cpp" />
+    <ClCompile Include="mesh_loader.cpp" />
+    <ClCompile Include="scene_graph.cpp" />
+    <ClCompile Include="stack_allocator.cpp" />
     <ClCompile Include="state_manager.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="render_system.cpp" />
@@ -215,18 +222,30 @@
     <ClInclude Include="character_cmn_states.h" />
     <ClInclude Include="collisions.h" />
     <ClInclude Include="console_system.h" />
+    <ClInclude Include="d3d11_font.h" />
+    <ClInclude Include="d3d11_mesh.h" />
+    <ClInclude Include="d3d11_rectangle.h" />
+    <ClInclude Include="debug_draw_manager.h" />
+    <ClInclude Include="debug_overlay.h" />
     <ClInclude Include="defs.h" />
     <ClInclude Include="event_queue.h" />
     <ClInclude Include="gamestate.h" />
     <ClInclude Include="gamestate_buffer.h" />
     <ClInclude Include="input_buffer.h" />
     <ClInclude Include="input_handler.h" />
+    <ClInclude Include="lights.h" />
     <ClInclude Include="linear_allocator.h" />
     <ClInclude Include="logging_system.h" />
     <ClInclude Include="memory_allocator.h" />
+    <ClInclude Include="mesh.h" />
+    <ClInclude Include="mesh_loader.h" />
     <ClInclude Include="move_description.h" />
+    <ClInclude Include="pointer.h" />
+    <ClInclude Include="render_state.h" />
+    <ClInclude Include="scene_graph.h" />
     <ClInclude Include="script_elements.h" />
     <ClInclude Include="shaders.h" />
+    <ClInclude Include="stack_allocator.h" />
     <ClInclude Include="state_manager.h" />
     <ClInclude Include="permanent_state.h" />
     <ClInclude Include="render_system.h" />
@@ -235,6 +254,7 @@
     <ClInclude Include="system_event.h" />
     <ClInclude Include="system_event_queue.h" />
     <ClInclude Include="taco_game.h" />
+    <ClInclude Include="test_scene.h" />
     <ClInclude Include="vertex.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

@@ -25,6 +25,9 @@
     <Filter Include="Character state &amp; scripts">
       <UniqueIdentifier>{85df1231-073d-4465-b155-6beebcc8d8f0}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Memory">
+      <UniqueIdentifier>{49ef4b51-984e-4a64-9b13-56de3ad82d21}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp">
@@ -54,9 +57,6 @@
     <ClCompile Include="state_manager.cpp">
       <Filter>Character state &amp; scripts</Filter>
     </ClCompile>
-    <ClCompile Include="render_system.cpp">
-      <Filter>Subsystems</Filter>
-    </ClCompile>
     <ClCompile Include="system_event_queue.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -66,11 +66,29 @@
     <ClCompile Include="gamestate_buffer.cpp">
       <Filter>Subsystems</Filter>
     </ClCompile>
-    <ClCompile Include="linear_allocator.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="camera.cpp">
       <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="mesh_loader.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="debug_overlay.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="render_system.cpp">
+      <Filter>Rendering</Filter>
+    </ClCompile>
+    <ClCompile Include="debug_draw_manager.cpp">
+      <Filter>Rendering</Filter>
+    </ClCompile>
+    <ClCompile Include="linear_allocator.cpp">
+      <Filter>Memory</Filter>
+    </ClCompile>
+    <ClCompile Include="stack_allocator.cpp">
+      <Filter>Memory</Filter>
+    </ClCompile>
+    <ClCompile Include="scene_graph.cpp">
+      <Filter>Rendering</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -119,9 +137,6 @@
     <ClInclude Include="character_cmn_states.h">
       <Filter>Character state &amp; scripts</Filter>
     </ClInclude>
-    <ClInclude Include="render_system.h">
-      <Filter>Subsystems</Filter>
-    </ClInclude>
     <ClInclude Include="system_event_queue.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -134,23 +149,65 @@
     <ClInclude Include="gamestate_buffer.h">
       <Filter>Subsystems</Filter>
     </ClInclude>
-    <ClInclude Include="memory_allocator.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="linear_allocator.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="camera.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="vertex.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="shaders.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="auto_profiler.h">
       <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="mesh_loader.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="debug_overlay.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="render_system.h">
+      <Filter>Rendering</Filter>
+    </ClInclude>
+    <ClInclude Include="shaders.h">
+      <Filter>Rendering</Filter>
+    </ClInclude>
+    <ClInclude Include="d3d11_rectangle.h">
+      <Filter>Rendering</Filter>
+    </ClInclude>
+    <ClInclude Include="d3d11_font.h">
+      <Filter>Rendering</Filter>
+    </ClInclude>
+    <ClInclude Include="mesh.h">
+      <Filter>Rendering</Filter>
+    </ClInclude>
+    <ClInclude Include="debug_draw_manager.h">
+      <Filter>Rendering</Filter>
+    </ClInclude>
+    <ClInclude Include="linear_allocator.h">
+      <Filter>Memory</Filter>
+    </ClInclude>
+    <ClInclude Include="memory_allocator.h">
+      <Filter>Memory</Filter>
+    </ClInclude>
+    <ClInclude Include="stack_allocator.h">
+      <Filter>Memory</Filter>
+    </ClInclude>
+    <ClInclude Include="pointer.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="lights.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="scene_graph.h">
+      <Filter>Rendering</Filter>
+    </ClInclude>
+    <ClInclude Include="render_state.h">
+      <Filter>Rendering</Filter>
+    </ClInclude>
+    <ClInclude Include="d3d11_mesh.h">
+      <Filter>Rendering</Filter>
+    </ClInclude>
+    <ClInclude Include="test_scene.h">
+      <Filter>Rendering</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

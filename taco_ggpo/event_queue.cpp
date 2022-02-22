@@ -2,6 +2,7 @@
 #include "subsystems.h"
 #include "console_system.h"
 #include "gamestate_buffer.h"
+#include "debug_overlay.h"
 
 event_queue::event_queue(system_event_queue* SystemEvents, event_queue_callbacks* Callbacks)
 {
@@ -25,37 +26,53 @@ void event_queue::ProcessSystemQueue()
 			break;
 		else if (ConsoleSystem->ProcessEvent(Event))
 			continue;
-#ifdef _DEBUG
+#if defined(_DEBUG) || defined(_PROFILE)
 		else if (Event.Type == EVENT_KEY)
 		{
-			if (Event.Parameters[0] >= 26 && Event.Parameters[0] <= 35)
+			if (Event.Parameters[0] >= 48 && Event.Parameters[0] <= 59)
 			{
 				GameStateBuffer->SetCaptureSlot((uint8)(Event.Parameters[0] - 26));
 			}
-			else if (Event.Parameters[0] == 57)
+			else if (Event.Parameters[0] == 32)
 			{
 				m_Callbacks.ToggleFrameSteppingCallback();
 			}
-			else if (Event.Parameters[0] == 58)
+			else if (Event.Parameters[0] == 13)
 			{
 				m_Callbacks.StepFrameCallback();
 			}
-			else if (Event.Parameters[0] == 85)
+			else if (Event.Parameters[0] == 112)
 			{
 				GameStateBuffer->SaveGameState();
 			}
-			else if (Event.Parameters[0] == 86)
+			else if (Event.Parameters[0] == 113)
 			{
 				GameStateBuffer->LoadGameState();
 			}
-			else if (Event.Parameters[0] == 87)
+			else if (Event.Parameters[0] == 114)
 			{
 				GameStateBuffer->ToggleInputRecording();
 			}
-			else if (Event.Parameters[0] == 88)
+			else if (Event.Parameters[0] == 115)
 			{
 				GameStateBuffer->ToggleInputPlayback();
 			}
+		}
+		else if (Event.Type == EVENT_MOUSEDOWN)
+		{
+			OverlayManager->MouseEvent(Event);
+		}
+		else if (Event.Type == EVENT_MOUSEUP)
+		{
+			OverlayManager->MouseEvent(Event);
+		}
+		else if (Event.Type == EVENT_MOUSEMOVE)
+		{
+			OverlayManager->MouseEvent(Event);
+		}
+		else if (Event.Type == EVENT_MOUSE2DOWN)
+		{
+			OverlayManager->MouseEvent(Event);
 		}
 #endif
 	}

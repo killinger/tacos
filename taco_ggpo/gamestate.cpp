@@ -4,6 +4,8 @@
 #include "gamestate_buffer.h"
 #include "render_system.h"
 #include "subsystems.h"
+#include <ctgmath>
+#include "auto_profiler.h"
 
 #define PLAYER_STARTING_POSITIONS 80.0f
 
@@ -15,14 +17,19 @@ void gamestate::Initialize()
 	m_Player[0].PositionX = -PLAYER_STARTING_POSITIONS;
 	m_Player[0].Facing = 1.0f;
 	m_Player[0].PlaybackState.New = true;
+	m_Player[0].PlaybackState.PlaybackRate = 1.0f;
+	m_Player[0].PlaybackState.PlaybackScaled = 0.0f;
 	m_Player[1].InputBuffer.Initialize();
 	m_Player[1].PositionX = PLAYER_STARTING_POSITIONS;
 	m_Player[1].Facing = -1.0f;
 	m_Player[1].PlaybackState.New = true;
+	m_Player[1].PlaybackState.PlaybackRate = 1.0f;
+	m_Player[1].PlaybackState.PlaybackScaled = 0.0f;
 }
 
 void gamestate::Update(uint32* Inputs, state_manager* StateManager)
 {
+	PROFILE();
 	if (!GameStateBuffer->IsReplaying())
 	{
 		bool FlipDirections[] = { m_Player[0].PositionX > m_Player[1].PositionX,
@@ -31,11 +38,6 @@ void gamestate::Update(uint32* Inputs, state_manager* StateManager)
 		m_Player[1].InputBuffer.Update(Inputs[1], m_FrameCount, FlipDirections[1]);
 	}
 	GameStateBuffer->Update();
-
-	if (m_Player[0].Hitstop)
-		m_Player[0].Hitstop--;
-	if (m_Player[1].Hitstop)
-		m_Player[1].Hitstop--;
 
 	// Transition stage
 	state_script* Script[2] = { AdvancePlayerState(StateManager, &m_Player[0], &m_Player[1]),
@@ -47,6 +49,11 @@ void gamestate::Update(uint32* Inputs, state_manager* StateManager)
 		UpdateMovement(&m_Player[1]);
 	CorrectAndFinalizePositions(Script);
 
+	if (m_Player[0].Hitstop)
+		m_Player[0].Hitstop--;
+	if (m_Player[1].Hitstop)
+		m_Player[1].Hitstop--;
+
 	// Hit detection
 	HitDetection(StateManager, 0, 1, Script[0], Script[1]);
 	HitDetection(StateManager, 1, 0, Script[1], Script[0]);
@@ -54,18 +61,23 @@ void gamestate::Update(uint32* Inputs, state_manager* StateManager)
 
 state_script* gamestate::AdvancePlayerState(state_manager* StateManager, playerstate* PlayerState, playerstate* OtherPlayer)
 {
+	PROFILE();
 	state_script* Script = StateManager->GetScript(PlayerState->PlaybackState.State);
 	bool ScriptFinished = false;
-	float CurrentFacing = 1.0f;
 
 	if (!PlayerState->Hitstop)
 	{
 		if (!PlayerState->PlaybackState.New)
-			if (++PlayerState->PlaybackState.PlaybackCursor >= Script->TotalFrames)
+		{
+			PlayerState->PlaybackState.PlaybackScaled += PlayerState->PlaybackState.PlaybackRate;
+			PlayerState->PlaybackState.PlaybackCursor = (uint32)floorf(PlayerState->PlaybackState.PlaybackScaled);
+			if (PlayerState->PlaybackState.PlaybackCursor >= Script->TotalFrames)
 				ScriptFinished = true;
+		}
 		PlayerState->PlaybackState.New = false;
 	}
-
+	
+	float CurrentFacing = 1.0f;
 	if (PlayerState->PositionX > OtherPlayer->PositionX)
 		CurrentFacing = -1.0f;
 	if (PlayerState->PositionY < 0.0f)
@@ -206,8 +218,6 @@ void gamestate::UpdateMovement(playerstate* PlayerState)
 	PlayerState->PositionY += PlayerState->VelocityY;
 	PlayerState->VelocityX += PlayerState->AccelerationX;
 	PlayerState->VelocityY += PlayerState->AccelerationY;
-
-
 }
 
 void gamestate::CorrectAndFinalizePositions(state_script* Script[2])
@@ -264,6 +274,7 @@ void gamestate::CorrectAndFinalizePositions(state_script* Script[2])
 
 void gamestate::HitDetection(state_manager* StateManager, uint32 PlayerIndex, uint32 OtherIndex, state_script* PlayerScript, state_script* OtherScript)
 {
+	PROFILE();
 	if (!m_Player[PlayerIndex].DisableHitbox)
 	{
 		collision_box Hitbox, Hurtbox;
@@ -368,5 +379,5 @@ void gamestate::ResolveHitAndApplyEffects(state_manager* StateManager, uint32 Pl
 	m_Player[PlayerIndex].Flags |= PLAYER_ALLOW_CANCEL;
 	m_Player[OtherIndex].Hitstop = HitboxEffects->HitstopDefender;
 	m_Player[OtherIndex].PlaybackState.New = true;
-	m_Player[OtherIndex].PlaybackState.PlaybackCursor = 0;
+	m_Player[OtherIndex].PlaybackState.Reset();
 }
