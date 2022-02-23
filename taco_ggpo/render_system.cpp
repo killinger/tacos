@@ -3,9 +3,9 @@
 #define STB_IMAGE_IMPLEMENTATION
 #include "stb_image.h"
 #include "mesh_loader.h"
-#include "auto_profiler.h"
 #include "test_scene.h"
 #include "scene_graph.h"
+#include "auto_profiler.h"
 
 #define RESOLUTION_WIDTH 1280
 #define RESOLUTION_HEIGHT 720

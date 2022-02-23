@@ -172,5 +172,6 @@ struct root_profiler
 };
 
 #else
-#define PROFILE(Index)
+#define PROFILE()
+#define PROFILE_ROOT()
 #endif //  _PROFILE
